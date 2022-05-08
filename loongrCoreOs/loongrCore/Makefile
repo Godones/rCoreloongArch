@@ -1,4 +1,4 @@
-TARGET := mips64el-unknown-linux-muslabi64
+TARGET := loongarch64-unknown-linux-gnu
 MODE := release
 
 KERNEL_ELF := target/$(TARGET)/$(MODE)/loongrCore
@@ -10,7 +10,7 @@ FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
 # BOARD
 BOARD ?= qemu
 SBI ?= rustsbi
-BOOTLOADER := ../loongarch_bios_0310.bin
+BOOTLOADER := ./loongarch_bios_0310.bin
 
 #内核入口地址
 
@@ -22,13 +22,10 @@ OBJCOPY := rust-objcopy --binary-architecture=riscv64
 # Disassembly
 DISASM ?= -x
 
-build: $(KERNEL_BIN)
+build: kernel
 
 env:
-	(rustup target list | grep "mips64el-unknown-linux-muslabi64 (installed)") || rustup target add $(TARGET)
 	cargo install cargo-binutils
-	rustup component add rust-src
-	rustup component add llvm-tools-preview
 
 $(KERNEL_BIN): kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
@@ -37,7 +34,7 @@ kernel:
 	@#cd ../user && make build
 	@#cd ../fs-test && make run
 	@echo Platform: $(BOARD)
-	@cargo build --release
+	@cargo build --release --features TRACE
 
 
 clean:
@@ -58,17 +55,8 @@ doc:
 
 run-inner: build
 ifeq ($(BOARD),qemu)
-	qemu-system-loongarch64 \
-		-nographic \
-		-vga none \
-		-bios $(BOOTLOADER)
-		-kernel $(KERNEL_BIN)
+	 cd qemu-loongarch-runenv&& ./run_loongarch.sh -k ../$(KERNEL_ELF)
 endif
 
-debug: build
-	@tmux new-session -d \
-		"qemu-system-riscv64 -machine virt -nographic -bios $(BOOTLOADER) -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) -s -S" && \
-		tmux split-window -h "riscv64-unknown-elf-gdb -ex 'file $(KERNEL_ELF)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:1234'" && \
-		tmux -2 attach-session -d
 
 .PHONY: build env kernel clean disasm disasm-vim run-inner

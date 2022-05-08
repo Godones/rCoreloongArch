@@ -2,13 +2,7 @@
 target = "loongarch64-unknown-linux-gnu"
 [target.loongarch64-unknown-linux-gnu]
 linker = "loongarch64-unknown-linux-gnu-gcc"
-##rustflags = ["-C", "target-feature=+crt-static"]
-#
-#[target.'cfg(target_os = "linux")']
-##rustflags = ["-C", "link-arg=-nostartfiles"]
-#rustflags = [
-#    "-Clink-arg=-Tsrc/linker.ld", "-Cforce-frame-pointers=yes"
-#]
+
 [profile.dev]
 panic = "abort" #关闭默认的panic栈回溯功能，裸机环境没有这个功能，直接abort
 
