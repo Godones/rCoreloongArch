@@ -58,5 +58,5 @@ ifeq ($(BOARD),qemu)
 	 cd qemu-loongarch-runenv&& ./run_loongarch.sh -k ../$(KERNEL_ELF)
 endif
 
-
+#qemu-system-loongarch64 -bios /home/proj93/loongrCore/qemu-loongarch-runenv/loongarch_bios_0310_debug.bin -kernel /home/proj93/loongrCore/target/loongarch64-unknown-linux-gnu/release/loongrCore -m 1G -smp 1 -vga none -nographic -s -serial mon:stdio
 .PHONY: build env kernel clean disasm disasm-vim run-inner

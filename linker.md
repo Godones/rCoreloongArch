@@ -1,7 +1,5 @@
 # 链接脚本相关介绍
 
-
-
 在编写rust的裸机代码时，需要在config文件下加入一行命令
 
 ```rust
@@ -19,8 +17,6 @@ This flag lets you append multiple extra arguments to the linker invocation. The
 ```
 
 在rustc完成编译后，会使用LLVM的链接器进行链接，因此 -T linker.ld 这个参数就会被传递给LLVM的链接器，告诉链接器使用linker.ld这个自定义链接脚本。
-
-
 
 ## 链接器脚本
 
@@ -51,7 +47,7 @@ SECTION{
 
 ### rust的build.rs文件
 
-在项目下存在一个build.rs文件，一些项目希望编译第三方的非 Rust 代码，例如 C 依赖库；一些希望链接本地或者基于源码构建的 C 依赖库；还有一些项目需要功能性的工具，例如在构建之间执行一些代码生成的工作等。对于这些目标，Cargo 提供了自定义构建脚本的方式，来帮助用户更好的解决类似的问题。
+在项目下存在一个build.rs文件。一些项目希望编译第三方的非 Rust 代码，例如 C 依赖库；一些希望链接本地或者基于源码构建的 C 依赖库；还有一些项目需要功能性的工具，例如在构建之间执行一些代码生成的工作等。对于这些目标，Cargo 提供了自定义构建脚本的方式，来帮助用户更好的解决类似的问题。
 
 只需在项目的根目录下添加一个 `build.rs` 文件即可。这样一来， Cargo 就会先编译和执行该构建脚本，然后再去构建整个项目
 
@@ -65,3 +61,4 @@ SECTION{
 3. cargo:rustc-link-arg=FLAG – 将自定义的 flags 传给 linker，用于后续的基准性能测试 benchmark、 可执行文件 binary,、cdylib 包、示例和测试
 ```
 
+后面会对代码中具体的内容进行介绍。
