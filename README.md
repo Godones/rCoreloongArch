@@ -18,7 +18,7 @@ ch0:
 ch1:
 
 - [ ] qemu模拟的LoongArch平台的关机功能
-- [ ] LoongArch的操作系统启动过程解析
+- [x] LoongArch的操作系统启动过程解析
 
 ch2：
 
