@@ -10,20 +10,23 @@ mod uart;
 mod print;
 mod lang_items;
 mod test;
+mod loong_arch;
 
+use uart_16550::MmioSerialPort;
 use config::FLAG;
 use core::arch::{global_asm};
 use crate::print::get_char;
 use test::color_output_test;
+use crate::config::UART;
+use crate::uart::Uart;
 
 global_asm!(include_str!("boot.S"));
 #[no_mangle]
 pub extern "C" fn main(){
     INFO!("{}",FLAG);
     color_output_test();
-    scanf();
+    panic!();
 }
-
 
 fn scanf(){
     const LF: u8 = 10; //换行键

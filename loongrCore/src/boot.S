@@ -12,7 +12,6 @@ _start:
     csrwr $t0,0x181 #LOONGARCH_CSR_DMWIN1
 1:
     la.global $t0, _bss_start
-    #st.d $zero, $t0,0
     la.global $t1, _bss_end
     bgeu $t0, $t1, 3f   #bge如果前者大于等于后者则跳转
 2:

@@ -28,7 +28,7 @@ MEM="1G"
 # 1-4
 CPUS="1"
 #BIOS="./loongarch_bios_0310.bin"
-BIOS="./loongarch_bios_0310_debug.bin"
+BIOS="./loongarch_bios_0310.bin"
 KERNEL="./vmlinux"
 INITRD="busybox-rootfs.img"
 USE_GRAPHIC="no"
