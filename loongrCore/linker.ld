@@ -1,59 +1,45 @@
-ENTRY( _start )
-
-
-MEMORY
-{
-  ram  (wxa) : ORIGIN = 0x9000000001034804, LENGTH = 1024M
-}
-
-PHDRS
-{
-  text PT_LOAD;
-  data PT_LOAD;
-  bss PT_LOAD;
-}
+OUTPUT_ARCH( "loongarch" )
+ENTRY( _start)
 
 SECTIONS
 {
-  . = 0x9000000001034804;
+    . = 0x9000000001034804;
+  #. = 0x00100000;
 
   .text : {
-    PROVIDE(_text_start = .);
-
-    *(.text.init) *(.text .text.*)
-
-    PROVIDE(_text_end = .);
+    *(.text.init)
+    *(.text .text.*)
+    PROVIDE(etext = .);
+    . = ALIGN(0x1000);
+    _keentry = .;
+    *(k_eentry)
   }
 
-   PROVIDE(_global_pointer = .);
-
   .rodata : {
-    PROVIDE(_rodata_start = .);
+    . = ALIGN(16);
+    *(.srodata .srodata.*)
+    . = ALIGN(16);
     *(.rodata .rodata.*)
-    PROVIDE(_rodata_end = .);
-
   }
 
   .data : {
-
-    . = ALIGN(4096);
-    PROVIDE(_data_start = .);
-
-    *(.sdata .sdata.*) *(.data .data.*)
-    PROVIDE(_data_end = .);
+. = ALIGN(16);
+    *(.sdata .sdata.*)
+. = ALIGN(16);
+    *(.data .data.*)
   }
 
   .bss : {
-    PROVIDE(_bss_start = .);
-    *(.sbss .sbss.*) *(.bss .bss.*)
-    PROVIDE(_bss_end = .);
+. = ALIGN(0x1000);
+    *(.bss.stack)
+    sbss = .;
+. = ALIGN(16);
+    *(.sbss .sbss.*)
+. = ALIGN(16);
+    *(.bss .bss.*)
+  }
 
-  } >ram AT>ram :bss
-
-  PROVIDE(_memory_start = ORIGIN(ram));
-
-  PROVIDE(_stack = _bss_end + 0x80000);
-  PROVIDE(_memory_end = ORIGIN(ram) + LENGTH(ram));
-  PROVIDE(_heap_start = _stack);
-  PROVIDE(_heap_size = _memory_end - _stack);
+    ebss = .;
+    ekernel = .;
+  PROVIDE(end = .);
 }

@@ -13,16 +13,14 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
             p.file(),
             info.message().unwrap()
         );
-    }
-    else {
+    } else {
         println!("no information available.");
     }
     abort();
 }
 
 #[no_mangle]
-extern "C"
-fn abort() -> ! {
+pub(crate) extern "C" fn abort() -> ! {
     loop {
         unsafe {
             asm!("idle 0");

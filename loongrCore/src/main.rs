@@ -5,63 +5,51 @@
 #![allow(dead_code)]
 #![feature(panic_info_message)]
 
+mod batch;
 mod config;
-mod uart;
-mod print;
 mod lang_items;
-mod test;
 mod loong_arch;
+mod print;
+mod scanf;
+mod sync;
+mod syscall;
+mod test;
+mod trap;
+mod uart;
+extern crate bit_field;
+extern crate rlibc;
+use bit_field::BitField;
 
-use uart_16550::MmioSerialPort;
 use config::FLAG;
-use core::arch::{global_asm};
-use crate::print::get_char;
-use test::color_output_test;
-use crate::config::UART;
-use crate::uart::Uart;
-
+use core::arch::global_asm;
+use lang_items::abort;
+use scanf::scanf;
+use test::{color_output_test, test_csr_register};
+use crate::batch::run_next_app;
+use crate::loong_arch::register::crmd::Crmd;
+use crate::loong_arch::register::estat::Trap::INT;
 global_asm!(include_str!("boot.S"));
-#[no_mangle]
-pub extern "C" fn main(){
-    INFO!("{}",FLAG);
-    color_output_test();
-    panic!();
+global_asm!(include_str!("link_app.S"));
+
+
+fn clear_bss() {
+    extern "C" {
+        fn sbss();
+        fn ebss();
+    }
+    (sbss as usize..ebss as usize).for_each(|addr| {
+        unsafe { (addr as *mut u8).write_volatile(0); }
+    });
 }
 
-fn scanf(){
-    const LF: u8 = 10; //换行键
-    const CR: u8 = 13; //回车键
-    const DEL: u8 = 127; //删除键
-    const BS: u8 = 8; //退格键
-    loop{
-        if let Some(ch) = get_char(){
-            match ch {
-                BS | DEL=>{
-                    print!("{}{}{}",ch as char,' ',ch as char);
-                }
-                LF | CR=>{
-                    println!();
-                }
-                //转义字符
-                0x1b=>{
-                    if let Some(next_ch) = get_char(){
-                        if next_ch == 0x5b {
-                            if let Some(n_next_char) = get_char(){
-                                match n_next_char as char {
-                                    'A'=>println!("↑"),
-                                    'B'=>println!("↓"),
-                                    'C'=>println!("←"),
-                                    'D'=>println!("→"),
-                                    _ => println!("{}",n_next_char),
-                                }
-                            }
-                        }
-                    }
-                }
-                _ =>{
-                    print!("{}",ch as char);
-                }
-            }
-        }
-    }
+
+#[no_mangle]
+pub extern "C" fn main() {
+    clear_bss();
+    INFO!("{}", FLAG);
+    test_csr_register();
+    trap::init();
+    batch::init();
+    run_next_app();
+    panic!("{}", "test");
 }

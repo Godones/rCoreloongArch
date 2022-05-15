@@ -2,8 +2,8 @@
 // UART routines and driver
 
 use core::convert::TryInto;
-use core::fmt::Write;
 use core::fmt::Error;
+use core::fmt::Write;
 
 pub struct Uart {
     base_address: usize,
@@ -20,15 +20,13 @@ impl Write for Uart {
 
 impl Uart {
     pub fn new(base_address: usize) -> Self {
-        Uart {
-            base_address
-        }
+        Uart { base_address }
     }
 
     pub fn init(&mut self) {
         let ptr = self.base_address as *mut u8;
         unsafe {
-           // 设置字符位数
+            // 设置字符位数
             ptr.add(3).write_volatile((1 << 0) | (1 << 1));
 
             //使能FIFIO
@@ -39,7 +37,7 @@ impl Uart {
             // 设置波特率
             let divisor: u16 = 592;
             let divisor_least: u8 = (divisor & 0xff).try_into().unwrap();
-            let divisor_most:  u8 = (divisor >> 8).try_into().unwrap();
+            let divisor_most: u8 = (divisor >> 8).try_into().unwrap();
 
             // Notice that the divisor register DLL (divisor latch least) and DLM (divisor latch most)
             // have the same base address as the receiver/transmitter and the interrupt enable register.
@@ -75,8 +73,7 @@ impl Uart {
             if ptr.add(5).read_volatile() & 1 == 0 {
                 // The DR bit is 0, meaning no data
                 None
-            }
-            else {
+            } else {
                 // The DR bit is 1, meaning data!
                 Some(ptr.add(0).read_volatile())
             }
