@@ -8,3 +8,5 @@ pub mod era;
 pub mod estat;
 pub mod prcfg1;
 pub mod tcfg;
+pub mod ticlr;
+pub mod prmd;

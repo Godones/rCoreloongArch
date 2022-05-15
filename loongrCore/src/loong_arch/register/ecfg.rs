@@ -17,15 +17,17 @@ impl Ecfg {
         }
         Self { bits }
     }
+    pub fn get_val(&self) -> usize {
+        self.bits
+    }
     pub fn get_local_interrupt(&self, index: usize) -> bool {
         // 中断位于0-12位,每一位代表一个局部中断
         assert!(index < 13);
         self.bits.get_bit(index)
     }
-    pub fn set_local_interrupt(&mut self, index: usize, value: bool) {
+    pub fn set_local_interrupt(&mut self, value :usize) {
         // 中断位于0-12位,每一位代表一个局部中断
-        assert!(index < 13);
-        self.bits.set_bit(index, value);
+        self.bits = value;
         unsafe {
             asm!(
                 "csrwr {},0x4",

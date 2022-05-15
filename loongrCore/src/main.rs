@@ -51,5 +51,6 @@ pub extern "C" fn main() {
     trap::init();
     batch::init();
     run_next_app();
+    // abort();
     panic!("{}", "test");
 }

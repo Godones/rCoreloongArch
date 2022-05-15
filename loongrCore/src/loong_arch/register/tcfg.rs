@@ -24,37 +24,17 @@ impl Tcfg {
         //第0位
         self.tcfg.get_bit(0)
     }
-    pub fn set_enable(&mut self, enable: bool) {
-        //第0位
-        self.tcfg.set_bit(0, enable);
-        unsafe {
-            asm!(
-                "csrwr {}, 0x41",
-                in(reg) self.tcfg,
-            )
-        }
-    }
     pub fn get_loop(&self) -> bool {
         //第1位
         self.tcfg.get_bit(1)
-    }
-    pub fn set_loop(&mut self, loop_: bool) {
-        //第1位
-        self.tcfg.set_bit(1, loop_);
-        unsafe {
-            asm!(
-                "csrwr {}, 0x41",
-                in(reg) self.tcfg,
-            )
-        }
     }
     pub fn get_tval(&self) -> usize {
         //第2位开始
         self.tcfg >> 2
     }
-    pub fn set_tval(&mut self, tval: usize) {
+    pub fn set_val(&mut self, val: usize) {
         //第2位开始
-        self.tcfg = (tval << 2) | self.tcfg; //保持第0位和第1位不变
+        self.tcfg = val;
         unsafe {
             asm!(
                 "csrwr {}, 0x41",

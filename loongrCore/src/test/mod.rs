@@ -34,8 +34,7 @@ pub fn color_output_test() {
 pub fn test_csr_register() {
     use crate::loong_arch::register::{crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat};
     let estat = Estat::read();
-    let ecode = estat.ecode();
-    INFO!("ecode:{}", ecode);
+    INFO!("sstat = {:#b}", estat.get_val());
     // 打印当前的特权级
     let crmd = Crmd::read();
     let spp = crmd.get_mode();
@@ -47,11 +46,10 @@ pub fn test_csr_register() {
     let mut ecfg = Ecfg::read();
     let add = ecfg.get_vs();
     INFO!("vs = {}", add);
-
     // 打印中断入口地址
     let mut eentry = Eentry::read();
     let add = eentry.get_eentry();
-    INFO!("evec = {:#x}", add);
+    INFO!("eentry = {:#x}", add);
     // save 寄存器个数
     use crate::loong_arch::register::prcfg1::Prcfg1;
     let prcfg1 = Prcfg1::read();
@@ -74,6 +72,12 @@ pub fn test_csr_register() {
     INFO!("da:{}", da);
     let pg = crmd.get_pg();
     INFO!("pg:{}", pg);
+
+    // 查看哪些中断被打开了
+    for i in 0..13 {
+        let interrupt = ecfg.get_local_interrupt(i);
+        INFO!("local_interrupt {}:{}",i, interrupt);
+    }
 }
 pub fn test_r21(){
     // 测试r21是否不会变化

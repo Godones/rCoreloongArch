@@ -1,11 +1,12 @@
 use bit_field::BitField;
+use crate::DEBUG;
 
 // 当前模式信息
 #[repr(C)]
 pub struct Crmd {
     bits: usize,
 }
-
+#[derive(Debug, Clone, Copy)]
 pub enum Mode {
     User = 3,
     Supervisor = 0,
@@ -31,13 +32,9 @@ impl Crmd {
     pub fn set_mode(&mut self, mode: Mode) {
         // 设置特权级模式
         // 0-1位
+        // let crmd = Self::read();
         self.bits.set_bits(0..2, mode as usize);
-        unsafe {
-            asm!(
-            "csrwr {},0x0",
-            in(reg) self.bits
-            );
-        }
+        DEBUG!("set_mode: {}", mode as usize);
     }
     pub fn set_interrupt_enable(&mut self, enable: bool) {
         // 设置全局中断使能
@@ -86,5 +83,10 @@ impl Crmd {
             in(reg) self.bits
             );
         }
+    }
+    pub fn get_val(&self) -> usize {
+        // 获取VAL
+        // 第5位
+        self.bits
     }
 }

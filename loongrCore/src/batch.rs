@@ -1,4 +1,4 @@
-use crate::println;
+use crate::{DEBUG, println};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use lazy_static::*;
@@ -8,7 +8,7 @@ const KERNEL_STACK_SIZE: usize = 4096 * 2;
 const MAX_APP_NUM: usize = 16;
 const APP_BASE_ADDRESS: usize = 0x00200000;
 // 0x9000000010000000
-const APP_SIZE_LIMIT: usize = 0x20000;
+const APP_SIZE_LIMIT: usize = 0x30000;
 
 #[repr(align(4096))]
 struct KernelStack {
@@ -133,11 +133,18 @@ pub fn run_next_app() -> ! {
     extern "C" {
         fn __restore(cx_addr: usize);
     }
+    DEBUG!("[kernel] run app!");
     unsafe {
-        __restore(KERNEL_STACK.push_context(TrapContext::app_init_context(
+        DEBUG!("[kernel] run app !!");
+        let trap_context =TrapContext::app_init_context(
             APP_BASE_ADDRESS,
             USER_STACK.get_sp(),
-        )) as *const _ as usize);
+        );
+
+        let kernel = KERNEL_STACK.push_context(trap_context);
+        DEBUG!("[kernel] run app!!!!");
+        DEBUG!("kernel addr = {:#x}", kernel as*const _ as usize);
+        __restore(kernel as *mut _ as usize);
     }
     panic!("Unreachable in batch::run_current_app!");
 }

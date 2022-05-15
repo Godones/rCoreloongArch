@@ -1,5 +1,5 @@
 TARGET := loongarch64-unknown-linux-gnu
-MODE := release
+MODE := debug
 
 KERNEL_ELF := target/$(TARGET)/$(MODE)/loongrCore
 KERNEL_BIN := $(KERNEL_ELF).bin
@@ -31,10 +31,10 @@ $(KERNEL_BIN): kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
 
 kernel:
-	@#cd ../user && make build
+	@cd ../user && make build
 	@#cd ../fs-test && make run
 	@echo Platform: $(BOARD)
-	@cargo build --release --features TRACE
+	@cargo build --features TRACE
 
 
 clean:

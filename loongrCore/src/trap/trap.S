@@ -9,7 +9,6 @@ __alltraps:
     xor $r21,$r21,$sp
     #上面的代码交换了sp 和 r21的值，r21是一个保留寄存器不会被使用，所以可以用来存储sp的值
     #r21保存了内核栈指针，sp保存了用户栈指针
-
     # allocate a TrapContext on kernel stack
     addi.d  $sp, $sp, -272
     #保存通用寄存器

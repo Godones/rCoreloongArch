@@ -33,6 +33,9 @@ impl Estat {
         // 取出22-30位
         self.bits.get_bits(22..=30)
     }
+    pub fn get_val(&self) -> usize {
+        self.bits
+    }
     pub fn cause(&self) -> Trap {
         let cause: usize = self.ecode();
         match cause {
