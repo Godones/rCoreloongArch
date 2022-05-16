@@ -1,5 +1,4 @@
 use bit_field::BitField;
-use crate::{DEBUG, INFO};
 
 // 状态寄存器
 #[derive(Debug, Clone, Copy)]
@@ -10,7 +9,7 @@ pub struct Estat {
 impl Estat {
     pub fn read() -> Self {
         //读取sstat的内容出来
-        let mut sstat: usize = 0;
+        let mut sstat;
         unsafe {
             asm!(
             "csrrd {},0x5",
@@ -39,30 +38,35 @@ impl Estat {
     pub fn cause(&self) -> Trap {
         let cause: usize = self.ecode();
         match cause {
-            0x0 => Trap::INT, // 当vs= 0时，表示中断发生
-            0x1 => Trap::PIL, // load
-            0x2 => Trap::PIS, // store
-            0x3 => Trap::PIF, //取指操作页面不存在
-            0x4 => Trap::PME, //页修改例外
-            0x5 => Trap::PNR, //页不可读
-            0x6 => Trap::PNX, //页不可执行
-            0x7 => Trap::PPI, //页特权级不合规
-            0xb => Trap::SYS, //系统调用
-            _ => Trap::UNK,   //未知
+            0x0 => Trap::Interrupt,            // 当vs= 0时，表示中断发生
+            0x1 => Trap::LoadPageFault,        // load
+            0x2 => Trap::StorePageFault,       // store
+            0x3 => Trap::FetchPageFault,       //取指操作页面不存在
+            0x4 => Trap::PageModifyFault,      //页修改例外
+            0x5 => Trap::PageNotReadFault,     //页不可读
+            0x6 => Trap::PageNotExecuteFault,  //页不可执行
+            0x7 => Trap::PagePrivilegeIllegal, //页特权级不合规
+            0xb => Trap::Syscall,              //系统调用
+            0xc => Trap::Breakpoint,           //调试中断
+            0xd => Trap::InstructionNotExist,  //指令不合规
+            0xe => Trap::InstructionPrivilegeIllegal, //指令特权级不合规
+            _ => Trap::UNK,                    //未知
         }
-
     }
 }
 #[derive(Debug, Clone, Copy)]
 pub enum Trap {
-    INT = 0x0,
-    PIL = 0x1,
-    PIS = 0x2,
-    PIF = 0x3,
-    PME = 0x4,
-    PNR = 0x5,
-    PNX = 0x6,
-    PPI = 0x7,
-    SYS = 0xB, //系统调用
-    UNK = 0xF,
+    Interrupt = 0x0,
+    LoadPageFault = 0x1,
+    StorePageFault = 0x2,
+    FetchPageFault = 0x3,
+    PageModifyFault = 0x4,
+    PageNotReadFault = 0x5,
+    PageNotExecuteFault = 0x6,
+    PagePrivilegeIllegal = 0x7,
+    Syscall = 0xB,             //系统调用
+    Breakpoint = 0xC,          //调试中断
+    InstructionNotExist = 0xD, //指令不合规
+    InstructionPrivilegeIllegal = 0xE,  //特权指令不合规
+    UNK = 0xFF,
 }

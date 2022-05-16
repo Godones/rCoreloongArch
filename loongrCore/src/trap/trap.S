@@ -4,45 +4,44 @@
     .align 4
 __alltraps:
     # csrrw sp, sscratch, sp
-    xor $r21,$r21,$sp
-    xor $sp,$sp,$r21
-    xor $r21,$r21,$sp
-    #上面的代码交换了sp 和 r21的值，r21是一个保留寄存器不会被使用，所以可以用来存储sp的值
-    #r21保存了内核栈指针，sp保存了用户栈指针
-    # allocate a TrapContext on kernel stack
+    #需要交换 sp 与 0x502 寄存器的值
+    csrwr $sp, 0x502
+
     addi.d  $sp, $sp, -272
     #保存通用寄存器
-    st.d $ra, $sp, 0
-    st.d $tp, $sp, 8
-    st.d $sp, $sp, 16
-    st.d $a0, $sp, 24
-    st.d $a1, $sp, 32
-    st.d $a2, $sp, 40
-    st.d $a3, $sp, 48
-    st.d $a4, $sp, 56
-    st.d $a5, $sp, 64
-    st.d $a6, $sp, 72
-    st.d $a7, $sp, 80
-    st.d $t0, $sp, 88
-    st.d $t1, $sp, 96
-    st.d $t2, $sp, 104
-    st.d $t3, $sp, 112
-    st.d $t4, $sp, 120
-    st.d $t5, $sp, 128
-    st.d $t6, $sp, 136
-    st.d $t7, $sp, 144
-    st.d $t8, $sp, 152
-    st.d $r21, $sp,160
-    st.d $fp, $sp, 168
-    st.d $s0, $sp, 176
-    st.d $s1, $sp, 184
-    st.d $s2, $sp, 192
-    st.d $s3, $sp, 200
-    st.d $s4, $sp, 208
-    st.d $s5, $sp, 216
-    st.d $s6, $sp, 224
-    st.d $s7, $sp, 232
-    st.d $s8, $sp, 240
+    st.d $r0, $sp, 0
+    st.d $r1, $sp, 8
+    st.d $r2, $sp, 16
+    # 这里不需要保存 sp的值
+    #st.d $r3, $sp, 24 #sp
+    st.d $r4, $sp, 32
+    st.d $r5, $sp, 40
+    st.d $r6, $sp, 48
+    st.d $r7, $sp, 56
+    st.d $r8, $sp, 64
+    st.d $r9, $sp, 72
+    st.d $r10, $sp, 80
+    st.d $r11, $sp, 88
+    st.d $r12, $sp, 96
+    st.d $r13, $sp, 104
+    st.d $r14, $sp, 112
+    st.d $r15, $sp, 120
+    st.d $r16, $sp, 128
+    st.d $r17, $sp, 136
+    st.d $r18, $sp, 144
+    st.d $r19, $sp, 152
+    st.d $r20, $sp,160
+    #st.d $r21, $sp, 168
+    st.d $r22, $sp, 176
+    st.d $r23, $sp, 184
+    st.d $r24, $sp, 192
+    st.d $r25, $sp, 200
+    st.d $r26, $sp, 208
+    st.d $r27, $sp, 216
+    st.d $r28, $sp, 224
+    st.d $r29, $sp, 232
+    st.d $r30, $sp, 240
+    st.d $r31, $sp, 248
 
     #读取crmd
     csrrd $t0, 0x0
@@ -50,70 +49,66 @@ __alltraps:
     st.d $t0, $sp,256
     st.d $t1, $sp,264
 
-    move $t2, $r21 #读出用户栈指针
-    st.d $t2, $sp,16
+    csrrd $t2,0x502 #读出用户栈指针
+
+    st.d $t2, $sp,24
     # set input argument of trap_handler(cx: &mut TrapContext)
+
     move $a0, $sp
     bl trap_handler
 
 __restore:
-    # case1: start running app by __restore
-    # case2: back to U after handling trap
-
     move $sp, $a0
-    # now sp->kernel stack(after allocated), sscratch->user stack
-    # restore sstatus/sepc
-
-    ld.d $t0, $sp,256
+    #ld.d $r21, $sp,256 #status
     ld.d $t1, $sp,264
-    ld.d $t2, $sp,16  #用户栈指针
-    csrwr $t0, 0x0
-    csrwr $t1, 0x6
-    move $r21, $t2    #将用户栈指针放到r21
+    ld.d $t2, $sp,24  #用户栈指针
+
+
+    csrwr $t1, 0x6      #返回地址
+    csrwr $t2, 0x502  #将用户栈指针放到DSAVE中
+
     # 恢复通用寄存器
-    ld.d $ra, $sp, 0
-    ld.d $tp, $sp, 8
-    ld.d $sp, $sp, 16
-    ld.d $a0, $sp, 24
-    ld.d $a1, $sp, 32
-    ld.d $a2, $sp, 40
-    ld.d $a3, $sp, 48
-    ld.d $a4, $sp, 56
-    ld.d $a5, $sp, 64
-    ld.d $a6, $sp, 72
-    ld.d $a7, $sp, 80
-    ld.d $t0, $sp, 88
-    ld.d $t1, $sp, 96
-    ld.d $t2, $sp, 104
-    ld.d $t3, $sp, 112
-    ld.d $t4, $sp, 120
-    ld.d $t5, $sp, 128
-    ld.d $t6, $sp, 136
-    ld.d $t7, $sp, 144
-    ld.d $t8, $sp, 152
-
-    #ld.d $r21, $sp,160
-
-    ld.d $fp, $sp, 168
-    ld.d $s0, $sp, 176
-    ld.d $s1, $sp, 184
-    ld.d $s2, $sp, 192
-    ld.d $s3, $sp, 200
-    ld.d $s4, $sp, 208
-    ld.d $s5, $sp, 216
-    ld.d $s6, $sp, 224
-    ld.d $s7, $sp, 232
-    ld.d $s8, $sp, 240
+    ld.d $r0, $sp, 0
+    ld.d $r1, $sp, 8
+    ld.d $r2, $sp, 16
+    # 这里不需要恢复 sp,此时这个内存位置是用户栈指针
+    # ld.d $r3, $sp, 24
+    ld.d $r4, $sp, 32
+    ld.d $r5, $sp, 40
+    ld.d $r6, $sp, 48
+    ld.d $r7, $sp, 56
+    ld.d $r8, $sp, 64
+    ld.d $r9, $sp, 72
+    ld.d $r10, $sp, 80
+    ld.d $r11, $sp, 88
+    ld.d $r12, $sp, 96
+    ld.d $r13, $sp, 104
+    ld.d $r14, $sp, 112
+    ld.d $r15, $sp, 120
+    ld.d $r16, $sp, 128
+    ld.d $r16, $sp, 136
+    ld.d $r18, $sp, 144
+    ld.d $r19, $sp, 152
+    ld.d $r20, $sp,160
+    #ld.d $r21, $sp, 168
+    ld.d $r22, $sp, 176
+    ld.d $r23, $sp, 184
+    ld.d $r24, $sp, 192
+    ld.d $r25, $sp, 200
+    ld.d $r26, $sp, 208
+    ld.d $r27, $sp, 216
+    ld.d $r28, $sp, 224
+    ld.d $r29, $sp, 232
+    ld.d $r30, $sp, 240
+    ld.d $r31, $sp, 248
     #r0不用恢复
-
     # release TrapContext on kernel stack
-
     addi.d $sp, $sp, 272
 
-    # now sp->user stack, r21->kernel stack
+    csrwr $sp, 0x502 #将用户栈指针与内核栈指针交换
+    #这个位置仍然会造成特权级指令访问错误
+    #一个方法是在这里修改PRMD 的PPLV值，这里ertn会将其恢复到CRMD中,刚好达到切换特权级的作用
 
-    xor $r21,$r21,$sp
-    xor $sp,$sp,$r21
-    xor $r21,$r21,$sp
+    #csrwr $r21, 0x0  #改变特权级，应该放到最后来使用，因为切换了特权级后特权级命令无法使用了
 
     ertn

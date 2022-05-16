@@ -8,7 +8,7 @@ pub struct Ecfg {
 
 impl Ecfg {
     pub fn read() -> Self {
-        let mut bits = 0;
+        let mut bits;
         unsafe {
             asm!(
                 "csrrd {},0x4",
@@ -25,9 +25,10 @@ impl Ecfg {
         assert!(index < 13);
         self.bits.get_bit(index)
     }
-    pub fn set_local_interrupt(&mut self, value :usize) {
+    pub fn set_local_interrupt(&mut self, index: usize, val: bool) {
         // 中断位于0-12位,每一位代表一个局部中断
-        self.bits = value;
+        assert!(index < 13);
+        self.bits.set_bit(index, val);
         unsafe {
             asm!(
                 "csrwr {},0x4",

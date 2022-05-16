@@ -7,7 +7,6 @@ SECTIONS
   . = 0x00100000;
 
   .text : {
-    *(.text.init)
     *(.text .text.*)
     PROVIDE(etext = .);
     . = ALIGN(0x1000);
@@ -30,8 +29,6 @@ SECTIONS
   }
 
   .bss : {
-. = ALIGN(0x1000);
-    *(.bss.stack)
     sbss = .;
 . = ALIGN(16);
     *(.sbss .sbss.*)

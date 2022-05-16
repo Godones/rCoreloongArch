@@ -6,7 +6,7 @@ pub struct Era {
 impl Era {
     pub fn read() -> Self {
         //读取era的内容出来
-        let mut era: usize = 0;
+        let mut era;
         unsafe {
             asm!(
             "csrrd {},0x6",

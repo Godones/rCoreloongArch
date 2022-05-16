@@ -6,11 +6,11 @@ pub struct Badi {
 
 impl Badi {
     pub fn read() -> Self {
-        let mut bits: usize = 0;
+        let mut bits;
         unsafe {
             asm!(
             "csrrd {},0x8",
-            in(reg) bits,
+            out(reg) bits,
             )
         }
         Self { bits }

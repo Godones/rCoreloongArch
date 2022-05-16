@@ -1,5 +1,4 @@
 use bit_field::BitField;
-use crate::DEBUG;
 
 // 当前模式信息
 #[repr(C)]
@@ -15,7 +14,7 @@ pub enum Mode {
 impl Crmd {
     pub fn read() -> Self {
         //读取crmd的内容出来
-        let mut crmd: usize = 0;
+        let mut crmd;
         unsafe {
             asm!(
             "csrrd {},0x0",
@@ -34,7 +33,6 @@ impl Crmd {
         // 0-1位
         // let crmd = Self::read();
         self.bits.set_bits(0..2, mode as usize);
-        DEBUG!("set_mode: {}", mode as usize);
     }
     pub fn set_interrupt_enable(&mut self, enable: bool) {
         // 设置全局中断使能

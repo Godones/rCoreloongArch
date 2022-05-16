@@ -1,7 +1,5 @@
 //例外入口地址
 
-use crate::DEBUG;
-
 pub struct Eentry {
     pub eentry: usize,
 }

@@ -8,6 +8,6 @@ extern crate user_lib;
 fn main() -> i32 {
     println!("Into Test store_fault, we will insert an invalid store operation...");
     println!("Kernel should kill this application!");
-    unsafe { (0x0 as *mut u8).write_volatile(0); }
+    unsafe { (0xffcffffffff as *mut u8).write_volatile(0); }
     0
 }

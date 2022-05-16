@@ -11,7 +11,7 @@ pub struct Tcfg {
 
 impl Tcfg {
     pub fn read() -> Self {
-        let mut tcfg = 0usize;
+        let mut tcfg;
         unsafe {
             asm!(
                 "csrrd {} , 0x41",

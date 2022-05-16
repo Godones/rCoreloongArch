@@ -11,7 +11,7 @@ pub struct Prcfg1 {
 
 impl Prcfg1 {
     pub fn read() -> Self {
-        let mut bits = 2;
+        let mut bits;
         unsafe {
             asm!(
                 "csrrd {},0x21",

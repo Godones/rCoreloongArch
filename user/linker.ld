@@ -6,6 +6,8 @@ SECTIONS
   #. = 0x9000000002000000;
   . = 0x00200000;
 
+
+
   .text : {
     *(.text.entry)
     . = ALIGN(4K);

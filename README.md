@@ -35,12 +35,13 @@ ch2：
 
 - [x] LoongArch特权指令的使用
 - [x] qemu模拟器的地址空间分布
-- [ ] buddy system allocator
+- [x] 使用rust编写loongArch的寄存器支持
 
 ch3:
 
 - [x] 中断
-- [ ] 计时器
+- [x] 计时器
+- [ ] buddy system allocator
 
 ch4:
 
@@ -52,18 +53,20 @@ ch4:
 
 #### 当前开发状态说明
 
-已经可以成功的运行rcore的前两章代码，但代码中存在BUG会导致运行不成功，目前在调试内核态与用户态之间的对接，修复其中的BUG。
+已经可以成功的运行rcore的前两章代码，完成内核态与用户态的转换。添加LoonArch寄存器的支持，便于在内核代码中使用相关寄存器。目前正在开发第三章和第四章功能。
 
-![image-20220515222554344](sourcepicture/image-20220515222554344.png)
+
 
 #### 项目运行
-
-
 
 ```
 进入loongrCore目录下
 make run
 ```
+
+运行截图：
+
+![image-20220516211611487](sourcepicture/image-20220516211611487.png)
 
 #### 一些说明文件和实验过程:
 

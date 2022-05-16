@@ -15,6 +15,7 @@ fn main() {
                                                 //println!("cargo:rustc-link-arg=-Wl,-Map=rust.map");
     println!("cargo:rerun-if-change=linker.ld");
     println!("cargo:rerun-if-changed=../user/src/");
+    println!("cargo:rerun-if-changed=src/");
     println!("cargo:rerun-if-changed={}", TARGET_PATH);
     insert_app_data().unwrap();
 }

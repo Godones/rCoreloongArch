@@ -1,34 +1,11 @@
-use crate::loong_arch::register::tcfg::Tcfg;
-use crate::{DEBUG, ERROR, INFO, TRACE, WARN};
+#![allow(unused_variables)]
+use crate::INFO;
 
 pub fn color_output_test() {
-    // extern "C" {
-    //     fn _text_start();
-    //     fn _text_end();
-    //     fn _rodata_start();
-    //     fn _rodata_end();
-    //     fn _data_start();
-    //     fn _data_end();
-    //     fn _bss_start();
-    //     fn _bss_end();
-    //     fn _stack();
-    //     fn _heap_start();
-    //     fn _heap_size();
-    // }
-    // WARN!(".text [{:#x}, {:#x})", _text_start as usize, _text_end as usize);
-    // INFO!(".rodata [{:#x}, {:#x})", _rodata_start as usize, _rodata_end as usize);
-    // DEBUG!(".data [{:#x}, {:#x})", _data_start as usize, _data_end as usize);
-    // TRACE!(
-    //     ".bss [{:#x}, {:#x})",
-    //     _bss_start as usize,
-    //     _bss_end as usize
-    // );
-    // TRACE!(
-    //     "heap [{:#x}, {:#x})",
-    //     _heap_start as usize,
-    //     _heap_start as usize + _heap_size as usize
-    // );
-    // TRACE!("stack [{:#x}, {:#x})", _bss_end as usize, _stack as usize);
+    extern "C" {
+        fn ekernel();
+    }
+    INFO!("kernel end :{:#x}", ekernel as usize);
 }
 
 pub fn test_csr_register() {
@@ -43,11 +20,11 @@ pub fn test_csr_register() {
     let interrupt = crmd.get_interrupt_enable();
     INFO!("global Interrupt:{}", interrupt);
     // 打印中断入口地址是否同一个
-    let mut ecfg = Ecfg::read();
+    let ecfg = Ecfg::read();
     let add = ecfg.get_vs();
     INFO!("vs = {}", add);
     // 打印中断入口地址
-    let mut eentry = Eentry::read();
+    let eentry = Eentry::read();
     let add = eentry.get_eentry();
     INFO!("eentry = {:#x}", add);
     // save 寄存器个数
@@ -76,24 +53,22 @@ pub fn test_csr_register() {
     // 查看哪些中断被打开了
     for i in 0..13 {
         let interrupt = ecfg.get_local_interrupt(i);
-        INFO!("local_interrupt {}:{}",i, interrupt);
+        INFO!("local_interrupt {}:{}", i, interrupt);
     }
 }
-pub fn test_r21(){
+pub fn test_r21() {
     // 测试r21是否不会变化
-    let x=  120usize;
+    let x = 120usize;
     unsafe {
         asm!(
-        "move $r21,{}",
+        "csrwr {},0x502",
         in(reg)x
         );
     }
-    // trap::init();
-    test_csr_register();
-    let mut y = 0usize;
+    let mut y: usize;
     unsafe {
         asm!(
-        "move {}, $r21",
+        "csrrd {},0x502",
         out(reg)y
         )
     }

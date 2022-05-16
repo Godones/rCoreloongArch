@@ -7,6 +7,6 @@ pub mod eentry;
 pub mod era;
 pub mod estat;
 pub mod prcfg1;
+pub mod prmd;
 pub mod tcfg;
 pub mod ticlr;
-pub mod prmd;
