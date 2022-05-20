@@ -11,10 +11,11 @@ OBJDUMP := rust-objdump --arch-name=riscv64
 OBJCOPY := loongarch64-unknown-linux-gnu-objcopy
 
 elf:
-	@cargo build --release
-	@echo $(APPS)
-	@echo $(ELFS)
-	@echo $(BINS)
+	@#cargo build --release
+	@#echo $(APPS)
+	@#echo $(ELFS)
+	@#echo $(BINS)
+	@python3 build.py
 
 binary: elf
 	$(foreach elf, $(ELFS), $(OBJCOPY) $(elf) --strip-all -O binary $(patsubst $(TARGET_DIR)/%, $(TARGET_DIR)/%.bin, $(elf));)

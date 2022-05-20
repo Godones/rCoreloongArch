@@ -1,4 +1,4 @@
-mod context;
+pub(crate) mod context;
 
 use crate::loong_arch::register::{
     crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat, estat::Trap,

@@ -2,12 +2,7 @@ use crate::println;
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use lazy_static::*;
-
-const USER_STACK_SIZE: usize = 4096 * 2;
-const KERNEL_STACK_SIZE: usize = 4096 * 2;
-const MAX_APP_NUM: usize = 16;
-const APP_BASE_ADDRESS: usize = 0x00200000;
-const APP_SIZE_LIMIT: usize = 0x30000;
+use crate::config::*;
 
 #[repr(align(4096))]
 struct KernelStack {

@@ -16,6 +16,8 @@ mod syscall;
 mod test;
 mod trap;
 mod uart;
+mod loader;
+
 extern crate bit_field;
 extern crate rlibc;
 
@@ -42,6 +44,8 @@ pub extern "C" fn main() {
     INFO!("{}", FLAG);
     trap::init();
     // test_csr_register();
-    batch::init();
-    run_next_app();
+    // batch::init();
+    // run_next_app();
+    loader::init_load();
+    loader::run_next_app();
 }
