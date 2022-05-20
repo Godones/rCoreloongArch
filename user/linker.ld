@@ -6,35 +6,32 @@ SECTIONS
   #. = 0x9000000002000000;
   . = 0x00200000;
 
-
-
   .text : {
     *(.text.entry)
-    . = ALIGN(4K);
     *(.text .text.*)
     PROVIDE(etext = .);
     . = ALIGN(0x1000);
   }
-. = ALIGN(4K);
   .rodata : {
+  . = ALIGN(16);
     *(.srodata .srodata.*)
+    . = ALIGN(16);
     *(.rodata .rodata.*)
   }
-    . = ALIGN(4K);
   .data : {
+  . = ALIGN(16);
     *(.sdata .sdata.*)
+    . = ALIGN(16);
     *(.data .data.*)
   }
-    . = ALIGN(4K);
   .bss : {
-    *(.bss.stack)
     sbss = .;
+    . = ALIGN(16);
     _bss_start = .;
     *(.sbss .sbss.*)
+    . = ALIGN(16);
     *(.bss .bss.*)
   }
-  . = ALIGN(4K);
-
     _bss_end = .;
     ekernel = .;
 
