@@ -40,12 +40,14 @@ ch2：
 ch3:
 
 - [x] 中断
+- [x] 多道程序共享
 - [x] 计时器
-- [ ] buddy system allocator
+- [x] buddy system allocator
 
 ch4:
 
 - [ ] 页表
+- [ ] 
 
 ........
 
@@ -66,7 +68,7 @@ make run
 
 运行截图：
 
-![image-20220516211611487](sourcepicture/image-20220516211611487.png)
+![image-20220605235656760](sourcepicture/image-20220605235656760.png)
 
 #### 一些说明文件和实验过程:
 
