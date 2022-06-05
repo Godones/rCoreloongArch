@@ -20,7 +20,7 @@ fn main() {
     insert_app_data().unwrap();
 }
 
-static TARGET_PATH: &str = "../user/target/loongarch64-unknown-linux-gnu/release/";
+static TARGET_PATH: &str = "../user/target/loongarch64-unknown-linux-gnu/debug/";
 
 fn insert_app_data() -> Result<()> {
     let mut f = File::create("src/link_app.S").unwrap();

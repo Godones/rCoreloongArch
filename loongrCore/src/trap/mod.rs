@@ -10,7 +10,7 @@ use crate::loong_arch::register::ticlr::Ticlr;
 use crate::syscall::syscall;
 use crate::{println, INFO};
 pub use context::TrapContext;
-use crate::task::{exit_current_run_next,suspend_current_run_next};
+use crate::task::{exit_current_run_next};
 
 
 
@@ -53,9 +53,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
         Trap::Syscall => {
             //系统调用
             cx.sepc += 4;
-            if cx.x[11]==124 {
-                INFO!("kerneltrap: syscall id:{} a0:{} a1:{} a2:{}",cx.x[11],cx.x[4],cx.x[5],cx.x[6]);
-            }
+            // INFO!("call id:{}, {} {} {}",cx.x[11], cx.x[4], cx.x[5], cx.x[6]);
             cx.x[4] = syscall(cx.x[11], [cx.x[4], cx.x[5], cx.x[6]]) as usize;
         }
         Trap::LoadPageFault | Trap::StorePageFault | Trap::FetchPageFault => {

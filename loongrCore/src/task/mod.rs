@@ -1,9 +1,7 @@
 use crate::config::{BIG_STRIDE, MAX_APP_NUM};
 use crate::loader::{get_num_app, init_app_cx};
 use crate::sync::UPSafeCell;
-use crate::DEBUG;
 use context::TaskContext;
-use core::fmt::Error;
 use lazy_static::lazy_static;
 use switch::__switch;
 use task::{TaskControlBlock, TaskStatus};
@@ -28,10 +26,11 @@ struct TaskManagerInner {
 
 unsafe impl Sync for TaskManager {}
 
-/// 初始化任务管理器
-/// 将各个应用的内核初始化完成 --- init_app_cx
-/// 将各个任务的状态改变为初始化完成状态
+
 lazy_static! {
+    /// 初始化任务管理器
+    /// 将各个应用的内核初始化完成 --- init_app_cx
+    /// 将各个任务的状态改变为初始化完成状态
     pub static ref TASK_MANAGER: TaskManager = {
         let num_app = get_num_app();
         let mut tasks = [
@@ -109,10 +108,10 @@ impl TaskManager {
     }
     fn run_first_task(&self)->! {
         let mut inner = self.inner.borrow();
-        let mut task0 = &mut inner.tasks[2];
+        let mut task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;
         // task0.stride += inner.tasks[0].pass;
-        let next_task_cx_ptr = &task0.task_cx_ptr as *const  TaskContext;
+        let next_task_cx_ptr = &task0.task_cx_ptr as *const TaskContext;
         let mut _unused = TaskContext::zero_init();
         drop(inner);
         unsafe {
@@ -127,11 +126,13 @@ impl TaskManager {
             let current_task = inner.current_task;
             inner.current_task = next;
             inner.tasks[next].task_status = TaskStatus::Running;
+
             // inner.tasks[next].stride += inner.tasks[next].pass;
             //获取两个任务的task上下文指针
             let current_task_cx_ptr = &mut inner.tasks[current_task].task_cx_ptr as *mut TaskContext;
             let next_task_cx_ptr2 = &inner.tasks[next].task_cx_ptr as *const TaskContext;
             //释放可变借用，否则进入下一个任务后将不能获取到inner的使用权
+
             drop(inner);
             unsafe {
                 __switch(current_task_cx_ptr, next_task_cx_ptr2);

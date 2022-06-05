@@ -7,6 +7,7 @@
 .endm
     .section .text
     .globl __switch
+    .align 4
 __switch:
     # __switch(
     #     current_task_cx_ptr: *mut TaskContext,
@@ -31,5 +32,5 @@ __switch:
     .endr
     ld.d  $fp,$a1,(9+2)*8
     # restore kernel stack of next task
-    ld.d $sp, $a1,8
+    ld.d $sp, $a1, 8
     jr $ra

@@ -1,5 +1,5 @@
 #![allow(unused_variables)]
-use crate::{INFO, println};
+use crate::{INFO};
 
 pub fn color_output_test() {
     extern "C" {

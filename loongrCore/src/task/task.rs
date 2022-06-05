@@ -1,13 +1,13 @@
 use crate::task::context::TaskContext;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq,Debug)]
 pub enum TaskStatus {
     Uninit,  //未初始化
     Ready,   //准备执行
     Running, //正在执行
     Exited,  //已经退出
 }
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone,Debug)]
 pub struct TaskControlBlock {
     pub task_cx_ptr: TaskContext, //任务上下文栈顶地址
     pub task_status: TaskStatus,

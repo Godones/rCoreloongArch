@@ -31,7 +31,7 @@ __alltraps:
     st.d $r18, $sp, 144
     st.d $r19, $sp, 152
     st.d $r20, $sp,160
-    #st.d $r21, $sp, 168
+    st.d $r21, $sp, 168
     st.d $r22, $sp, 176
     st.d $r23, $sp, 184
     st.d $r24, $sp, 192
@@ -58,12 +58,11 @@ __alltraps:
     bl trap_handler
 
 __restore:
-    #ld.d $r21, $sp,256 #status
+
     ld.d $t1, $sp,264
     ld.d $t2, $sp,24  #用户栈指针
 
-
-    csrwr $t1, 0x6      #返回地址
+    csrwr $t1, 0x6    #返回地址
     csrwr $t2, 0x502  #将用户栈指针放到DSAVE中
 
     # 恢复通用寄存器
@@ -89,7 +88,7 @@ __restore:
     ld.d $r18, $sp, 144
     ld.d $r19, $sp, 152
     ld.d $r20, $sp,160
-    #ld.d $r21, $sp, 168
+    ld.d $r21, $sp, 168
     ld.d $r22, $sp, 176
     ld.d $r23, $sp, 184
     ld.d $r24, $sp, 192
@@ -108,6 +107,6 @@ __restore:
     #这个位置仍然会造成特权级指令访问错误
     #一个方法是在这里修改PRMD 的PPLV值，这里ertn会将其恢复到CRMD中,刚好达到切换特权级的作用
 
-    #csrwr $r21, 0x0  #改变特权级，应该放到最后来使用，因为切换了特权级后特权级命令无法使用了
+     #改变特权级，应该放到最后来使用，因为切换了特权级后特权级命令无法使用了
 
     ertn

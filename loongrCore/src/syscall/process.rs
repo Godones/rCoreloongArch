@@ -1,4 +1,4 @@
-use crate::{DEBUG, println};
+use crate::{ println};
 use crate::task::{
     suspend_current_run_next,
     exit_current_run_next,

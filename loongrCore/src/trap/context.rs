@@ -1,8 +1,9 @@
 use crate::loong_arch::register::prmd::Prmd;
-use crate::loong_arch::register::{crmd::Crmd, crmd::Mode};
+use crate::loong_arch::register::{crmd::Crmd};
 
-#[repr(C)]
+
 #[derive(Debug, Copy, Clone)]
+#[repr(C)]
 pub struct TrapContext {
     pub x: [usize; 32], //通用寄存器 ，第4个寄存器是sp
     pub sstatus: usize, //控制状态寄存器
@@ -15,8 +16,8 @@ impl TrapContext {
         self.x[3] = sp;
     }
     pub fn app_init_context(entry: usize, sp: usize) -> Self {
-        let mut sstatus = Crmd::read();
-        sstatus.set_mode(Mode::User);
+        let sstatus = Crmd::read();
+        // sstatus.set_mode(Mode::User);
         let sstatus = sstatus.get_val();
         Prmd::read().set_pplv(3);
         // 设置进入用户态

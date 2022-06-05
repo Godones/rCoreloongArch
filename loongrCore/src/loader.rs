@@ -1,8 +1,5 @@
-///将应用程序全部加载到内存中
 use crate::config::*;
 use crate::trap::context::TrapContext;
-// use crate::{DEBUG, INFO};
-use crate::task::context::TaskContext;
 use core::slice::{from_raw_parts, from_raw_parts_mut};
 use crate::DEBUG;
 
@@ -52,14 +49,15 @@ pub fn get_num_app() -> usize {
     let num_app_ptr = _num_app as usize as *const usize; //取地址
     unsafe { num_app_ptr.read_volatile() } //读内容 应用数量
 }
-/// 最重要的函数
+
 /// 用于初始化相关的设置
 pub fn init_app_cx(app: usize) -> usize {
     //返回任务的上下文
-    KERNEL_STACK[app].push_context(
+    let t = KERNEL_STACK[app].push_context(
         //首先压入trap上下文，再压入task上下文
-        TrapContext::app_init_context(get_base_address(app), USER_STACK[app].get_sp()),
-    )
+        TrapContext::app_init_context(get_base_address(app), USER_STACK[app].get_sp())
+    );
+    t
 }
 
 pub fn load_app() {
@@ -90,11 +88,9 @@ pub fn load_app() {
                 app_start[i + 1] - app_start[i], //长度，以字节记
             )
         };
-        DEBUG!("addr: {:#x}", app_i_address);
         let app_dst = unsafe { from_raw_parts_mut(app_i_address as *mut u8, app_src.len()) };
         app_dst.copy_from_slice(app_src); //写入数据
     }
-    DEBUG!("load app done");
 }
 
 fn get_base_address(app_id: usize) -> usize {

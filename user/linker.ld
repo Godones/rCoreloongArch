@@ -1,11 +1,10 @@
 OUTPUT_ARCH( "loongarch" )
 ENTRY( _start)
 
+
 SECTIONS
 {
-  #. = 0x9000000002000000;
-  . = 0x00200000;
-
+. = 0x260000;
   .text : {
     *(.text.entry)
     *(.text .text.*)
