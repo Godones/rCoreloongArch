@@ -58,7 +58,6 @@ __alltraps:
     bl trap_handler
 
 __restore:
-    move $sp, $a0
     #ld.d $r21, $sp,256 #status
     ld.d $t1, $sp,264
     ld.d $t2, $sp,24  #用户栈指针

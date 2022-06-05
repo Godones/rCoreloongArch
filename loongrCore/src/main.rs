@@ -5,25 +5,26 @@
 #![allow(dead_code)]
 #![feature(panic_info_message)]
 
-mod batch;
 mod config;
 mod lang_items;
+mod loader;
 mod loong_arch;
 mod print;
 mod scanf;
 mod sync;
 mod syscall;
+mod task;
 mod test;
 mod trap;
 mod uart;
-mod loader;
+mod timer;
 
 extern crate bit_field;
 extern crate rlibc;
 
-use crate::batch::run_next_app;
 use config::FLAG;
 use core::arch::global_asm;
+use crate::test::test_csr_register;
 
 global_asm!(include_str!("boot.S"));
 global_asm!(include_str!("link_app.S"));
@@ -42,10 +43,15 @@ fn clear_bss() {
 pub extern "C" fn main() {
     clear_bss();
     INFO!("{}", FLAG);
+    test::print_range();
+
     trap::init();
+    test_csr_register();
     // test_csr_register();
-    // batch::init();
-    // run_next_app();
-    loader::init_load();
-    loader::run_next_app();
+    //运行程序
+    loader::load_app();
+    // timer::enable_timer_interrupt(); //使能位
+    // timer::set_next_timetrigger();
+    task::run_first_task();
+    scanf::scanf();
 }

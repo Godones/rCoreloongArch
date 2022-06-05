@@ -38,19 +38,19 @@ impl Estat {
     pub fn cause(&self) -> Trap {
         let cause: usize = self.ecode();
         match cause {
-            0x0 => Trap::Interrupt,            // 当vs= 0时，表示中断发生
-            0x1 => Trap::LoadPageFault,        // load
-            0x2 => Trap::StorePageFault,       // store
-            0x3 => Trap::FetchPageFault,       //取指操作页面不存在
-            0x4 => Trap::PageModifyFault,      //页修改例外
-            0x5 => Trap::PageNotReadFault,     //页不可读
-            0x6 => Trap::PageNotExecuteFault,  //页不可执行
-            0x7 => Trap::PagePrivilegeIllegal, //页特权级不合规
-            0xb => Trap::Syscall,              //系统调用
-            0xc => Trap::Breakpoint,           //调试中断
-            0xd => Trap::InstructionNotExist,  //指令不合规
+            0x0 => Trap::Interrupt,                   // 当vs= 0时，表示中断发生
+            0x1 => Trap::LoadPageFault,               // load
+            0x2 => Trap::StorePageFault,              // store
+            0x3 => Trap::FetchPageFault,              //取指操作页面不存在
+            0x4 => Trap::PageModifyFault,             //页修改例外
+            0x5 => Trap::PageNotReadFault,            //页不可读
+            0x6 => Trap::PageNotExecuteFault,         //页不可执行
+            0x7 => Trap::PagePrivilegeIllegal,        //页特权级不合规
+            0xb => Trap::Syscall,                     //系统调用
+            0xc => Trap::Breakpoint,                  //调试中断
+            0xd => Trap::InstructionNotExist,         //指令不合规
             0xe => Trap::InstructionPrivilegeIllegal, //指令特权级不合规
-            _ => Trap::UNK,                    //未知
+            _ => Trap::UNK,                           //未知
         }
     }
 }
@@ -64,9 +64,9 @@ pub enum Trap {
     PageNotReadFault = 0x5,
     PageNotExecuteFault = 0x6,
     PagePrivilegeIllegal = 0x7,
-    Syscall = 0xB,             //系统调用
-    Breakpoint = 0xC,          //调试中断
-    InstructionNotExist = 0xD, //指令不合规
-    InstructionPrivilegeIllegal = 0xE,  //特权指令不合规
+    Syscall = 0xB,                     //系统调用
+    Breakpoint = 0xC,                  //调试中断
+    InstructionNotExist = 0xD,         //指令不合规
+    InstructionPrivilegeIllegal = 0xE, //特权指令不合规
     UNK = 0xFF,
 }

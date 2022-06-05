@@ -1,8 +1,8 @@
+use crate::config::*;
 use crate::println;
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use lazy_static::*;
-use crate::config::*;
 
 #[repr(align(4096))]
 struct KernelStack {

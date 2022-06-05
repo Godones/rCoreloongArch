@@ -7,6 +7,7 @@
 pub mod console;
 mod syscall;
 mod lang_items;
+extern crate rlibc;
 
 #[no_mangle]
 #[link_section = ".text.entry"]
@@ -39,3 +40,6 @@ pub fn write(fd: usize, buf: &[u8]) -> isize {
 pub fn exit(exit_code: i32) -> isize {
     sys_exit(exit_code,1)
 }
+
+pub fn yield_() -> isize { sys_yield(0,0) }
+pub fn get_time() -> isize { sys_get_time(0,0) }

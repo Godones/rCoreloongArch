@@ -1,5 +1,5 @@
 #![allow(unused_variables)]
-use crate::INFO;
+use crate::{INFO, println};
 
 pub fn color_output_test() {
     extern "C" {
@@ -56,21 +56,21 @@ pub fn test_csr_register() {
         INFO!("local_interrupt {}:{}", i, interrupt);
     }
 }
-pub fn test_r21() {
-    // 测试r21是否不会变化
-    let x = 120usize;
-    unsafe {
-        asm!(
-        "csrwr {},0x502",
-        in(reg)x
-        );
+pub fn print_range(){
+    extern "C" {
+        fn stext();
+        fn etext();
+        fn srodata();
+        fn erodata();
+        fn sdata();
+        fn edata();
+        fn sbss();
+        fn ebss();
+        fn ekernel();
     }
-    let mut y: usize;
-    unsafe {
-        asm!(
-        "csrrd {},0x502",
-        out(reg)y
-        )
-    }
-    INFO!("y = {}", y);
+    INFO!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
+    INFO!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
+    INFO!(".data [{:#x}, {:#x})", sdata as usize, edata as usize);
+    INFO!(".bss [{:#x}, {:#x})", sbss as usize, ebss as usize);
+    INFO!("kernel end :{:#x}", ekernel as usize);
 }

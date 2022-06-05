@@ -6,20 +6,25 @@ SECTIONS
   #  . = 0x9000000001034804;
   . = 0x00100000;
 
+    PROVIDE(etext = .);
   .text : {
     *(.text .text.*)
-    PROVIDE(etext = .);
     . = ALIGN(0x1000);
     _keentry = .;
     *(k_eentry)
   }
+ PROVIDE(stext = .);
 
+  PROVIDE(erodata = .);
   .rodata : {
-        . = ALIGN(16);
+     . = ALIGN(16);
     *(.srodata .srodata.*)
     . = ALIGN(16);
     *(.rodata .rodata.*)
   }
+PROVIDE(srodata = .);
+
+PROVIDE(edata = .);
 
   .data : {
 . = ALIGN(16);
@@ -27,6 +32,8 @@ SECTIONS
 . = ALIGN(16);
     *(.data .data.*)
   }
+PROVIDE(sdata = .);
+
 
   .bss : {
     sbss = .;
