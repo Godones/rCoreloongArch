@@ -8,7 +8,7 @@ use crate::loong_arch::register::prmd::Prmd;
 use crate::loong_arch::register::tcfg::Tcfg;
 use crate::loong_arch::register::ticlr::Ticlr;
 use crate::syscall::syscall;
-use crate::{println, INFO};
+use crate::{println, INFO, DEBUG};
 pub use context::TrapContext;
 use crate::task::{exit_current_run_next};
 
@@ -23,18 +23,24 @@ pub fn init() {
     }
     let mut ticlr = Ticlr::read();
     ticlr.clear();
-    Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER); //设置计时器的配置
-                                                                        // ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
-                                                                        // Ecfg::read().set_local_interrupt((0usize << CSR_ECFG_VS_SHIFT) | HWI_VEC | TI_VEC); // 设置所有异常处理函数的入口为同一个
+    //设置计时器的配置
+    // Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER);
+    ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
     Ecfg::read().set_vs(0);
+    //关闭时钟中断
     Ecfg::read().set_local_interrupt(11, false);
-    Crmd::read().set_interrupt_enable(false); //开启全局中断
-                                              // INFO!(
-                                              //     "global interrupt enable: {}",
-                                              //     Crmd::read().get_interrupt_enable()
-                                              // );
+    //开启全局中断
+    Crmd::read().set_interrupt_enable(false);
     Eentry::read().set_eentry(__alltraps as usize); // 设置中断入口
 }
+
+pub fn enable_timer_interrupt() {
+    Ticlr::read().set_val(Ticlr::read().get_val() | CSR_TICLR_CLR);
+    Tcfg::read().set_val(0x10000usize | CSR_TCFG_EN | CSR_TCFG_PER);
+    Ecfg::read().set_local_interrupt(11, true);
+    Crmd::read().set_interrupt_enable(true);
+}
+
 // loongArch的参数寄存器为a0-a7
 #[no_mangle]
 pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
@@ -78,11 +84,16 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
                     record = i;
                 }
             }
-            panic!(
-                "Unsupported trap {:?}, interrupt = {}!",
-                estat.get_val().get_bits(16..=21),
-                record
-            );
+            if record == 11{
+                //时钟中断
+                timer_handler();
+            }else {
+                panic!(
+                    "Unsupported trap {:?}, interrupt = {}!",
+                    estat.get_val().get_bits(16..=21),
+                    record
+                );
+            }
         }
     }
     cx

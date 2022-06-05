@@ -22,7 +22,7 @@ impl Tcfg {
     }
     pub fn get_enable(&self) -> bool {
         //第0位
-        self.tcfg.get_bit(0)
+        !self.tcfg.get_bit(0)
     }
     pub fn get_loop(&self) -> bool {
         //第1位

@@ -1,5 +1,6 @@
 #![allow(unused_variables)]
 use crate::{INFO};
+use crate::loong_arch::register::tcfg::Tcfg;
 
 pub fn color_output_test() {
     extern "C" {
@@ -36,14 +37,15 @@ pub fn test_csr_register() {
     INFO!("timer bits:{}", time_bits);
     INFO!("prcfg1:{:?}", prcfg1);
 
-    // //查看计时器配置
-    // let tcfg = Tcfg::read();
-    // let enable = tcfg.get_enable();
-    // let loop_ = tcfg.get_loop();
-    // let tval = tcfg.get_tval();
-    // INFO!("time_enable:{}", enable);
-    // INFO!("time_loop:{}", loop_);
-    // INFO!("time_tval:{}", tval);
+    //查看计时器配置
+    let tcfg = Tcfg::read();
+    let enable = tcfg.get_enable();
+    let loop_ = tcfg.get_loop();
+    let tval = tcfg.get_tval();
+
+    INFO!("time_enable:{}", enable);
+    INFO!("time_loop:{}", loop_);
+    INFO!("time_tval:{}", tval);
     // 查看地址翻译模式
     let da = crmd.get_da();
     INFO!("da:{}", da);

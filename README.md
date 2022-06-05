@@ -40,12 +40,14 @@ ch2：
 ch3:
 
 - [x] 中断
+- [x] 多道程序共享
 - [x] 计时器
-- [ ] buddy system allocator
+- [x] buddy system allocator
 
 ch4:
 
 - [ ] 页表
+- [ ] 
 
 ........
 
