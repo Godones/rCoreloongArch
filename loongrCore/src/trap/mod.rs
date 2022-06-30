@@ -10,7 +10,8 @@ use crate::loong_arch::register::ticlr::Ticlr;
 use crate::syscall::syscall;
 use crate::{println, INFO};
 pub use context::TrapContext;
-use crate::task::{exit_current_run_next};
+use crate::task::{exit_current_run_next, suspend_current_run_next};
+
 
 
 
@@ -22,19 +23,26 @@ pub fn init() {
         fn __alltraps();
     }
     let mut ticlr = Ticlr::read();
-    ticlr.clear();
-    Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER); //设置计时器的配置
-                                                                        // ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
-                                                                        // Ecfg::read().set_local_interrupt((0usize << CSR_ECFG_VS_SHIFT) | HWI_VEC | TI_VEC); // 设置所有异常处理函数的入口为同一个
-    Ecfg::read().set_vs(0);
+    ticlr.clear(); //清除时钟专断
+    //设置计时器的配置
+    // Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER);
+    //关闭时钟中断
     Ecfg::read().set_local_interrupt(11, false);
-    Crmd::read().set_interrupt_enable(false); //开启全局中断
-                                              // INFO!(
-                                              //     "global interrupt enable: {}",
-                                              //     Crmd::read().get_interrupt_enable()
-                                              // );
-    Eentry::read().set_eentry(__alltraps as usize); // 设置中断入口
+    Crmd::read().set_interrupt_enable(false); //关闭全局中断
+    Eentry::read().set_eentry(__alltraps as usize); //设置中断入口
 }
+
+pub fn enable_timer_interrupt() {
+    Ticlr::read().clear(); //清除时钟专断
+    Tcfg::read()
+        .set_enable(true)
+        .set_loop(true)
+        .set_tval(0x100000usize)
+        .flush(); //设置计时器的配置
+    Ecfg::read().set_local_interrupt(11, true);
+    Crmd::read().set_interrupt_enable(true); //开启全局中断
+}
+
 // loongArch的参数寄存器为a0-a7
 #[no_mangle]
 pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
@@ -78,18 +86,25 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
                     record = i;
                 }
             }
-            panic!(
-                "Unsupported trap {:?}, interrupt = {}!",
-                estat.get_val().get_bits(16..=21),
-                record
-            );
+            if record == 11{
+                //时钟中断
+                timer_handler();
+            }else {
+                panic!(
+                    "Unsupported trap {:?}, interrupt = {}!",
+                    estat.get_val().get_bits(16..=21),
+                    record
+                );
+            }
         }
     }
     cx
 }
 
 fn timer_handler() {
-    println!("timer_interrupt");
+    // println!("timer_interrupt");
+    // INFO!("time: {}ms",get_time_ms());
     let mut ticlr = Ticlr::read();
     ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
+    suspend_current_run_next();
 }

@@ -18,6 +18,15 @@ impl Estat {
         }
         Estat { bits: sstat }
     }
+    pub fn read_interrupt(&self)->usize{
+        // 0-12位为中断
+        for i in 0..13{
+            if self.bits.get_bit(i){
+                return i;
+            }
+        }
+        13
+    }
     pub fn ecode(&self) -> usize {
         //例外类型一级编号 21-16位
         // 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000

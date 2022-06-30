@@ -1,7 +1,6 @@
 use crate::config::*;
 use crate::trap::context::TrapContext;
 use core::slice::{from_raw_parts, from_raw_parts_mut};
-use crate::DEBUG;
 
 static KERNEL_STACK: [KernelStack; MAX_APP_NUM] = [KernelStack {
     data: [0; KERNEL_STACK_SIZE],

@@ -10,3 +10,4 @@ pub mod prcfg1;
 pub mod prmd;
 pub mod tcfg;
 pub mod ticlr;
+pub mod time;

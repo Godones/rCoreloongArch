@@ -22,7 +22,7 @@ impl Tcfg {
     }
     pub fn get_enable(&self) -> bool {
         //第0位
-        self.tcfg.get_bit(0)
+        !self.tcfg.get_bit(0)
     }
     pub fn get_loop(&self) -> bool {
         //第1位
@@ -30,11 +30,32 @@ impl Tcfg {
     }
     pub fn get_tval(&self) -> usize {
         //第2位开始
-        self.tcfg >> 2
+        (self.tcfg >> 2) << 2
     }
     pub fn set_val(&mut self, val: usize) {
-        //第2位开始
         self.tcfg = val;
+        unsafe {
+            asm!(
+                "csrwr {}, 0x41",
+                in(reg) self.tcfg,
+            )
+        }
+    }
+    pub fn set_enable(&mut self, enable: bool) -> Self {
+        self.tcfg.set_bit(0, enable);
+        Self{tcfg: self.tcfg}
+    }
+    pub fn set_loop(&mut self, loop_: bool) ->Self{
+        self.tcfg.set_bit(1, loop_);
+        Self{tcfg: self.tcfg}
+    }
+    pub fn set_tval(&mut self, val: usize) -> Self {
+        // 设置计数值, 只能是4的整数倍
+        // 在数值末尾会补上2bit0
+        self.tcfg = self.tcfg|(val<<2);
+        Self{tcfg: self.tcfg}
+    }
+    pub fn flush(&mut self) {
         unsafe {
             asm!(
                 "csrwr {}, 0x41",

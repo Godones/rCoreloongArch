@@ -59,11 +59,11 @@ __alltraps:
 
 __restore:
 
-    ld.d $t1, $sp,264
+    ld.d $t1, $sp,264 #加载返回地址
     ld.d $t2, $sp,24  #用户栈指针
 
-    csrwr $t1, 0x6    #返回地址
-    csrwr $t2, 0x502  #将用户栈指针放到DSAVE中
+    csrwr $t1, 0x6    #将返回地址写入$era寄存器中
+    csrwr $t2, 0x502  #将用户栈指针放到DSAVE中,这里暂时使用此寄存器
 
     # 恢复通用寄存器
     ld.d $r0, $sp, 0
@@ -87,7 +87,7 @@ __restore:
     ld.d $r16, $sp, 136
     ld.d $r18, $sp, 144
     ld.d $r19, $sp, 152
-    ld.d $r20, $sp,160
+    ld.d $r20, $sp, 160
     ld.d $r21, $sp, 168
     ld.d $r22, $sp, 176
     ld.d $r23, $sp, 184
@@ -99,14 +99,12 @@ __restore:
     ld.d $r29, $sp, 232
     ld.d $r30, $sp, 240
     ld.d $r31, $sp, 248
-    #r0不用恢复
+    # r0不用恢复
     # release TrapContext on kernel stack
     addi.d $sp, $sp, 272
 
     csrwr $sp, 0x502 #将用户栈指针与内核栈指针交换
     #这个位置仍然会造成特权级指令访问错误
     #一个方法是在这里修改PRMD 的PPLV值，这里ertn会将其恢复到CRMD中,刚好达到切换特权级的作用
-
-     #改变特权级，应该放到最后来使用，因为切换了特权级后特权级命令无法使用了
 
     ertn

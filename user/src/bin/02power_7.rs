@@ -4,8 +4,6 @@
 #[macro_use]
 extern crate user_lib;
 
-use user_lib::yield_;
-
 const LEN: usize = 100;
 
 #[no_mangle]
@@ -22,7 +20,6 @@ fn main() -> i32 {
         cur = next;
         if i % 10000 == 0 {
             println!("power_7 [{}/{}]", i, iter);
-            yield_();
         }
     }
     println!("{}^{} = {}(MOD {})", p, iter, s[cur], m);
