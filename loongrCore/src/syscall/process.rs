@@ -1,4 +1,4 @@
-use crate::{ println};
+use crate::{get_time_ms, println};
 use crate::task::{
     suspend_current_run_next,
     exit_current_run_next,
@@ -17,6 +17,5 @@ pub fn sys_yield() -> isize {
 }
 
 pub fn sys_get_time() -> isize {
-    // get_time_ms() as isize
-    0
+    get_time_ms() as isize
 }

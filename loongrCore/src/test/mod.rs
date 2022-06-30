@@ -35,7 +35,7 @@ pub fn test_csr_register() {
     let time_bits = prcfg1.get_timer_bits();
     INFO!("save register num:{}", prc);
     INFO!("timer bits:{}", time_bits);
-    INFO!("prcfg1:{:?}", prcfg1);
+    INFO!("{:?}", prcfg1);
 
     //查看计时器配置
     let tcfg = Tcfg::read();

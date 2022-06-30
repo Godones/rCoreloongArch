@@ -8,9 +8,10 @@ use crate::loong_arch::register::prmd::Prmd;
 use crate::loong_arch::register::tcfg::Tcfg;
 use crate::loong_arch::register::ticlr::Ticlr;
 use crate::syscall::syscall;
-use crate::{println, INFO, DEBUG};
+use crate::{println, INFO};
 pub use context::TrapContext;
-use crate::task::{exit_current_run_next};
+use crate::task::{exit_current_run_next, suspend_current_run_next};
+
 
 
 
@@ -22,23 +23,24 @@ pub fn init() {
         fn __alltraps();
     }
     let mut ticlr = Ticlr::read();
-    ticlr.clear();
+    ticlr.clear(); //清除时钟专断
     //设置计时器的配置
     // Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER);
-    ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
-    Ecfg::read().set_vs(0);
     //关闭时钟中断
     Ecfg::read().set_local_interrupt(11, false);
-    //开启全局中断
-    Crmd::read().set_interrupt_enable(false);
-    Eentry::read().set_eentry(__alltraps as usize); // 设置中断入口
+    Crmd::read().set_interrupt_enable(false); //关闭全局中断
+    Eentry::read().set_eentry(__alltraps as usize); //设置中断入口
 }
 
 pub fn enable_timer_interrupt() {
-    Ticlr::read().set_val(Ticlr::read().get_val() | CSR_TICLR_CLR);
-    Tcfg::read().set_val(0x10000usize | CSR_TCFG_EN | CSR_TCFG_PER);
+    Ticlr::read().clear(); //清除时钟专断
+    Tcfg::read()
+        .set_enable(true)
+        .set_loop(true)
+        .set_tval(0x100000usize)
+        .flush(); //设置计时器的配置
     Ecfg::read().set_local_interrupt(11, true);
-    Crmd::read().set_interrupt_enable(true);
+    Crmd::read().set_interrupt_enable(true); //开启全局中断
 }
 
 // loongArch的参数寄存器为a0-a7
@@ -100,7 +102,9 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
 }
 
 fn timer_handler() {
-    println!("timer_interrupt");
+    // println!("timer_interrupt");
+    // INFO!("time: {}ms",get_time_ms());
     let mut ticlr = Ticlr::read();
     ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
+    suspend_current_run_next();
 }

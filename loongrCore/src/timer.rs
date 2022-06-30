@@ -1,4 +1,14 @@
+use crate::config::{CLOCK_FREQ,MSEC_PER_SEC};
+use crate::loong_arch::register::time::*;
 
 
-const TICKS_PER_SEC: usize = 100;
-const MSEC_PER_SEC: usize = 1000;
+
+
+pub fn get_time() -> usize {
+    Time::read()
+}
+
+pub fn get_time_ms() -> usize {
+    Time::read() / (CLOCK_FREQ / MSEC_PER_SEC)
+}
+

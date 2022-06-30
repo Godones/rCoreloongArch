@@ -17,11 +17,8 @@ impl TrapContext {
     }
     pub fn app_init_context(entry: usize, sp: usize) -> Self {
         let sstatus = Crmd::read();
-        // sstatus.set_mode(Mode::User);
         let sstatus = sstatus.get_val();
-        Prmd::read().set_pplv(3);
-        // 设置进入用户态
-        // 应该在汇编代码中切换到用户态
+        Prmd::read().set_pplv(3); //设置为用户模式,trap使用ertn进入用户态时会被加载到crmd寄存器中
         let mut cx = Self {
             x: [0; 32],
             sstatus,

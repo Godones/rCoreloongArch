@@ -27,8 +27,7 @@ use core::arch::global_asm;
 use crate::scanf::scanf;
 use crate::test::test_csr_register;
 use crate::trap::enable_timer_interrupt;
-
-
+use crate::timer::get_time_ms;
 global_asm!(include_str!("boot.S"));
 global_asm!(include_str!("link_app.S"));
 
@@ -46,12 +45,11 @@ fn clear_bss() {
 pub extern "C" fn main() {
     clear_bss();
     INFO!("{}", FLAG);
-    trap::init();
     // test_csr_register();
-    //运行程序
-    // loader::load_app();
-    // enable_timer_interrupt();
+    trap::init();
     test_csr_register();
+    //运行程序
+    loader::load_app();
+    enable_timer_interrupt();
     task::run_first_task();
-    scanf();
 }
