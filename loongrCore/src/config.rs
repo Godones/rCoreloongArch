@@ -27,7 +27,6 @@ pub const CLOCK_FREQ: usize = 12500000; //qemu时钟频率
 pub const TICKS_PER_SEC: usize = 100;
 pub const MSEC_PER_SEC: usize = 1000;
 
-
 pub const HWI_VEC: usize = 0x3fc;
 pub const TI_VEC: usize = 0x1 << 11;
 pub const CSR_ECFG_VS_SHIFT: usize = 16;

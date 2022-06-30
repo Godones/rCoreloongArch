@@ -1,110 +1,91 @@
 pub(crate) mod context;
+use crate::loong_arch::register::csr::Register;
+use crate::loong_arch::register::estat::{Exception, Interrupt};
+use crate::loong_arch::register::tcfg::Tcfg;
+use crate::loong_arch::register::ticlr::Ticlr;
 use crate::loong_arch::register::{
     crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat, estat::Trap,
 };
-use bit_field::BitField;
-use crate::config::*;
-use crate::loong_arch::register::prmd::Prmd;
-use crate::loong_arch::register::tcfg::Tcfg;
-use crate::loong_arch::register::ticlr::Ticlr;
 use crate::syscall::syscall;
+use crate::task::{exit_current_run_next, suspend_current_run_next};
 use crate::{println, INFO};
 pub use context::TrapContext;
-use crate::task::{exit_current_run_next, suspend_current_run_next};
-
-
-
 
 global_asm!(include_str!("trap.S"));
-
 
 pub fn init() {
     extern "C" {
         fn __alltraps();
     }
-    let mut ticlr = Ticlr::read();
-    ticlr.clear(); //清除时钟专断
-    //设置计时器的配置
-    // Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER);
-    //关闭时钟中断
-    Ecfg::read().set_local_interrupt(11, false);
-    Crmd::read().set_interrupt_enable(false); //关闭全局中断
-    Eentry::read().set_eentry(__alltraps as usize); //设置中断入口
+    Ticlr::read().clear_timer().write(); //清除时钟专断
+                                         //设置计时器的配置
+                                         // Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER);
+                                         //关闭时钟中断
+    Ecfg::read().set_lie_with_index(11, false).write();
+    Crmd::read().set_ie(false).write(); //关闭全局中断
+    Eentry::read().set_eentry(__alltraps as usize).write(); //设置中断入口
 }
 
 pub fn enable_timer_interrupt() {
-    Ticlr::read().clear(); //清除时钟专断
+    Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read()
         .set_enable(true)
         .set_loop(true)
         .set_tval(0x100000usize)
-        .flush(); //设置计时器的配置
-    Ecfg::read().set_local_interrupt(11, true);
-    Crmd::read().set_interrupt_enable(true); //开启全局中断
+        .write(); //设置计时器的配置
+    Ecfg::read().set_lie_with_index(11, true).write();
+    Crmd::read().set_ie(true).write(); //开启全局中断
 }
 
-// loongArch的参数寄存器为a0-a7
 #[no_mangle]
 pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
-    let prmd = Prmd::read().get_val(); //记录例外前的信息
     let estat = Estat::read();
-    if (prmd & PRMD_PPLV) != 0 {
-        // 非特权级0的例外
-        // INFO!("kerneltrap: not from privilege0");
-    }
     let crmd = Crmd::read();
-    if crmd.get_interrupt_enable() {
+    if crmd.get_ie() {
         // 全局中断会在中断处理程序被关掉
         INFO!("kerneltrap: global interrupt enable");
     }
     match estat.cause() {
-        Trap::Syscall => {
+        Trap::Exception(Exception::Syscall) => {
             //系统调用
             cx.sepc += 4;
             // INFO!("call id:{}, {} {} {}",cx.x[11], cx.x[4], cx.x[5], cx.x[6]);
             cx.x[4] = syscall(cx.x[11], [cx.x[4], cx.x[5], cx.x[6]]) as usize;
         }
-        Trap::LoadPageFault | Trap::StorePageFault | Trap::FetchPageFault => {
+        Trap::Exception(Exception::LoadPageFault)
+        | Trap::Exception(Exception::StorePageFault)
+        | Trap::Exception(Exception::FetchPageFault) => {
             //页面异常
             println!("[kernel] PageFault in application, core dumped.");
             exit_current_run_next();
         }
-        Trap::InstructionNotExist => {
+        Trap::Exception(Exception::InstructionNotExist) => {
             //指令不存在
             println!("[kernel] IllegalInstruction in application, core dumped.");
             exit_current_run_next();
         }
-        Trap::InstructionPrivilegeIllegal => {
+        Trap::Exception(Exception::InstructionPrivilegeIllegal) => {
             //指令权限不足
             println!("[kernel] InstructionPrivilegeIllegal in application, core dumped.");
             exit_current_run_next();
         }
+        Trap::Interrupt(Interrupt::Timer) => {
+            //时钟中断
+            timer_handler();
+        }
         _ => {
-            let mut record = 0;
-            for i in 0..13 {
-                if estat.get_val().get_bit(i) {
-                    record = i;
-                }
-            }
-            if record == 11{
-                //时钟中断
-                timer_handler();
-            }else {
-                panic!(
-                    "Unsupported trap {:?}, interrupt = {}!",
-                    estat.get_val().get_bits(16..=21),
-                    record
-                );
-            }
+            panic!(
+                "estat:{:#x}, ecfg:{:#x}",
+                estat.get_val(),
+                Ecfg::read().get_val()
+            );
         }
     }
     cx
 }
 
 fn timer_handler() {
-    // println!("timer_interrupt");
-    // INFO!("time: {}ms",get_time_ms());
     let mut ticlr = Ticlr::read();
-    ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
+    ticlr.clear_timer().write(); //清除时钟中断
     suspend_current_run_next();
 }

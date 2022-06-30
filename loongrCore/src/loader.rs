@@ -36,7 +36,9 @@ impl KernelStack {
 
     pub fn push_context(&self, trap_cx: TrapContext) -> usize {
         let trap_cx_ptr = (self.get_sp() - core::mem::size_of::<TrapContext>()) as *mut TrapContext;
-        unsafe { *trap_cx_ptr = trap_cx; }
+        unsafe {
+            *trap_cx_ptr = trap_cx;
+        }
         trap_cx_ptr as usize
     }
 }
@@ -54,7 +56,7 @@ pub fn init_app_cx(app: usize) -> usize {
     //返回任务的上下文
     let t = KERNEL_STACK[app].push_context(
         //首先压入trap上下文，再压入task上下文
-        TrapContext::app_init_context(get_base_address(app), USER_STACK[app].get_sp())
+        TrapContext::app_init_context(get_base_address(app), USER_STACK[app].get_sp()),
     );
     t
 }

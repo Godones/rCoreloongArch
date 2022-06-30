@@ -15,19 +15,17 @@ mod sync;
 mod syscall;
 mod task;
 mod test;
+mod timer;
 mod trap;
 mod uart;
-mod timer;
 
 extern crate bit_field;
 extern crate rlibc;
-
 use config::FLAG;
-use core::arch::global_asm;
-use crate::scanf::scanf;
 use crate::test::test_csr_register;
-use crate::trap::enable_timer_interrupt;
 use crate::timer::get_time_ms;
+use crate::trap::enable_timer_interrupt;
+use core::arch::global_asm;
 global_asm!(include_str!("boot.S"));
 global_asm!(include_str!("link_app.S"));
 
@@ -45,9 +43,8 @@ fn clear_bss() {
 pub extern "C" fn main() {
     clear_bss();
     INFO!("{}", FLAG);
-    // test_csr_register();
     trap::init();
-    test_csr_register();
+    // test_csr_register();
     //运行程序
     loader::load_app();
     enable_timer_interrupt();

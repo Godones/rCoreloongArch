@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
-use crate::{INFO};
+use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::tcfg::Tcfg;
+use crate::INFO;
 
 pub fn color_output_test() {
     extern "C" {
@@ -15,10 +16,10 @@ pub fn test_csr_register() {
     INFO!("sstat = {:#b}", estat.get_val());
     // 打印当前的特权级
     let crmd = Crmd::read();
-    let spp = crmd.get_mode();
+    let spp = crmd.get_plv();
     INFO!("Privilege level:{}", spp);
     // 打印是否开启全局中断
-    let interrupt = crmd.get_interrupt_enable();
+    let interrupt = crmd.get_ie();
     INFO!("global Interrupt:{}", interrupt);
     // 打印中断入口地址是否同一个
     let ecfg = Ecfg::read();
@@ -54,11 +55,11 @@ pub fn test_csr_register() {
 
     // 查看哪些中断被打开了
     for i in 0..13 {
-        let interrupt = ecfg.get_local_interrupt(i);
+        let interrupt = ecfg.get_lie_with_index(i);
         INFO!("local_interrupt {}:{}", i, interrupt);
     }
 }
-pub fn print_range(){
+pub fn print_range() {
     extern "C" {
         fn stext();
         fn etext();

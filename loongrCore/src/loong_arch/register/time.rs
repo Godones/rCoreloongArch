@@ -2,7 +2,7 @@ pub struct Time {}
 
 impl Time {
     pub fn read() -> usize {
-        let mut counter:usize;
+        let mut counter: usize;
         unsafe {
             asm!(
             "rdtime.d {},{}",

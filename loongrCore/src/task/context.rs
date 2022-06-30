@@ -4,7 +4,7 @@
 /// 而其它寄存器不保存时因为属于调用者保存的寄存器是由编译器在高级语言编写
 /// 的调用函数中自动生成的代码来完成保存的；还有一些寄存器属于临时寄存器，
 /// 不需要保存和恢复。
-#[derive(Copy, Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct TaskContext {
     //ra: 此寄存器存储的是函数返回时跳转的地址
@@ -31,7 +31,7 @@ impl TaskContext {
         }
         Self {
             ra: __restore as usize,
-            sp: kstack_ptr,//存放了trap上下文后的栈地址,内核栈地址
+            sp: kstack_ptr, //存放了trap上下文后的栈地址,内核栈地址
             s: [0; 10],
         }
     }

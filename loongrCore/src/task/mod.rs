@@ -26,7 +26,6 @@ struct TaskManagerInner {
 
 unsafe impl Sync for TaskManager {}
 
-
 lazy_static! {
     /// 初始化任务管理器
     /// 将各个应用的内核初始化完成 --- init_app_cx
@@ -106,7 +105,7 @@ impl TaskManager {
         self.rr()
         // self.stride()
     }
-    fn run_first_task(&self)->! {
+    fn run_first_task(&self) -> ! {
         let mut inner = self.inner.borrow();
         let mut task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;
@@ -119,7 +118,7 @@ impl TaskManager {
         }
         panic!("unreachable in first_task");
     }
-    fn run_next_task(&self){
+    fn run_next_task(&self) {
         if let Some(next) = self.find_next_task() {
             //查询是否有处于准备的任务，如果有就运行
             let mut inner = self.inner.borrow();
@@ -128,7 +127,8 @@ impl TaskManager {
             inner.tasks[next].task_status = TaskStatus::Running;
             // inner.tasks[next].stride += inner.tasks[next].pass;
             //获取两个任务的task上下文指针
-            let current_task_cx_ptr = &mut inner.tasks[current_task].task_cx_ptr as *mut TaskContext;
+            let current_task_cx_ptr =
+                &mut inner.tasks[current_task].task_cx_ptr as *mut TaskContext;
             let next_task_cx_ptr2 = &inner.tasks[next].task_cx_ptr as *const TaskContext;
             //释放可变借用，否则进入下一个任务后将不能获取到inner的使用权
             drop(inner);

@@ -1,7 +1,9 @@
 //! loongArch的一些寄存器
 pub mod badi;
+pub mod badv;
 pub mod config;
 pub mod crmd;
+pub mod csr;
 pub mod ecfg;
 pub mod eentry;
 pub mod era;
