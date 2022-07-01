@@ -4,6 +4,8 @@
 #![no_main]
 #![allow(dead_code)]
 #![feature(panic_info_message)]
+#![feature(alloc_error_handler)]
+#![feature(const_mut_refs)]
 
 mod config;
 mod lang_items;
@@ -18,14 +20,19 @@ mod test;
 mod timer;
 mod trap;
 mod uart;
+mod mm;
 
 extern crate bit_field;
 extern crate rlibc;
+extern crate alloc;
+
+
 use config::FLAG;
 use crate::test::test_csr_register;
 use crate::timer::get_time_ms;
 use crate::trap::enable_timer_interrupt;
 use core::arch::global_asm;
+use crate::mm::system_allocator::heap_test;
 global_asm!(include_str!("boot.S"));
 global_asm!(include_str!("link_app.S"));
 
@@ -43,6 +50,7 @@ fn clear_bss() {
 pub extern "C" fn main() {
     clear_bss();
     INFO!("{}", FLAG);
+    heap_test();
     trap::init();
     // test_csr_register();
     //运行程序
