@@ -1,10 +1,10 @@
 ///! buddy分配器
 ///! 使用bump分配器分配内存然后在buddy分配器中进行分配管理
-use crate::mm:: system_allocator::common::{align_up, Locked};
+use crate::mm::system_allocator::common::{align_up, Locked};
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;
 use core::alloc::{GlobalAlloc, Layout};
 use core::fmt::{Debug, Formatter};
-use core::mem::{size_of};
+use core::mem::size_of;
 use core::ptr::null_mut;
 
 const MAXLISTS: usize = 32;
@@ -29,15 +29,11 @@ impl Node {
 pub struct Buddy {
     free_lists: [*mut Node; MAXLISTS], //每个队列都是按照2的幂进行对齐
     linked_list: Locked<LinkedListAllocator>,
-    max_free_index:usize,
+    max_free_index: usize,
 }
 impl Debug for Buddy {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(
-            f,
-            "freelists: {:?}",
-            self.free_lists,
-        )
+        write!(f, "freelists: {:?}", self.free_lists,)
     }
 }
 unsafe impl Send for Buddy {}
@@ -118,7 +114,7 @@ impl Buddy {
                 }
             }
             self.free_lists[pow2] = target_list;
-            self.max_free_index = pow2;//在merge的时候更新最大的free_index
+            self.max_free_index = pow2; //在merge的时候更新最大的free_index
         }
     }
     fn inner(&mut self, index: usize) -> *mut u8 {
@@ -221,20 +217,14 @@ pub fn find_last_min_pow2(mut addr: usize) -> usize {
 
 unsafe impl GlobalAlloc for Locked<Buddy> {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let size = layout
-            .size()
-            .max(size_of::<Node>())
-            .next_power_of_two();
+        let size = layout.size().max(size_of::<Node>()).next_power_of_two();
         //构造合适的layout转递给linked_listAllocator
         let layout = Layout::from_size_align(size, size).unwrap();
         let answer = self.lock().get(layout);
         answer
     }
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        let size = layout
-            .size()
-            .max(size_of::<Node>())
-            .next_power_of_two();
+        let size = layout.size().max(size_of::<Node>()).next_power_of_two();
         //构造合适的layout转递给linked_listAllocator
         self.lock().delete(ptr as usize, size);
     }

@@ -1,4 +1,4 @@
-use crate::loong_arch::register::csr::Register;
+use super::csr::{Register,CSR_ECFG};
 use bit_field::BitField;
 
 /// 控制例外和中断的入口地址计算方式，以及局部中断使能
@@ -8,11 +8,11 @@ pub struct Ecfg {
 impl Register for Ecfg {
     fn read() -> Self {
         let mut bits;
-        unsafe { asm!("csrrd {},0x4", out(reg) bits ) }
+        unsafe { asm!("csrrd {},{}", out(reg) bits,const CSR_ECFG ) }
         Self { bits }
     }
     fn write(&mut self) {
-        unsafe { asm!("csrwr {},0x4", in(reg) self.bits ) }
+        unsafe { asm!("csrwr {},{}", in(reg) self.bits,const CSR_ECFG ) }
     }
 }
 

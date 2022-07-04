@@ -54,7 +54,7 @@ impl Tcfg {
     pub fn set_tval(&mut self, val: usize) -> &mut Self {
         // 设置计数值, 只能是4的整数倍
         // 在数值末尾会补上2bit0
-        self.bits = self.bits | (val << 2);
+        self.bits.set_bits(2.., val >> 2);
         self
     }
 }

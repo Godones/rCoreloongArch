@@ -1,6 +1,6 @@
 import os
-
-base_address = 0x00200000
+#base_address =  0x80400000
+base_address = 0x93000000
 app_address = 0x20000
 
 linker = "linker.ld"
@@ -14,7 +14,7 @@ for i,app in enumerate(apps):
     app_name = app.split('.')[0]
     with open(linker,'w+') as f:
         for line in ori_text:
-            if "0x2" in line:
+            if "0x9" in line:
                 new_text = ". = "+ str(hex(base_address+app_address*i)) + ";\n"
             else:
                 new_text = line

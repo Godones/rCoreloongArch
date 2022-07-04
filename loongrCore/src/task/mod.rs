@@ -5,6 +5,7 @@ use context::TaskContext;
 use lazy_static::lazy_static;
 use switch::__switch;
 use task::{TaskControlBlock, TaskStatus};
+
 /// 为了更好地完成任务上下文切换，需要对任务处于什么状态做明确划分
 ///任务的运行状态：未初始化->准备执行->正在执行->已退出
 pub mod context;
@@ -105,6 +106,7 @@ impl TaskManager {
         self.rr()
         // self.stride()
     }
+    #[no_mangle]
     fn run_first_task(&self) -> ! {
         let mut inner = self.inner.borrow();
         let mut task0 = &mut inner.tasks[0];

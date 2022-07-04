@@ -1,6 +1,7 @@
 use crate::loong_arch::register::csr::Register;
-use bit_field::BitField;
 use crate::loong_arch::register::ecfg::Ecfg;
+use super::csr::CSR_ESTAT;
+use bit_field::BitField;
 
 // 该寄存器记录例外的状态信息，包括所触发例外的一二级编码，以及各中断的状态
 #[derive(Debug, Clone, Copy)]
@@ -13,13 +14,13 @@ impl Register for Estat {
         //读取sstat的内容出来
         let mut bits;
         unsafe {
-            asm!("csrrd {},0x5", out(reg) bits);
+            asm!("csrrd {},{}", out(reg) bits,const CSR_ESTAT);
         }
         Estat { bits }
     }
     fn write(&mut self) {
         unsafe {
-            asm!("csrwr {},0x5", in(reg) self.bits);
+            asm!("csrwr {},{}", in(reg) self.bits,const CSR_ESTAT);
         }
     }
 }

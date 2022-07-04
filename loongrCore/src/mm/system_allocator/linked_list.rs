@@ -99,7 +99,7 @@ unsafe impl GlobalAlloc for Locked<LinkedListAllocator> {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         //将要申请的对齐方式与listnode比较
         //至少要分配一个能存储listnode大小的区域
-        let (size, align) = (layout.size(),layout.align());
+        let (size, align) = (layout.size(), layout.align());
         let mut allocator = self.lock();
         if let Some((region, alloc_start)) = allocator.pop(size, align) {
             let alloc_end = alloc_start + size;

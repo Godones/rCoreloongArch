@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::tcfg::Tcfg;
-use crate::INFO;
+use crate::{Dmw0, Dmw1, INFO};
 
 pub fn color_output_test() {
     extern "C" {
@@ -52,6 +52,8 @@ pub fn test_csr_register() {
     INFO!("da:{}", da);
     let pg = crmd.get_pg();
     INFO!("pg:{}", pg);
+    INFO!("dmwo:{:b}", Dmw0::read().get_value());
+    INFO!("dmw1:{:b}", Dmw1::read().get_value());
 
     // 查看哪些中断被打开了
     for i in 0..13 {

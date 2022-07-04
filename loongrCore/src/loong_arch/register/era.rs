@@ -1,6 +1,7 @@
-use crate::loong_arch::register::csr::Register;
+use crate::loong_arch::register::csr::{CSR_ERA, Register};
 
-// 例外返回地址
+// 该寄存器记录普通例外处理完毕之后的返回地址。当触发例外时，如果例外类型既不是 TLB 重填例外
+// 也不是机器错误例外，则触发例外的指令的 PC 将被记录在该寄存器中
 pub struct Era {
     bits: usize,
 }
@@ -10,14 +11,14 @@ impl Register for Era {
         //读取era的内容出来
         let mut era;
         unsafe {
-            asm!("csrrd {},0x6", out(reg) era);
+            asm!("csrrd {},{}", out(reg) era,const CSR_ERA);
         }
         Era { bits: era }
     }
     fn write(&mut self) {
         //写入era的内容
         unsafe {
-            asm!("csrwr {},0x6", in(reg) self.bits);
+            asm!("csrwr {},{}", in(reg) self.bits,const CSR_ERA);
         }
     }
 }

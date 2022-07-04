@@ -1,3 +1,5 @@
 pub mod cpu;
 pub mod register;
-pub mod trap;
+pub mod tlb;
+pub mod mem;
+

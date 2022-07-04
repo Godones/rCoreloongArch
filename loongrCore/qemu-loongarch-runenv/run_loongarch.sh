@@ -24,7 +24,7 @@ Help()
 }
 
 # >= 512M
-MEM="1G"
+MEM="4G"
 # 1-4
 CPUS="1"
 #BIOS="./loongarch_bios_0310.bin"

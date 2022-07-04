@@ -6,18 +6,13 @@ pub mod bump_allocator;
 mod common;
 mod linked_list;
 
-
-
 use crate::config::KERNEL_HEAP_SIZE;
 use crate::mm::system_allocator::bump_allocator::BumpAllocator;
 use crate::mm::system_allocator::common::Locked;
 // use crate::system_allocator::linked_list::LinkedListAllocator;
 use crate::mm::system_allocator::buddy::Buddy;
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;
-use crate::INFO;
-
-
-
+use crate::{DEBUG, INFO};
 
 static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 
@@ -50,7 +45,6 @@ pub fn heap_test() {
     let a = Box::new(5);
 
     assert_eq!(*a, 5);
-
     assert!(bss_range.contains(&(a.as_ref() as *const _ as usize)));
     //判断指针是否指向bss段
     drop(a);

@@ -1,8 +1,10 @@
 pub(crate) mod context;
+use crate::config::TICKS_PER_SEC;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::estat::{Exception, Interrupt};
 use crate::loong_arch::register::tcfg::Tcfg;
 use crate::loong_arch::register::ticlr::Ticlr;
+use crate::loong_arch::register::time::get_timer_freq;
 use crate::loong_arch::register::{
     crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat, estat::Trap,
 };
@@ -10,7 +12,6 @@ use crate::syscall::syscall;
 use crate::task::{exit_current_run_next, suspend_current_run_next};
 use crate::{println, INFO};
 pub use context::TrapContext;
-
 global_asm!(include_str!("trap.S"));
 
 pub fn init() {
@@ -21,17 +22,19 @@ pub fn init() {
                                          //设置计时器的配置
                                          // Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER);
                                          //关闭时钟中断
+    Tcfg::read().set_enable(false).write();
     Ecfg::read().set_lie_with_index(11, false).write();
     Crmd::read().set_ie(false).write(); //关闭全局中断
     Eentry::read().set_eentry(__alltraps as usize).write(); //设置中断入口
 }
 
 pub fn enable_timer_interrupt() {
+    let timer_freq = get_timer_freq();
     Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read()
         .set_enable(true)
         .set_loop(true)
-        .set_tval(0x100000usize)
+        .set_tval(timer_freq / TICKS_PER_SEC)
         .write(); //设置计时器的配置
     Ecfg::read().set_lie_with_index(11, true).write();
     Crmd::read().set_ie(true).write(); //开启全局中断
@@ -61,7 +64,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
         }
         Trap::Exception(Exception::InstructionNotExist) => {
             //指令不存在
-            println!("[kernel] IllegalInstruction in application, core dumped.");
+            println!("[kernel] InstructionNotExist in application, core dumped.");
             exit_current_run_next();
         }
         Trap::Exception(Exception::InstructionPrivilegeIllegal) => {
@@ -74,11 +77,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
             timer_handler();
         }
         _ => {
-            panic!(
-                "estat:{:#x}, ecfg:{:#x}",
-                estat.get_val(),
-                Ecfg::read().get_val()
-            );
+            panic!("{:?}", estat.cause());
         }
     }
     cx
@@ -88,4 +87,11 @@ fn timer_handler() {
     let mut ticlr = Ticlr::read();
     ticlr.clear_timer().write(); //清除时钟中断
     suspend_current_run_next();
+}
+
+pub fn tlb_handler() {
+    println!("[kernel] tlb_handler in application, core dumped.");
+    unsafe {
+        asm!("ertn");
+    }
 }

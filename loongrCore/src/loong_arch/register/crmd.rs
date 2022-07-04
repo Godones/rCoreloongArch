@@ -1,7 +1,7 @@
-use crate::loong_arch::cpu::CpuMode;
-use crate::loong_arch::register::csr::Register;
+use super::csr::Register;
+use super::super::cpu::CpuMode;
 use bit_field::BitField;
-
+use super::csr::CSR_CRMD;
 // 当前模式信息
 #[repr(C)]
 pub struct Crmd {
@@ -13,14 +13,14 @@ impl Register for Crmd {
         //读取crmd的内容
         let mut crmd;
         unsafe {
-            asm!("csrrd {},0x0", out(reg) crmd);
+            asm!("csrrd {},{}", out(reg) crmd,const CSR_CRMD);
         }
         Crmd { bits: crmd }
     }
-    fn write(& mut self) {
+    fn write(&mut self) {
         //写入crmd
         unsafe {
-            asm!("csrwr {},0x0", in(reg) self.bits);
+            asm!("csrwr {},{}", in(reg) self.bits,const CSR_CRMD);
         }
     }
 }
@@ -72,6 +72,24 @@ impl Crmd {
     // 设置PG,页翻译使能
     pub fn set_pg(&mut self, pg: bool) -> &mut Self {
         self.bits.set_bit(4, pg);
+        self
+    }
+    // 获取直接地址翻译模式时，取指操作的存储访问类型
+    // 在采用软件处理 TLB 重填的情况下，当软件将 PG 置为 1 时，需同时将 DATF 域置为
+    // 0b01，即一致可缓存类型
+    pub fn get_datf(&self) -> usize {
+        self.bits.get_bits(5..=6)
+    }
+    pub fn set_datf(&mut self, datf: usize) -> &mut Self {
+        self.bits.set_bits(5..=6, datf);
+        self
+    }
+    // 直接地址翻译模式时，load 和 store 操作的存储访问类型
+    pub fn get_datm(&self) -> usize {
+        self.bits.get_bits(7..=8)
+    }
+    pub fn set_datm(&mut self, datm: usize) -> &mut Self {
+        self.bits.set_bits(7..=8, datm);
         self
     }
 }
