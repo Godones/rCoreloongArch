@@ -1,4 +1,4 @@
-use crate::loong_arch::register::csr::Register;
+use crate::loong_arch::register::csr::{Register, CSR_PRCFG1};
 use bit_field::BitField;
 
 #[derive(Debug)]
@@ -13,7 +13,7 @@ pub struct Prcfg1 {
 impl Register for Prcfg1 {
     fn read() -> Self {
         let mut bits;
-        unsafe { asm!("csrrd {},0x21", out(reg) bits, ) }
+        unsafe { asm!("csrrd {},{}", out(reg) bits,const CSR_PRCFG1 ) }
         Self { bits }
     }
     fn write(&mut self) {}

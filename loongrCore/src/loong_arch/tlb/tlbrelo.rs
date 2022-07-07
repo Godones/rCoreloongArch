@@ -4,41 +4,37 @@
 // 无论 CSR.TLBRERA.IsTLBR 等于何值，执行 TLBRD 指令都只更新 TLBELO0/1 两寄存器。
 // 无论 CSR.TLBRERA.IsTLBR 等于何值，执行 LDPTE 指令都只更新 TLBRELO0/1 两寄存器
 
-
-
-use bit_field::BitField;
-use crate::loong_arch::register::csr::{CSR_TLBRELO};
+use crate::loong_arch::register::csr::CSR_TLBRELO;
 use crate::loong_arch::tlb::tlbelo::TLBEL;
+use bit_field::BitField;
 
 pub struct TlbRelo {
-    bits:usize,
-    index:usize,
+    bits: usize,
+    index: usize,
 }
-impl TlbRelo{
-    fn read(index:usize) -> Self {
-        let bits:usize;
-        unsafe{
+impl TlbRelo {
+    fn read(index: usize) -> Self {
+        let bits: usize;
+        unsafe {
             match index {
                 0 => asm!("csrrd {},{}",out(reg)bits,const CSR_TLBRELO),
                 1 => asm!("csrrd {},{}",out(reg)bits,const CSR_TLBRELO+1),
-                _ => panic!("TLBELO index out of range")
+                _ => panic!("TLBELO index out of range"),
             }
-
         }
-        Self{bits, index }
+        Self { bits, index }
     }
     fn write(&mut self) {
-        unsafe{
+        unsafe {
             match self.index {
                 0 => asm!("csrwr {},{}",in(reg)self.bits,const CSR_TLBRELO),
                 1 => asm!("csrwr {},{}",in(reg)self.bits,const CSR_TLBRELO+1),
-                _ => panic!("TLBELO index out of range")
+                _ => panic!("TLBELO index out of range"),
             }
-
         }
     }
 }
-impl TLBEL for TlbRelo{
+impl TLBEL for TlbRelo {
     // 页表项的有效位（V）
     fn get_valid(&self) -> bool {
         self.bits.get_bit(0)
@@ -85,12 +81,12 @@ impl TLBEL for TlbRelo{
         self
     }
 
-    fn get_ppn(&self,palen:usize) -> usize {
+    fn get_ppn(&self, palen: usize) -> usize {
         self.bits.get_bits(12..palen)
     }
 
-    fn set_ppn(&mut self, palen:usize,ppn: usize) -> &mut Self {
-        self.bits.set_bits(12..palen,ppn);
+    fn set_ppn(&mut self, palen: usize, ppn: usize) -> &mut Self {
+        self.bits.set_bits(12..palen, ppn);
         self
     }
 

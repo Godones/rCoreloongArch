@@ -1,4 +1,4 @@
-use crate::loong_arch::register::csr::{CSR_ERA, Register};
+use crate::loong_arch::register::csr::{Register, CSR_ERA};
 
 // 该寄存器记录普通例外处理完毕之后的返回地址。当触发例外时，如果例外类型既不是 TLB 重填例外
 // 也不是机器错误例外，则触发例外的指令的 PC 将被记录在该寄存器中

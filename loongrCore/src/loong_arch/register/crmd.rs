@@ -1,7 +1,7 @@
-use super::csr::Register;
 use super::super::cpu::CpuMode;
-use bit_field::BitField;
+use super::csr::Register;
 use super::csr::CSR_CRMD;
+use bit_field::BitField;
 // 当前模式信息
 #[repr(C)]
 pub struct Crmd {

@@ -34,7 +34,7 @@ kernel:
 	@cd ../user && make build
 	@#cd ../fs-test && make run
 	@echo Platform: $(BOARD)
-	@cargo build --release --features TRACE
+	@cargo build --$(MODE) --features TRACE
 
 
 clean:

@@ -6,9 +6,11 @@
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
 #![feature(const_mut_refs)]
+#![feature(stmt_expr_attributes)]
 
 mod boot_param;
 mod config;
+mod info;
 mod lang_items;
 mod loader;
 mod loong_arch;
@@ -27,18 +29,23 @@ extern crate alloc;
 extern crate bit_field;
 extern crate rlibc;
 
+extern crate bitflags;
+
+
 use crate::boot_param::boot_params_interface::BootParamsInterface;
-use crate::loong_arch::cpu::{get_palen, get_valen};
+
 use crate::loong_arch::register::crmd::Crmd;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::dmwn::{Dmw0, Dmw1};
-use loong_arch::tlb::tlbentry::TLBREntry;
+
+use crate::info::print_machine_info;
 use crate::mm::system_allocator::heap_test;
 use crate::test::{print_range, test_csr_register};
 use crate::timer::get_time_ms;
 use crate::trap::enable_timer_interrupt;
 use config::FLAG;
 use core::arch::global_asm;
+use crate::mm::{frame_allocator_test, init_frame_allocator};
 global_asm!(include_str!("boot.S"));
 global_asm!(include_str!("link_app.S"));
 
@@ -59,17 +66,21 @@ pub extern "C" fn main(
     _boot_params_interface: *const BootParamsInterface,
 ) {
     clear_bss();
-    Crmd::read().set_da(true).set_pg(false).write();
     INFO!("{}", FLAG);
-    INFO!("argc:{}", argc);
-    INFO!("PALEN: {}", get_palen());
-    INFO!("VLEN: {}", get_valen());
-    INFO!("CRMD: {:#b}", Crmd::read().get_val());
-    INFO!("TLBRENTRY: {:#x}", TLBREntry::read().get_val());
+    print_machine_info();
+    INFO!("kernel args: {}", argc);
+    INFO!("kernel argv address: {:#x}", _argv as usize);
+    INFO!(
+        "kernel boot_params_interface address: {:#x}",
+        _boot_params_interface as usize
+    );
+
     print_range();
     heap_test();
+    init_frame_allocator();
+    frame_allocator_test();
     trap::init();
-    test_csr_register();
+
     //运行程序
     loader::load_app();
     enable_timer_interrupt();

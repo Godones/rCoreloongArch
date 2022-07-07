@@ -10,13 +10,11 @@ pub struct Pgd {
 
 impl Register for Pgd {
     fn read() -> Self {
-        let bits :usize;
+        let bits: usize;
         unsafe {
             asm!("csrrd {},{}",out(reg)bits,const CSR_PGD);
         }
-        Self {
-            pgd: bits,
-        }
+        Self { pgd: bits }
     }
     fn write(&mut self) {}
 }

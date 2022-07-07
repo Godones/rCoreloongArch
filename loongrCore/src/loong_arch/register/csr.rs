@@ -17,7 +17,6 @@ pub const CSR_TLBEHI: usize = 0x11;
 
 pub const CSR_TLBELO: usize = 0x12;
 
-
 pub const CSR_ASID: usize = 0x18;
 pub const CSR_PGDL: usize = 0x19;
 pub const CSR_PGDH: usize = 0x1A;
@@ -43,7 +42,6 @@ pub const CSR_TLBRERA: usize = 0x8A;
 pub const CSR_TLBRSAVE: usize = 0x8B;
 
 pub const CSR_TLBRELO: usize = 0x8C;
-
 
 pub const CSR_TLBREHI: usize = 0x8E;
 pub const CSR_TLBRPRMD: usize = 0x8F;

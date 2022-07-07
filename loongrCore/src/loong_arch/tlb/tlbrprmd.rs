@@ -1,10 +1,10 @@
 // 当触发 TLB 重填例外时，硬件会将此时处理器核的特权等级、客户机模式、全局中断使能和监视点使
 // 能位保存至该寄存器中，用于例外返回时恢复处理器核的现场
 
-use bit_field::BitField;
 use crate::loong_arch::cpu::CpuMode;
 use crate::loong_arch::register::csr::CSR_TLBRPRMD;
 use crate::Register;
+use bit_field::BitField;
 
 pub struct TlbRPrmd {
     bits: u32,
@@ -12,7 +12,7 @@ pub struct TlbRPrmd {
 
 impl Register for TlbRPrmd {
     fn read() -> Self {
-        let bits:u32;
+        let bits: u32;
         unsafe {
             asm!("csrrd {},{}", out(reg) bits,const CSR_TLBRPRMD);
         }

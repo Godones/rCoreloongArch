@@ -21,7 +21,7 @@ impl TlbRBadv {
     pub fn get_val(&self) -> usize {
         self.bits
     }
-    pub fn set_val(&mut self, value: usize)->&mut Self {
+    pub fn set_val(&mut self, value: usize) -> &mut Self {
         self.bits = value;
         self
     }

@@ -10,24 +10,19 @@ pub struct Pgdl {
 
 impl Register for Pgdl {
     fn read() -> Self {
-        let bits:usize;
-        unsafe {
-            asm!("csrrd {},{}",out(reg)bits,const CSR_PGDL)
-        }
+        let bits: usize;
+        unsafe { asm!("csrrd {},{}",out(reg)bits,const CSR_PGDL) }
         Self { bits }
     }
     fn write(&mut self) {
-        unsafe {
-            asm!("csrwr {},{}",in(reg)self.bits,const CSR_PGDL)
-        }
+        unsafe { asm!("csrwr {},{}",in(reg)self.bits,const CSR_PGDL) }
     }
-
 }
 impl Pgdl {
     pub fn get_val(&self) -> usize {
         self.bits
     }
-    pub fn set_val(&mut self, val: usize)->&mut Self {
+    pub fn set_val(&mut self, val: usize) -> &mut Self {
         // 确保地址是 4KB 边界地址对齐的
         assert!(val & 0xFFF == 0);
         self.bits = val;

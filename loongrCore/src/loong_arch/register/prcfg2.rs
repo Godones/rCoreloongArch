@@ -6,18 +6,18 @@ use crate::Register;
 pub struct Prcfg2 {
     bits: usize,
 }
-impl Register for Prcfg2{
+impl Register for Prcfg2 {
     fn read() -> Self {
-        let bits:usize;
+        let bits: usize;
         unsafe {
             asm!("csrrd {},{}",out(reg) bits,const CSR_PRCFG2);
         }
-        Self{ bits }
+        Self { bits }
     }
     fn write(&mut self) {}
 }
 
-impl Prcfg2{
+impl Prcfg2 {
     pub fn get_val(&self) -> usize {
         self.bits
     }

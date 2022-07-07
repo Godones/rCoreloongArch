@@ -1,5 +1,5 @@
-use crate::Register;
 use super::csr::CSR_RVACFG;
+use crate::Register;
 // 该寄存器用于控制虚地址缩减模式下被缩减的地址位宽。
 pub struct RvaCfg {
     bits: u32,
@@ -7,7 +7,7 @@ pub struct RvaCfg {
 
 impl Register for RvaCfg {
     fn read() -> Self {
-        let bits :u32;
+        let bits: u32;
         unsafe {
             asm!("csrrd {},{}",out(reg) bits, const CSR_RVACFG);
         }
@@ -27,7 +27,7 @@ impl RvaCfg {
     // 虚地址缩减模式下，被缩减的高位地址的位数。可以配置为 0~8 之间的值。
     // 0 是一个特殊的配置值，意味着不启用虚地址缩减模式。
     // 如果配置的值大于 8，则处理器行为不确定
-    fn set_val(&mut self, val: u32)->&mut Self {
+    fn set_val(&mut self, val: u32) -> &mut Self {
         self.bits = val;
         self
     }

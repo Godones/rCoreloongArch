@@ -1,23 +1,23 @@
 // 无论 CSR.TLBRERA.IsTLBR 等于何值，执行 TLBRD 指令都只更新 TLBEHI 寄存器
 
-use bit_field::BitField;
 use crate::loong_arch::register::csr::CSR_TLBREHI;
 use crate::Register;
+use bit_field::BitField;
 
-struct TlbREhi{
+struct TlbREhi {
     bits: u64,
 }
 
-impl Register  for TlbREhi{
+impl Register for TlbREhi {
     fn read() -> Self {
-        let bits:u64;
+        let bits: u64;
         unsafe {
             asm!("csrrd {},{}",out(reg)bits,const CSR_TLBREHI);
         }
-        Self{bits}
+        Self { bits }
     }
     fn write(&mut self) {
-        unsafe{
+        unsafe {
             asm!("csrwr {},{}",in(reg)self.bits,const CSR_TLBREHI);
         }
     }
@@ -29,14 +29,14 @@ impl TlbREhi {
     pub fn get_page_size(&self) -> u64 {
         self.bits.get_bits(0..=5)
     }
-    pub fn set_page_size(&mut self, page_size: u64)->&mut Self {
+    pub fn set_page_size(&mut self, page_size: u64) -> &mut Self {
         self.bits.set_bits(0..=5, page_size);
         self
     }
-    pub fn get_vppn(&self,valen:usize) -> u64 {
+    pub fn get_vppn(&self, valen: usize) -> u64 {
         self.bits.get_bits(13..valen)
     }
-    pub fn set_vppn(&mut self, valen:usize, vppn:u64) ->&mut Self {
+    pub fn set_vppn(&mut self, valen: usize, vppn: u64) -> &mut Self {
         self.bits.set_bits(13..valen, vppn);
         self
     }

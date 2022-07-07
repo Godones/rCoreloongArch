@@ -9,6 +9,7 @@ mod linked_list;
 use crate::config::KERNEL_HEAP_SIZE;
 use crate::mm::system_allocator::bump_allocator::BumpAllocator;
 use crate::mm::system_allocator::common::Locked;
+use bit_field::BitField;
 // use crate::system_allocator::linked_list::LinkedListAllocator;
 use crate::mm::system_allocator::buddy::Buddy;
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;
@@ -40,7 +41,7 @@ pub fn heap_test() {
         fn ebss();
     }
 
-    let bss_range = sbss as usize..ebss as usize;
+    let bss_range = (sbss as usize).get_bits(0..32)..(ebss as usize).get_bits(0..32);
 
     let a = Box::new(5);
 

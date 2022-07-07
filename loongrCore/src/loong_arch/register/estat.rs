@@ -1,6 +1,6 @@
+use super::csr::CSR_ESTAT;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::ecfg::Ecfg;
-use super::csr::CSR_ESTAT;
 use bit_field::BitField;
 
 // 该寄存器记录例外的状态信息，包括所触发例外的一二级编码，以及各中断的状态

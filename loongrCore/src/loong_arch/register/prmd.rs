@@ -1,7 +1,6 @@
+use super::csr::{Register, CSR_PRMD};
 use crate::loong_arch::cpu::CpuMode;
-use super::csr::{Register,CSR_PRMD};
 use bit_field::BitField;
-
 
 // 当触发例外时，如果例外类型不是 TLB 重填例外和机器错误例外，硬件会将此时处理器核的特权等级、
 // 全局中断使能和监视点使能位保存至例外前模式信息寄存器中，用于例外返回时恢复处理器核的现场
@@ -24,7 +23,7 @@ impl Prmd {
     pub fn get_val(&self) -> usize {
         self.bits
     }
-    pub fn set_val(&mut self, val: usize)->&mut Self {
+    pub fn set_val(&mut self, val: usize) -> &mut Self {
         self.bits = val;
         self
     }

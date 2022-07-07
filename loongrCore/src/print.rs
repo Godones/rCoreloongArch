@@ -71,12 +71,12 @@ macro_rules! ERROR {
 #[macro_export]
 macro_rules! WARN {
     () => (
-        #[cfg(any(feature = " WARN ", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
+        #[cfg(any(feature = "WARN", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
         $crate::print!("\n");
         $crate::print!("");
     );
     ($($arg:tt)*) => {
-        #[cfg(any(feature = " WARN ", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
+        #[cfg(any(feature = "WARN", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
         ($crate::print!("\x1b[93m[WARN]{}\x1b[0m\n", format_args!($($arg)*)));
         $crate::print!("");
     }

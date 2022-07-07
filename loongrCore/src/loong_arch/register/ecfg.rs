@@ -1,4 +1,4 @@
-use super::csr::{Register,CSR_ECFG};
+use super::csr::{Register, CSR_ECFG};
 use bit_field::BitField;
 
 /// 控制例外和中断的入口地址计算方式，以及局部中断使能

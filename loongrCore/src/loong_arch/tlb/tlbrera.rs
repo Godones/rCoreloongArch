@@ -1,9 +1,9 @@
 // 该寄存器保存 TLB 重填例外处理完毕之后的返回地址。除此之外，该寄存器还包含用于标识当前例外
 // 是 TLB 重填例外的标志位
 
-use bit_field::BitField;
 use crate::loong_arch::register::csr::CSR_TLBRERA;
 use crate::Register;
+use bit_field::BitField;
 
 pub struct TLBREra {
     bits: usize,
@@ -20,7 +20,7 @@ impl Register for TLBREra {
     fn write(&mut self) {
         //写入era的内容
         unsafe {
-        asm!("csrwr {},{}", in(reg) self.bits,const CSR_TLBRERA);
+            asm!("csrwr {},{}", in(reg) self.bits,const CSR_TLBRERA);
         }
     }
 }
@@ -35,7 +35,7 @@ impl TLBREra {
     }
     pub fn get_is_tlbr(&self) -> bool {
         // 返回是否是 TLB 重填例外
-       self.bits.get_bit(0)
+        self.bits.get_bit(0)
     }
     pub fn set_is_tlbr(&mut self, is_tlbr: bool) -> &mut Self {
         self.bits.set_bit(0, is_tlbr);
