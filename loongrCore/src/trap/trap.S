@@ -58,7 +58,6 @@ __alltraps:
     bl trap_handler
 
 __restore:
-
     ld.d $t1, $sp,264 #加载返回地址
     ld.d $t2, $sp,24  #用户栈指针
 

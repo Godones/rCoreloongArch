@@ -1,9 +1,9 @@
-use bit_field::BitField;
 use super::{PhysAddr, PhysPageNum};
 use crate::config::MEMORY_END;
-use crate::{DEBUG, println};
+use crate::println;
 use crate::sync::UPSafeCell;
 use alloc::vec::Vec;
+use bit_field::BitField;
 use core::fmt::{self, Debug, Formatter};
 use lazy_static::*;
 
@@ -50,7 +50,6 @@ impl StackFrameAllocator {
     pub fn init(&mut self, l: PhysPageNum, r: PhysPageNum) {
         self.current = l.0;
         self.end = r.0;
-        DEBUG!("StackFrameAllocator: init: l={:#x}, r={:#x}", l.0, r.0);
     }
 }
 impl FrameAllocator for StackFrameAllocator {
@@ -97,7 +96,7 @@ pub fn init_frame_allocator() {
     }
     FRAME_ALLOCATOR.exclusive_access().init(
         //需要对ekernel地址取32位物理地址出来，这是由于地址映射的缘故
-        PhysAddr::from((ekernel as usize).get_bits(0..32) ).ceil(),
+        PhysAddr::from((ekernel as usize).get_bits(0..32)).ceil(),
         PhysAddr::from(MEMORY_END).floor(),
     );
 }
@@ -112,7 +111,6 @@ pub fn frame_alloc() -> Option<FrameTracker> {
 fn frame_dealloc(ppn: PhysPageNum) {
     FRAME_ALLOCATOR.exclusive_access().dealloc(ppn);
 }
-
 
 pub fn frame_allocator_test() {
     let mut v: Vec<FrameTracker> = Vec::new();

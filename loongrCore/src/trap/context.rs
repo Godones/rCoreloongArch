@@ -17,12 +17,11 @@ impl TrapContext {
         self.x[3] = sp;
     }
     pub fn app_init_context(entry: usize, sp: usize) -> Self {
-        let sstatus = Crmd::read();
-        let sstatus = sstatus.get_val();
+        let crmd = Crmd::read().get_val();
         Prmd::read().set_pplv(CpuMode::User).write(); //设置为用户模式,trap使用ertn进入用户态时会被加载到crmd寄存器中
         let mut cx = Self {
             x: [0; 32],
-            crmd: sstatus,
+            crmd,
             sepc: entry,
         };
         cx.set_sp(sp);

@@ -1,10 +1,13 @@
-use crate::config::{BIG_STRIDE, MAX_APP_NUM};
-use crate::loader::{get_num_app, init_app_cx};
+use crate::config::{BIG_STRIDE};
+use crate::loader::{get_num_app,get_app_data};
 use crate::sync::UPSafeCell;
 use context::TaskContext;
 use lazy_static::lazy_static;
 use switch::__switch;
 use task::{TaskControlBlock, TaskStatus};
+use crate::trap::TrapContext;
+use alloc::vec::Vec;
+use crate::println;
 
 /// 为了更好地完成任务上下文切换，需要对任务处于什么状态做明确划分
 ///任务的运行状态：未初始化->准备执行->正在执行->已退出
@@ -22,7 +25,7 @@ pub struct TaskManager {
 struct TaskManagerInner {
     current_task: usize,
     //当前任务
-    tasks: [TaskControlBlock; MAX_APP_NUM],
+    tasks: Vec<TaskControlBlock>,
 }
 
 unsafe impl Sync for TaskManager {}
@@ -32,19 +35,15 @@ lazy_static! {
     /// 将各个应用的内核初始化完成 --- init_app_cx
     /// 将各个任务的状态改变为初始化完成状态
     pub static ref TASK_MANAGER: TaskManager = {
+        println!("init TASK_MANAGER");
         let num_app = get_num_app();
-        let mut tasks = [
-            TaskControlBlock {
-                task_cx_ptr: TaskContext::zero_init(),
-                task_status: TaskStatus::Uninit,
-                pass:0,
-                stride:0
-            };
-            MAX_APP_NUM
-        ];
+        println!("num_app = {}", num_app);
+        let mut tasks: Vec<TaskControlBlock> = Vec::new();
         for i in 0..num_app {
-            tasks[i].task_cx_ptr = TaskContext::goto_restore(init_app_cx(i));
-            tasks[i].task_status = TaskStatus::Ready;
+            tasks.push(TaskControlBlock::new(
+                get_app_data(i),
+                i,
+            ));
         }
         TaskManager {
             num_app,
@@ -106,7 +105,7 @@ impl TaskManager {
         self.rr()
         // self.stride()
     }
-    #[no_mangle]
+
     fn run_first_task(&self) -> ! {
         let mut inner = self.inner.borrow();
         let mut task0 = &mut inner.tasks[0];
@@ -141,6 +140,11 @@ impl TaskManager {
             panic!("There are no tasks!");
         }
     }
+    fn get_current_token(&self) -> usize {
+        let inner = self.inner.exclusive_access();
+        inner.tasks[inner.current_task].get_user_token()
+    }
+
 }
 
 pub fn suspend_current_run_next() {
@@ -157,6 +161,8 @@ pub fn set_priority(priority: usize) -> isize {
     //设置特权级
     TASK_MANAGER.set_priority(priority)
 }
+
+
 pub fn run_first_task() {
     TASK_MANAGER.run_first_task();
 }
@@ -171,4 +177,7 @@ fn mark_current_exited() {
 
 fn run_next_task() {
     TASK_MANAGER.run_next_task();
+}
+pub fn current_user_token() -> usize {
+    TASK_MANAGER.get_current_token()
 }

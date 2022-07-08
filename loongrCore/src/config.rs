@@ -1,13 +1,13 @@
-pub const FLAG: &str = "
+pub const FLAG: &str =
+"
+██╗      ██████╗  ██████╗ ███╗   ██╗ ██████╗ ██████╗  ██████╗ ██████╗ ██████╗ ███████╗
+██║     ██╔═══██╗██╔═══██╗████╗  ██║██╔════╝ ██╔══██╗██╔════╝██╔═══██╗██╔══██╗██╔════╝
+██║     ██║   ██║██║   ██║██╔██╗ ██║██║  ███╗██████╔╝██║     ██║   ██║██████╔╝█████╗
+██║     ██║   ██║██║   ██║██║╚██╗██║██║   ██║██╔══██╗██║     ██║   ██║██╔══██╗██╔══╝
+███████╗╚██████╔╝╚██████╔╝██║ ╚████║╚██████╔╝██║  ██║╚██████╗╚██████╔╝██║  ██║███████╗
+╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
 
- ██████╗ ███╗   ██╗███████╗ ██████╗ ███████╗
-██╔═══██╗████╗  ██║██╔════╝██╔═══██╗██╔════╝
-██║   ██║██╔██╗ ██║█████╗  ██║   ██║███████╗
-██║   ██║██║╚██╗██║██╔══╝  ██║   ██║╚════██║
-╚██████╔╝██║ ╚████║███████╗╚██████╔╝███████║
- ╚═════╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚══════╝
 ";
-
 pub const UART: usize = 0x1FE001E0;
 
 pub const MAX_APP_NUM: usize = 10;
@@ -26,14 +26,5 @@ pub const MSEC_PER_SEC: usize = 1000;
 pub const MEMORY_END: usize = 0x1000_0000;
 pub const PAGE_SIZE: usize = 0x4000; //16kB
 pub const PAGE_SIZE_BITS: usize = 14; //16kB
-pub const PALEN :usize= 48;
-pub const VALEN :usize= 48;
-
-pub const TRAMPOLINE: usize = usize::MAX - PAGE_SIZE + 1;
-pub const TRAP_CONTEXT: usize = TRAMPOLINE - PAGE_SIZE;
-/// Return (bottom, top) of a kernel stack in kernel space.
-pub fn kernel_stack_position(app_id: usize) -> (usize, usize) {
-    let top = TRAMPOLINE - app_id * (KERNEL_STACK_SIZE + PAGE_SIZE);
-    let bottom = top - KERNEL_STACK_SIZE;
-    (bottom, top)
-}
+pub const PALEN: usize = 48;
+pub const VALEN: usize = 48;

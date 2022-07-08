@@ -6,7 +6,7 @@ use crate::loong_arch::register::crmd::Crmd;
 use crate::loong_arch::register::prcfg2::Prcfg2;
 use crate::loong_arch::register::prcfg3::Prcfg3;
 use crate::loong_arch::tlb::tlbentry::TLBREntry;
-use crate::loong_arch::tlb::{sltb::Sltb,pwcl::Pwcl};
+use crate::loong_arch::tlb::{pwcl::Pwcl, sltb::Sltb};
 use crate::{Register, INFO};
 
 // 打印硬件的相关信息
@@ -41,7 +41,7 @@ pub fn print_machine_info() {
     INFO!("SLTB Ways :{}", Prcfg3::read().get_stlb_ways()); //STLB的路数量
     INFO!("SLTB Entry: {}", Prcfg3::read().get_sltb_sets()); //STLB每一路的项数
     INFO!("SLTB Page-size: {}", Sltb::read().get_page_size()); //STLB的页大小
-    INFO!("PTE-size: {}",Pwcl::read().get_pte_width()); //PTE的大小
+    INFO!("PTE-size: {}", Pwcl::read().get_pte_width()); //PTE的大小
 }
 
 // 检查初始化后的硬件是否正确

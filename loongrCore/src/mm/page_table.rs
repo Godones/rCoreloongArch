@@ -1,11 +1,11 @@
-use bit_field::BitField;
 use super::{frame_alloc, FrameTracker, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
 use alloc::vec;
 use alloc::vec::Vec;
+use bit_field::BitField;
+use core::fmt;
 
-
-use bitflags::*;
 use crate::config::PALEN;
+use bitflags::*;
 
 bitflags! {
     pub struct PTEFlags: usize {
@@ -23,20 +23,29 @@ bitflags! {
         const RPLV = 1 << 63;
     }
 }
+impl PTEFlags {
+    fn default() -> Self {
+        PTEFlags::V | PTEFlags::MATL | PTEFlags::G | PTEFlags::P
+    }
+}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PageTableEntry {
     pub bits: usize,
 }
 
+impl fmt::Display for PageTableEntry {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:b}", self.bits)
+    }
+}
+
 impl PageTableEntry {
     pub fn new(ppn: PhysPageNum, flags: PTEFlags) -> Self {
         let mut bits = 0usize;
-        bits.set_bits(14..PALEN,ppn.0); //采用16kb大小的页
-        bits = bits|flags.bits;
-        PageTableEntry {
-            bits
-        }
+        bits.set_bits(14..PALEN, ppn.0); //采用16kb大小的页
+        bits = bits | flags.bits;
+        PageTableEntry { bits }
     }
     // 空页表项
     pub fn empty() -> Self {
@@ -54,7 +63,7 @@ impl PageTableEntry {
     pub fn is_valid(&self) -> bool {
         (self.flags() & PTEFlags::V) != PTEFlags::empty()
     }
-   // 是否可写
+    // 是否可写
     pub fn writable(&self) -> bool {
         (self.flags() & PTEFlags::W) != PTEFlags::empty()
     }
@@ -103,7 +112,7 @@ impl PageTable {
             }
             if !pte.is_valid() {
                 let frame = frame_alloc().unwrap();
-                *pte = PageTableEntry::new(frame.ppn, PTEFlags::V);
+                *pte = PageTableEntry::new(frame.ppn, PTEFlags::default());
                 self.frames.push(frame);
             }
             ppn = pte.ppn();
@@ -131,7 +140,11 @@ impl PageTable {
     pub fn map(&mut self, vpn: VirtPageNum, ppn: PhysPageNum, flags: PTEFlags) {
         let pte = self.find_pte_create(vpn).unwrap();
         assert!(!pte.is_valid(), "vpn {:?} is mapped before mapping", vpn);
-        *pte = PageTableEntry::new(ppn, flags | PTEFlags::V);
+        *pte = PageTableEntry::new(
+            ppn,
+            flags | PTEFlags::V | PTEFlags::MATL | PTEFlags::G | PTEFlags::P,
+        );
+        //
     }
     #[allow(unused)]
     pub fn unmap(&mut self, vpn: VirtPageNum) {
@@ -143,7 +156,7 @@ impl PageTable {
         self.find_pte(vpn).map(|pte| pte.clone())
     }
     pub fn token(&self) -> usize {
-        8usize << 60 | self.root_ppn.0
+        self.root_ppn.0
     }
 }
 
