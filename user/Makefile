@@ -11,7 +11,7 @@ OBJDUMP := rust-objdump --arch-name=riscv64
 OBJCOPY := loongarch64-unknown-linux-gnu-objcopy
 
 elf:
-	@#cargo build --release
+	@cargo build --release
 	@python3 build.py
 	@#echo $(APPS)
 	@#echo $(ELFS)
