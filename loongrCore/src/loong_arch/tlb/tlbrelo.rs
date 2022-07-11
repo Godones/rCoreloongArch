@@ -7,13 +7,30 @@
 use crate::loong_arch::register::csr::CSR_TLBRELO;
 use crate::loong_arch::tlb::tlbelo::TLBEL;
 use bit_field::BitField;
+use core::fmt;
+use crate::config::PALEN;
 
 pub struct TlbRelo {
     bits: usize,
     index: usize,
 }
+
+impl fmt::Debug for TlbRelo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "TlbRelo{}: RPLV:{},NX:{},NR:{},PPN:{:#x},G:{},MAT:{},PLV:{},D:{},V:{}",self.index,
+        self.get_rplv(),
+        self.get_not_executable(),
+        self.get_not_readable(),
+            self.get_ppn(PALEN),
+            self.get_global_flag(),
+            self.get_mem_access_type(),
+            self.get_plv(),
+            self.get_dirty(),
+            self.get_valid())
+    }
+}
 impl TlbRelo {
-    fn read(index: usize) -> Self {
+    pub fn read(index: usize) -> Self {
         let bits: usize;
         unsafe {
             match index {
@@ -24,7 +41,7 @@ impl TlbRelo {
         }
         Self { bits, index }
     }
-    fn write(&mut self) {
+    pub fn write(&mut self) {
         unsafe {
             match self.index {
                 0 => asm!("csrwr {},{}",in(reg)self.bits,const CSR_TLBRELO),
@@ -35,6 +52,8 @@ impl TlbRelo {
     }
 }
 impl TLBEL for TlbRelo {
+
+
     // 页表项的有效位（V）
     fn get_valid(&self) -> bool {
         self.bits.get_bit(0)
@@ -82,11 +101,11 @@ impl TLBEL for TlbRelo {
     }
 
     fn get_ppn(&self, palen: usize) -> usize {
-        self.bits.get_bits(12..palen)
+        self.bits.get_bits(14..palen)
     }
 
     fn set_ppn(&mut self, palen: usize, ppn: usize) -> &mut Self {
-        self.bits.set_bits(12..palen, ppn);
+        self.bits.set_bits(14..palen, ppn);
         self
     }
 
@@ -114,6 +133,16 @@ impl TLBEL for TlbRelo {
 
     fn set_rplv(&mut self, rplv: bool) -> &mut Self {
         self.bits.set_bit(63, rplv);
+        self
+    }
+}
+
+impl TlbRelo {
+    pub fn get_val(&self) -> usize {
+        self.bits
+    }
+    pub fn set_val(&mut self, val: usize) -> &mut Self {
+        self.bits = val;
         self
     }
 }

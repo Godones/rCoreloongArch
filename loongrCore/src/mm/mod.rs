@@ -9,7 +9,7 @@ pub use address::{PhysAddr, PhysPageNum, StepByOne, VPNRange, VirtAddr, VirtPage
 pub use frame_allocator::frame_allocator_test;
 pub use frame_allocator::{frame_alloc, FrameTracker};
 pub use memory_set::{MapPermission, MemorySet};
-pub use page_table::{PTEFlags, PageTable, PageTableEntry,translated_byte_buffer};
+pub use page_table::{translated_byte_buffer, PTEFlags, PageTable, PageTableEntry};
 
 pub fn init() {
     init_heap(); //初始化堆分配

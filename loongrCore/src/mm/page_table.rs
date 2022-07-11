@@ -2,9 +2,10 @@ use super::{frame_alloc, FrameTracker, PhysPageNum, StepByOne, VirtAddr, VirtPag
 use alloc::vec;
 use alloc::vec::Vec;
 use bit_field::BitField;
-use core::fmt;
-
-use crate::config::PALEN;
+use core::fmt::Formatter;
+use core::fmt::{self,Debug};
+use crate::config::{PAGE_SIZE_BITS, PALEN};
+use crate::DEBUG;
 use bitflags::*;
 
 bitflags! {
@@ -25,7 +26,7 @@ bitflags! {
 }
 impl PTEFlags {
     fn default() -> Self {
-        PTEFlags::V | PTEFlags::MATL | PTEFlags::G | PTEFlags::P
+        PTEFlags::V | PTEFlags::MATL | PTEFlags::P |PTEFlags::W
     }
 }
 #[derive(Copy, Clone)]
@@ -34,9 +35,25 @@ pub struct PageTableEntry {
     pub bits: usize,
 }
 
+impl fmt::Debug for PageTableEntry {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "PageTableEntry RPLV:{},NX:{},NR:{},PPN:{:#x},W:{},P:{},G:{},MAT:{},PLV:{},D:{},V:{}",
+            self.bits.get_bit(63),
+            self.bits.get_bit(62),
+            self.bits.get_bit(61),
+            self.bits.get_bits(14..PALEN),
+            self.bits.get_bit(8),
+            self.bits.get_bit(7),
+            self.bits.get_bit(6),
+            self.bits.get_bits(4..=5),
+            self.bits.get_bits(2..=3),
+            self.bits.get_bit(1),
+            self.bits.get_bit(0))
+    }
+}
 impl fmt::Display for PageTableEntry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:b}", self.bits)
+        f.write_fmt(format_args!("{:#x}", self.bits))
     }
 }
 
@@ -57,7 +74,10 @@ impl PageTableEntry {
     }
     // 返回标志位
     pub fn flags(&self) -> PTEFlags {
-        PTEFlags::from_bits(self.bits).unwrap()
+        //这里只需要标志位，需要把非标志位的位置清零
+        let mut bits = self.bits;
+        bits.set_bits(14..PALEN, 0);
+        PTEFlags::from_bits(bits).unwrap()
     }
     // 有效位
     pub fn is_valid(&self) -> bool {
@@ -74,6 +94,14 @@ impl PageTableEntry {
     // 是否可执行
     pub fn executable(&self) -> bool {
         !((self.flags() & PTEFlags::NX) != PTEFlags::empty())
+    }
+    //设置脏位
+    pub fn set_dirty(&mut self) {
+        self.bits.set_bit(1, true);
+    }
+    //
+    pub fn is_zero(&self) -> bool {
+        self.bits == 0
     }
 }
 
@@ -95,7 +123,7 @@ impl PageTable {
     /// pgd是全局目录基地址，类似于riscv的satp,其是物理地址
     pub fn from_token(pgd: usize) -> Self {
         Self {
-            root_ppn: PhysPageNum::from(pgd & ((1usize << 48) - 1)),
+            root_ppn: PhysPageNum::from(pgd & ((1usize << 34) - 1)),
             frames: Vec::new(),
         }
     }
@@ -110,26 +138,28 @@ impl PageTable {
                 result = Some(pte);
                 break;
             }
-            if !pte.is_valid() {
+            if pte.is_zero() {
                 let frame = frame_alloc().unwrap();
-                *pte = PageTableEntry::new(frame.ppn, PTEFlags::default());
+                *pte = PageTableEntry{
+                    bits: frame.ppn.0 << PAGE_SIZE_BITS,
+                };
                 self.frames.push(frame);
             }
             ppn = pte.ppn();
         }
         result
     }
-    fn find_pte(&self, vpn: VirtPageNum) -> Option<&PageTableEntry> {
+    pub fn find_pte(&self, vpn: VirtPageNum) -> Option<&mut PageTableEntry> {
         let idxs = vpn.indexes();
         let mut ppn = self.root_ppn;
-        let mut result: Option<&PageTableEntry> = None;
+        let mut result: Option<&mut PageTableEntry> = None;
         for i in 0..3 {
-            let pte = &ppn.get_pte_array()[idxs[i]];
+            let pte = &mut ppn.get_pte_array()[idxs[i]];
             if i == 2 {
                 result = Some(pte);
                 break;
             }
-            if !pte.is_valid() {
+            if pte.is_zero() {
                 return None;
             }
             ppn = pte.ppn();
@@ -138,13 +168,14 @@ impl PageTable {
     }
     #[allow(unused)]
     pub fn map(&mut self, vpn: VirtPageNum, ppn: PhysPageNum, flags: PTEFlags) {
+        let rppn = self.root_ppn.0;
         let pte = self.find_pte_create(vpn).unwrap();
+        DEBUG!("map: root:{:#x}, {:?}, {:?}, flags: {:?}",rppn ,vpn, ppn, flags);
         assert!(!pte.is_valid(), "vpn {:?} is mapped before mapping", vpn);
         *pte = PageTableEntry::new(
             ppn,
-            flags | PTEFlags::V | PTEFlags::MATL | PTEFlags::G | PTEFlags::P,
+            flags | PTEFlags::V | PTEFlags::MATL| PTEFlags::P,
         );
-        //
     }
     #[allow(unused)]
     pub fn unmap(&mut self, vpn: VirtPageNum) {

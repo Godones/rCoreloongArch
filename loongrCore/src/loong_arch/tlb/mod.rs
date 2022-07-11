@@ -5,7 +5,7 @@ pub mod pgdh;
 pub mod pgdl;
 pub mod pwch;
 pub mod pwcl;
-pub mod sltb;
+pub mod sltbps;
 pub mod tlbehi;
 pub mod tlbelo;
 pub mod tlbentry;

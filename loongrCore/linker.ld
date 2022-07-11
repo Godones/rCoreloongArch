@@ -8,7 +8,6 @@ SECTIONS
    . = 0x9000000000001000;
   # . =  0x92000000;
 
-
     PROVIDE(etext = .);
   .text : {
     *(.text .text.*)
@@ -38,14 +37,14 @@ PROVIDE(edata = .);
 PROVIDE(sdata = .);
 
   .bss : {
-    sbss = .;
+    ebss = .;
 . = ALIGN(16);
     *(.sbss .sbss.*)
 . = ALIGN(16);
     *(.bss .bss.*)
   }
 
-    ebss = .;
+    sbss = .;
     ekernel = .;
   PROVIDE(end = .);
 }

@@ -1,14 +1,13 @@
+use crate::DEBUG;
 use crate::loader::init_app_cx;
-use crate::mm::{MemorySet};
+use crate::mm::MemorySet;
 use crate::task::context::TaskContext;
-
 
 pub struct TaskControlBlock {
     pub task_status: TaskStatus,
-    pub task_cx_ptr: TaskContext,  //任务上下文栈顶地址
-    pub memory_set: MemorySet, //新增的地址空间
-
-    task_id: usize,    //任务id
+    pub task_cx_ptr: TaskContext, //任务上下文栈顶地址
+    pub memory_set: MemorySet,    //新增的地址空间
+    pub task_id: usize,    //任务id
     pub stride: usize, //已走步长
     pub pass: usize,   //每一步的步长，只与特权级相关
     pub base_size: usize,
@@ -21,10 +20,11 @@ impl TaskControlBlock {
     pub fn new(elf_data: &[u8], app_id: usize) -> Self {
         // memory_set with elf program headers/trampoline/trap context/user stack
         let (memory_set, user_sp, entry_point) = MemorySet::from_elf(elf_data);
+        DEBUG!("entry_point: {:#x}, user_sp: {:#x}", entry_point,user_sp);
         let task_status = TaskStatus::Ready; //准备指向状态
         let task_control_block = Self {
             task_status,
-            task_cx_ptr: TaskContext::goto_restore(init_app_cx(app_id,entry_point,user_sp)),
+            task_cx_ptr: TaskContext::goto_restore(init_app_cx(app_id, entry_point, user_sp)),
             //初始化任务上下文,参数为内核栈地址，内核栈存放的是trap上下文
             memory_set,
             task_id: app_id,

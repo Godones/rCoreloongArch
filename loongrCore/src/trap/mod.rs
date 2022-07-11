@@ -1,5 +1,7 @@
 pub(crate) mod context;
-use crate::config::TICKS_PER_SEC;
+
+use bit_field::BitField;
+use crate::config::{PAGE_SIZE_BITS, PALEN, TICKS_PER_SEC, VALEN};
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::estat::{Exception, Interrupt};
 use crate::loong_arch::register::tcfg::Tcfg;
@@ -9,9 +11,20 @@ use crate::loong_arch::register::{
     crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat, estat::Trap,
 };
 use crate::syscall::syscall;
-use crate::task::{exit_current_run_next, suspend_current_run_next};
-use crate::{println, INFO};
+use crate::task::{current_user_token, exit_current_run_next, suspend_current_run_next};
+use crate::{println, INFO, DEBUG};
 pub use context::TrapContext;
+use crate::loong_arch::tlb::pgd::Pgd;
+use crate::loong_arch::tlb::pwch::Pwch;
+use crate::loong_arch::tlb::pwcl::Pwcl;
+use crate::loong_arch::tlb::sltbps::SltbPs;
+use crate::loong_arch::tlb::tlbelo::{TLBEL, TLBELO};
+use crate::loong_arch::tlb::tlbentry::TLBREntry;
+use crate::loong_arch::tlb::tlbidx::TlbIdx;
+use crate::loong_arch::tlb::tlbrbadv::TlbRBadv;
+use crate::loong_arch::tlb::tlbrehi::TlbREhi;
+use crate::loong_arch::tlb::tlbrelo::TlbRelo;
+use crate::mm::{PageTable, PageTableEntry, VirtAddr, VirtPageNum};
 global_asm!(include_str!("trap.S"));
 
 pub fn init() {
@@ -19,13 +32,26 @@ pub fn init() {
         fn __alltraps();
     }
     Ticlr::read().clear_timer().write(); //清除时钟专断
-                                         //设置计时器的配置
-                                         // Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER);
-                                         //关闭时钟中断
     Tcfg::read().set_enable(false).write();
     Ecfg::read().set_lie_with_index(11, false).write();
     Crmd::read().set_ie(false).write(); //关闭全局中断
-    Eentry::read().set_eentry(__alltraps as usize).write(); //设置中断入口
+    Eentry::read().set_eentry(__alltraps as usize).write(); //设置普通异常和中断入口
+    //设置TLB重填异常地址
+    TLBREntry::read().set_val((__alltraps as usize).get_bits(0..32)).write(); //复用原来的trap处理入口
+    SltbPs::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
+    TlbREhi::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
+
+    Pwcl::read()
+        .set_ptbase(0xe)
+        .set_ptwidth(0xb)
+        .set_dir1_base(25)//页目录表起始位置
+        .set_dir1_width(0xb) //页目录表宽度为11位
+        .write();//16KiB的页大小
+    Pwch::read()
+        .set_dir3_base(36) //第三级页目录表
+        .set_dir3_width(0xb)//页目录表宽度为11位
+        .write();
+    INFO!("init trap ok");
 }
 
 pub fn enable_timer_interrupt() {
@@ -76,9 +102,9 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
             //时钟中断
             timer_handler();
         }
-        _ => {
-            panic!("{:?}", estat.cause());
-        }
+        Trap::Exception(Exception::TLBRFill) => tlb_refill_handler(),
+        Trap::Exception(Exception::PageModifyFault) => tlb_page_modify_handler(),
+        _ => { panic!("{:?}", estat.cause()); }
     }
     cx
 }
@@ -89,9 +115,86 @@ fn timer_handler() {
     suspend_current_run_next();
 }
 
-pub fn tlb_handler() {
-    println!("[kernel] tlb_handler in application, core dumped.");
-    unsafe {
-        asm!("ertn");
+// 重填异常处理
+fn tlb_refill_handler() {
+    INFO!("TLBRFill handler");
+    let badv = TlbRBadv::read().get_val(); //出错虚拟地址
+    INFO!("badv: {:#x}", badv);
+    let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
+    INFO!("vppn: {:#x}", vppn);
+    let pgd = Pgd::read().get_val(); //根目录
+    INFO!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
+    //尝试读出页表项观察
+    extern "C"{
+        pub fn __tlb_rfill();
     }
+    unsafe {
+        __tlb_rfill();
+    }
+    //获取页表项
+    let pte0 = TlbRelo::read(0); //页表项0
+    let pte1 = TlbRelo::read(1); //页表项1
+    INFO!("pte0: {:?}", pte0);
+    INFO!("pte1: {:?}", pte1);
+
+    INFO!("Calculating self-----------------------------------------------------");
+    let vpn:VirtAddr = badv.into(); //虚拟地址
+    let vpn:VirtPageNum= vpn.floor(); //虚拟地址的虚拟页号
+    INFO!("{:?}", vpn);
+    let token = current_user_token();
+    INFO!("token: {:#x}", token);
+    let page_table = PageTable::from_token(token); //获取用户的页表
+    let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
+    // INFO!("{:?},ppn: {:#x}", pte,pte.bits.get_bits(14..PALEN));
+    INFO!("{:?}", pte);
+    // let pmd:usize;
+    // unsafe {
+    //     asm!(
+    //         "csrrd $t0, 0x1B",
+    //         "lddir $t0, $t0, 4",
+    //         "lddir $t0, $t0, 2",
+    //         "move {}, $t0",
+    //         out(reg) pmd,
+    //     )
+    // }
+    // INFO!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+
 }
+
+/// Exception(PageModifyFault)的处理
+/// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且 V=1，且特权等级合规的项，但是该页
+//  表项的 D 位为 0，将触发该例外
+fn tlb_page_modify_handler(){
+    INFO!("PageModifyFault handler");
+    //找到对应的页表项，修改D位为1
+    let badv = TlbRBadv::read().get_val(); //出错虚拟地址
+    let vpn:VirtAddr = badv.into(); //虚拟地址
+    let vpn:VirtPageNum= vpn.floor(); //虚拟地址的虚拟页号
+    let token = current_user_token();
+    let page_table = PageTable::from_token(token);
+    let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
+    pte.set_dirty(); //修改D位为1
+    // INFO!("{:?}", pte);
+    unsafe{
+        asm!(
+            "tlbsrch",
+            "tlbrd",
+        );//根据TLBEHI的虚双页号查询TLB对应项
+    }
+    let tlbidx = TlbIdx::read(); //获取TLB项索引
+    assert_eq!(tlbidx.get_ne(),false);
+    // INFO!("page-size: {}",tlbidx.get_ps());
+    let mut tlbelo0 = TLBELO::read(0); //获取TLB项0
+    let mut tlbelo1 = TLBELO::read(1); //获取TLB项1
+    tlbelo0.set_dirty(true).write();
+    tlbelo1.set_dirty(true).write();
+
+    // INFO!("{:?}",tlbelo0);
+    // INFO!("{:?}",tlbelo1);
+    unsafe {
+        asm!("tlbwr");//重新将tlbelo写入tlb
+    }
+    // panic!("PageModifyFault");
+}
+
+

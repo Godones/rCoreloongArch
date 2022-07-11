@@ -4,11 +4,11 @@ use crate::loong_arch::register::csr::CSR_STLBPS;
 use crate::Register;
 use bit_field::BitField;
 
-pub struct Sltb {
+pub struct SltbPs {
     bits: u32,
 }
 
-impl Register for Sltb {
+impl Register for SltbPs {
     fn read() -> Self {
         let bits: u32;
         unsafe { asm!("csrrd {},{}",out(reg)bits,const CSR_STLBPS) }
@@ -19,11 +19,12 @@ impl Register for Sltb {
     }
 }
 
-impl Sltb {
+impl SltbPs {
     pub fn get_page_size(&self) -> u32 {
         self.bits.get_bits(0..=5)
     }
-    pub fn set_page_size(&mut self, page_size: u32) {
+    pub fn set_page_size(&mut self, page_size: u32)->&mut Self {
         self.bits.set_bits(0..=5, page_size);
+        self
     }
 }

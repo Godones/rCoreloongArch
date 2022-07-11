@@ -2,6 +2,7 @@
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::tcfg::Tcfg;
 use crate::{Dmw0, Dmw1, INFO};
+use crate::loong_arch::tlb::tlbentry::TLBREntry;
 
 pub fn color_output_test() {
     extern "C" {
@@ -52,9 +53,9 @@ pub fn test_csr_register() {
     INFO!("da:{}", da);
     let pg = crmd.get_pg();
     INFO!("pg:{}", pg);
-    INFO!("dmwo:{:b}", Dmw0::read().get_value());
-    INFO!("dmw1:{:b}", Dmw1::read().get_value());
-
+    INFO!("dmwo:{:#x}", Dmw0::read().get_value());
+    INFO!("dmw1:{:#x}", Dmw1::read().get_value());
+    INFO!("TLB-reload entry_point :{:#x}",TLBREntry::read().get_val());
     // 查看哪些中断被打开了
     for i in 0..13 {
         let interrupt = ecfg.get_lie_with_index(i);
@@ -73,9 +74,9 @@ pub fn print_range() {
         fn ebss();
         fn ekernel();
     }
-    INFO!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
-    INFO!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
-    INFO!(".data [{:#x}, {:#x})", sdata as usize, edata as usize);
-    INFO!(".bss [{:#x}, {:#x})", sbss as usize, ebss as usize);
+    INFO!(".text [{:#x}, {:#x})", etext as usize, stext as usize);
+    INFO!(".rodata [{:#x}, {:#x})", erodata as usize, srodata as usize);
+    INFO!(".data [{:#x}, {:#x})", edata as usize, sdata as usize);
+    INFO!(".bss [{:#x}, {:#x})", ebss as usize, sbss as usize);
     INFO!("kernel end :{:#x}", ekernel as usize);
 }

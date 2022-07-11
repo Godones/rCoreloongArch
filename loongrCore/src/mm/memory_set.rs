@@ -7,6 +7,7 @@ use alloc::vec::Vec;
 use bitflags::bitflags;
 
 use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
+use crate::{DEBUG, WARN};
 
 pub struct MemorySet {
     // 页表，这里主要管理的是各级目录所在位置
@@ -126,6 +127,7 @@ pub struct MapArea {
 
 impl MapArea {
     pub fn new(start_va: VirtAddr, end_va: VirtAddr, map_perm: MapPermission) -> Self {
+        WARN!("MapArea::new: {:#x}-{:#x}", start_va.0, end_va.0);
         let start_vpn: VirtPageNum = start_va.floor();
         let end_vpn: VirtPageNum = end_va.ceil();
         Self {

@@ -2,6 +2,7 @@ use super::csr::CSR_ESTAT;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::ecfg::Ecfg;
 use bit_field::BitField;
+use crate::loong_arch::tlb::tlbrera::TLBREra;
 
 // 该寄存器记录例外的状态信息，包括所触发例外的一二级编码，以及各中断的状态
 #[derive(Debug, Clone, Copy)]
@@ -57,6 +58,11 @@ impl Estat {
     }
 
     pub fn cause(&self) -> Trap {
+        // 优先判断是否是重填异常
+        let is_tlb_reload = TLBREra::read().get_is_tlbr();
+        if is_tlb_reload {
+            return Trap::Exception(Exception::TLBRFill);
+        }
         let ecode = self.get_ecode();
         if ecode == 0 {
             // 仅当 CSR.ECFG.VS=0 时，表示是中断
@@ -118,6 +124,7 @@ pub enum Exception {
     InstructionNotExist = 0xD,         //指令不合规
     InstructionPrivilegeIllegal = 0xE, //特权指令不合规
     FloatingPointUnavailable = 0xF,    //浮点不可用
+    TLBRFill             //TLB重填
 }
 
 // 中断类型

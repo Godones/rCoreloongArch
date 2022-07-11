@@ -32,17 +32,16 @@ extern crate lazy_static;
 extern crate rlibc;
 extern crate xmas_elf;
 
-
 use crate::boot_param::boot_params_interface::BootParamsInterface;
+use crate::info::print_machine_info;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::dmwn::{Dmw0, Dmw1};
-use crate::info::print_machine_info;
-use crate::test::{print_range};
+use crate::test::{print_range, test_csr_register};
 use crate::timer::get_time_ms;
 use crate::trap::enable_timer_interrupt;
 use config::FLAG;
 use core::arch::global_asm;
-global_asm!(include_str!("boot.S"));
+
 global_asm!(include_str!("link_app.S"));
 
 fn clear_bss() {
@@ -63,7 +62,10 @@ pub extern "C" fn main(
 ) {
     clear_bss();
     println!("{}", FLAG);
-    print_machine_info();
+    // unsafe {
+    //     asm!();
+    // }
+
     INFO!("kernel args: {}", argc);
     INFO!("kernel argv address: {:#x}", _argv as usize);
     INFO!(
@@ -73,9 +75,10 @@ pub extern "C" fn main(
     print_range();
     mm::init();
     trap::init();
+    print_machine_info();
+    // test_csr_register();
     //运行程序
     // enable_timer_interrupt();
-    // task::run_first_task();
+    task::run_first_task();
     panic!("main end");
-
 }

@@ -4,7 +4,7 @@ use crate::loong_arch::register::csr::CSR_TLBREHI;
 use crate::Register;
 use bit_field::BitField;
 
-struct TlbREhi {
+pub struct TlbREhi {
     bits: u64,
 }
 

@@ -14,6 +14,9 @@ __switch:
     #     next_task_cx_ptr: *const TaskContext
     # )
     # save kernel stack of current task
+
+
+
     st.d $sp, $a0,8
     # save ra & s0~s19 of current execution
     st.d $ra, $a0,0
@@ -33,4 +36,8 @@ __switch:
     ld.d  $fp,$a1,(9+2)*8
     # restore kernel stack of next task
     ld.d $sp, $a1, 8
+
+    csrwr $a2,0x18 #切换任务
+
+
     jr $ra

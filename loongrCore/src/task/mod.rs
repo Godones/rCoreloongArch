@@ -1,13 +1,15 @@
-use crate::config::{BIG_STRIDE};
-use crate::loader::{get_num_app,get_app_data};
+use crate::config::{BIG_STRIDE, PAGE_SIZE_BITS};
+use crate::loader::{get_app_data, get_num_app};
 use crate::sync::UPSafeCell;
+use crate::trap::TrapContext;
+use crate::{println, DEBUG,INFO, Register};
+use alloc::vec::Vec;
 use context::TaskContext;
 use lazy_static::lazy_static;
 use switch::__switch;
 use task::{TaskControlBlock, TaskStatus};
-use crate::trap::TrapContext;
-use alloc::vec::Vec;
-use crate::println;
+use crate::loong_arch::tlb::asid::Asid;
+use crate::loong_arch::tlb::pgdl::Pgdl;
 
 /// 为了更好地完成任务上下文切换，需要对任务处于什么状态做明确划分
 ///任务的运行状态：未初始化->准备执行->正在执行->已退出
@@ -35,9 +37,9 @@ lazy_static! {
     /// 将各个应用的内核初始化完成 --- init_app_cx
     /// 将各个任务的状态改变为初始化完成状态
     pub static ref TASK_MANAGER: TaskManager = {
-        println!("init TASK_MANAGER");
+        INFO!("init TASK_MANAGER");
         let num_app = get_num_app();
-        println!("num_app = {}", num_app);
+        INFO!("num_app = {}", num_app);
         let mut tasks: Vec<TaskControlBlock> = Vec::new();
         for i in 0..num_app {
             tasks.push(TaskControlBlock::new(
@@ -45,6 +47,7 @@ lazy_static! {
                 i,
             ));
         }
+        DEBUG!("load app done");
         TaskManager {
             num_app,
             inner: unsafe { UPSafeCell::new(TaskManagerInner {
@@ -96,7 +99,6 @@ impl TaskManager {
                 index = i;
             }
         }
-        // DEBUG!("[kernel debug] {} {}",miniest,index);
         Some(index)
     }
 
@@ -105,7 +107,7 @@ impl TaskManager {
         self.rr()
         // self.stride()
     }
-
+    #[no_mangle]
     fn run_first_task(&self) -> ! {
         let mut inner = self.inner.borrow();
         let mut task0 = &mut inner.tasks[0];
@@ -113,12 +115,23 @@ impl TaskManager {
         // task0.stride += inner.tasks[0].pass;
         let next_task_cx_ptr = &task0.task_cx_ptr as *const TaskContext;
         let mut _unused = TaskContext::zero_init();
+        let pgd = task0.get_user_token()<<PAGE_SIZE_BITS;//获得根页表基地址
+
+        DEBUG!("first task pgd = {:#x}", pgd);
+        Pgdl::read().set_val(pgd).write();//设置根页表基地址
+        let current_task_id = task0.task_id;
+        // Asid::read().set_asid(current_task_id as u32).write();//设置ASID
+        // unsafe {
+        //     asm!("INVTLB 0,$r0,$r0");//清除TLB缓存
+        // }
         drop(inner);
         unsafe {
-            __switch(&mut _unused as *mut TaskContext, next_task_cx_ptr);
+            __switch(&mut _unused as *mut TaskContext, next_task_cx_ptr,current_task_id);
         }
         panic!("unreachable in first_task");
     }
+    #[no_mangle]
+    fn man(){}
     fn run_next_task(&self) {
         if let Some(next) = self.find_next_task() {
             //查询是否有处于准备的任务，如果有就运行
@@ -131,10 +144,18 @@ impl TaskManager {
             let current_task_cx_ptr =
                 &mut inner.tasks[current_task].task_cx_ptr as *mut TaskContext;
             let next_task_cx_ptr2 = &inner.tasks[next].task_cx_ptr as *const TaskContext;
+            let pgd = inner.tasks[next].get_user_token() << PAGE_SIZE_BITS;//获得根页表基地址
+            Pgdl::read().set_val(pgd).write();//设置根页表基地址
+            let current_task_id = inner.tasks[next].task_id;
+            DEBUG!("switch task----");
+            TaskManager::man();
+            // Asid::read().set_asid(current_task_id as u32).write();//设置ASID
+            DEBUG!("switch task-----");
             //释放可变借用，否则进入下一个任务后将不能获取到inner的使用权
             drop(inner);
+            DEBUG!("switch task---");
             unsafe {
-                __switch(current_task_cx_ptr, next_task_cx_ptr2);
+                __switch(current_task_cx_ptr, next_task_cx_ptr2,current_task_id);
             }
         } else {
             panic!("There are no tasks!");
@@ -144,7 +165,13 @@ impl TaskManager {
         let inner = self.inner.exclusive_access();
         inner.tasks[inner.current_task].get_user_token()
     }
-
+    fn get_current_task_id(&self) -> usize {
+        DEBUG!("get_current_task_id");
+        let inner = self.inner.exclusive_access();
+        // inner.tasks[inner.current_task].task_id;
+        DEBUG!("current task id = {}", inner.tasks[inner.current_task].task_id);
+        0
+    }
 }
 
 pub fn suspend_current_run_next() {
@@ -161,7 +188,6 @@ pub fn set_priority(priority: usize) -> isize {
     //设置特权级
     TASK_MANAGER.set_priority(priority)
 }
-
 
 pub fn run_first_task() {
     TASK_MANAGER.run_first_task();
@@ -180,4 +206,7 @@ fn run_next_task() {
 }
 pub fn current_user_token() -> usize {
     TASK_MANAGER.get_current_token()
+}
+pub fn current_task_id() -> usize {
+    TASK_MANAGER.get_current_task_id()
 }
