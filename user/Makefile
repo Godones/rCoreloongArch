@@ -12,7 +12,7 @@ OBJCOPY := loongarch64-unknown-linux-gnu-objcopy
 
 elf:
 	@cargo build --release
-	@python3 build.py
+	@#python3 build.py
 	@#echo $(APPS)
 	@#echo $(ELFS)
 	@#echo $(BINS)
