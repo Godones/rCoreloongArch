@@ -1,7 +1,6 @@
 use crate::loader::init_app_cx;
 use crate::mm::MemorySet;
 use crate::task::context::TaskContext;
-use crate::DEBUG;
 
 pub struct TaskControlBlock {
     pub task_status: TaskStatus,
@@ -20,7 +19,7 @@ impl TaskControlBlock {
     pub fn new(elf_data: &[u8], app_id: usize) -> Self {
         // memory_set with elf program headers/trampoline/trap context/user stack
         let (memory_set, user_sp, entry_point) = MemorySet::from_elf(elf_data);
-        DEBUG!("entry_point: {:#x}, user_sp: {:#x}", entry_point, user_sp);
+        // DEBUG!("entry_point: {:#x}, user_sp: {:#x}", entry_point, user_sp);
         let task_status = TaskStatus::Ready; //准备指向状态
         let task_control_block = Self {
             task_status,

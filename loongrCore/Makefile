@@ -27,15 +27,12 @@ build: kernel
 env:
 	cargo install cargo-binutils
 
-$(KERNEL_BIN): kernel
-	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
 
 kernel:
 	@cd ../user && make build
 	@#cd ../fs-test && make run
 	@echo Platform: $(BOARD)
-	@cargo build --$(MODE) --features TRACE
-
+	@cargo build --$(MODE) --features $(INFO)
 
 clean:
 	@cargo clean
@@ -51,7 +48,7 @@ disasm-vim: kernel
 run: run-inner
 
 doc:
-	@cargo doc --open --features "board_$(BOARD)" --features"$(INFO)" --no-deps
+	@cargo doc --open --features"$(INFO)" --no-deps
 
 run-inner: build
 ifeq ($(BOARD),qemu)

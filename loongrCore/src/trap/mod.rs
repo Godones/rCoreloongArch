@@ -1,4 +1,4 @@
-pub(crate) mod context;
+pub mod context;
 
 use crate::config::{PAGE_SIZE_BITS, TICKS_PER_SEC, VALEN};
 use crate::loong_arch::register::csr::Register;
@@ -22,7 +22,7 @@ use crate::loong_arch::tlb::tlbrelo::TlbRelo;
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
 use crate::task::{current_user_token, exit_current_run_next, suspend_current_run_next};
-use crate::{println, INFO};
+use crate::{println, info};
 use bit_field::BitField;
 pub use context::TrapContext;
 
@@ -55,7 +55,7 @@ pub fn init() {
         .set_dir3_base(36) //第三级页目录表
         .set_dir3_width(0xb) //页目录表宽度为11位
         .write();
-    INFO!("init trap ok");
+    info!("init trap ok");
 }
 
 pub fn enable_timer_interrupt() {
@@ -76,7 +76,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
     let crmd = Crmd::read();
     if crmd.get_ie() {
         // 全局中断会在中断处理程序被关掉
-        INFO!("kerneltrap: global interrupt enable");
+        info!("kerneltrap: global interrupt enable");
     }
     match estat.cause() {
         Trap::Exception(Exception::Syscall) => {
@@ -129,13 +129,13 @@ fn timer_handler() {
 
 // 重填异常处理
 fn tlb_refill_handler() {
-    INFO!("TLBRFill handler");
+    info!("TLBRFill handler");
     let badv = TlbRBadv::read().get_val(); //出错虚拟地址
-    INFO!("badv: {:#x}", badv);
+    info!("badv: {:#x}", badv);
     let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
-    INFO!("vppn: {:#x}", vppn);
+    info!("vppn: {:#x}", vppn);
     let pgd = Pgd::read().get_val(); //根目录
-    INFO!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
+    info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
     //尝试读出页表项观察
     extern "C" {
         pub fn __tlb_rfill();
@@ -146,18 +146,18 @@ fn tlb_refill_handler() {
     //获取页表项
     let pte0 = TlbRelo::read(0); //页表项0
     let pte1 = TlbRelo::read(1); //页表项1
-    INFO!("pte0: {:?}", pte0);
-    INFO!("pte1: {:?}", pte1);
-    INFO!("Calculating self-----------------------------------------------------");
+    info!("pte0: {:?}", pte0);
+    info!("pte1: {:?}", pte1);
+    info!("Calculating self-----------------------------------------------------");
     let vpn: VirtAddr = badv.into(); //虚拟地址
     let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
-    INFO!("{:?}", vpn);
+    info!("{:?}", vpn);
     let token = current_user_token();
-    INFO!("token: {:#x}", token);
+    info!("token: {:#x}", token);
     let page_table = PageTable::from_token(token); //获取用户的页表
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
                                                  // INFO!("{:?},ppn: {:#x}", pte,pte.bits.get_bits(14..PALEN));
-    INFO!("{:?}", pte);
+    info!("{:?}", pte);
     // let pmd:usize;
     // unsafe {
     //     asm!(

@@ -2,7 +2,7 @@ use crate::config::{BIG_STRIDE, PAGE_SIZE_BITS};
 use crate::loader::{get_app_data, get_num_app};
 use crate::loong_arch::tlb::pgdl::Pgdl;
 use crate::sync::UPSafeCell;
-use crate::{enable_timer_interrupt, Register, DEBUG, INFO};
+use crate::{enable_timer_interrupt, Register, info};
 use alloc::vec::Vec;
 use context::TaskContext;
 use lazy_static::lazy_static;
@@ -35,9 +35,9 @@ lazy_static! {
     /// 将各个应用的内核初始化完成 --- init_app_cx
     /// 将各个任务的状态改变为初始化完成状态
     pub static ref TASK_MANAGER: TaskManager = {
-        INFO!("init TASK_MANAGER");
+        info!("init TASK_MANAGER");
         let num_app = get_num_app();
-        INFO!("num_app = {}", num_app);
+        info!("num_app = {}", num_app);
         let mut tasks: Vec<TaskControlBlock> = Vec::new();
         for i in 0..num_app {
             tasks.push(TaskControlBlock::new(
@@ -45,7 +45,7 @@ lazy_static! {
                 i,
             ));
         }
-        INFO!("init TASK_MANAGER success");
+        info!("init TASK_MANAGER success");
         TaskManager {
             num_app,
             inner: unsafe { UPSafeCell::new(TaskManagerInner {
@@ -107,7 +107,8 @@ impl TaskManager {
     }
 
     fn run_first_task(&self) -> ! {
-        enable_timer_interrupt();
+        enable_timer_interrupt(); //开启时钟中断
+
         let mut inner = self.inner.borrow();
         let mut task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;
@@ -156,16 +157,6 @@ impl TaskManager {
         let inner = self.inner.exclusive_access();
         inner.tasks[inner.current_task].get_user_token()
     }
-    fn get_current_task_id(&self) -> usize {
-        DEBUG!("get_current_task_id");
-        let inner = self.inner.exclusive_access();
-        // inner.tasks[inner.current_task].task_id;
-        DEBUG!(
-            "current task id = {}",
-            inner.tasks[inner.current_task].task_id
-        );
-        0
-    }
 }
 
 pub fn suspend_current_run_next() {
@@ -200,7 +191,4 @@ fn run_next_task() {
 }
 pub fn current_user_token() -> usize {
     TASK_MANAGER.get_current_token()
-}
-pub fn current_task_id() -> usize {
-    TASK_MANAGER.get_current_task_id()
 }

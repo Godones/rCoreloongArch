@@ -25,6 +25,7 @@ mod timer;
 mod trap;
 mod uart;
 
+
 extern crate alloc;
 extern crate bit_field;
 extern crate bitflags;
@@ -32,6 +33,8 @@ extern crate lazy_static;
 extern crate rlibc;
 extern crate xmas_elf;
 
+
+// use log::info;
 use crate::boot_param::boot_params_interface::BootParamsInterface;
 use crate::info::print_machine_info;
 use crate::loong_arch::register::csr::Register;
@@ -52,19 +55,17 @@ pub extern "C" fn main(
     _boot_params_interface: *const BootParamsInterface,
 ) {
     println!("{}", FLAG);
-    INFO!("kernel args: {}", argc);
-    INFO!("kernel argv address: {:#x}", _argv as usize);
-    INFO!(
+    print_range();
+    info!("kernel args: {}", argc);
+    info!("kernel argv address: {:#x}", _argv as usize);
+    info!(
         "kernel boot_params_interface address: {:#x}",
         _boot_params_interface as usize
     );
-    print_range();
     mm::init();
     trap::init();
     print_machine_info();
-    // test_csr_register();
     //运行程序
-    // enable_timer_interrupt();
     task::run_first_task();
     panic!("main end");
 }

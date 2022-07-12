@@ -10,10 +10,10 @@ use crate::config::KERNEL_HEAP_SIZE;
 use crate::mm::system_allocator::bump_allocator::BumpAllocator;
 use crate::mm::system_allocator::common::Locked;
 use bit_field::BitField;
+use crate::info;
 // use crate::system_allocator::linked_list::LinkedListAllocator;
 use crate::mm::system_allocator::buddy::Buddy;
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;
-use crate::{DEBUG, INFO};
 
 static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 
@@ -57,5 +57,5 @@ pub fn heap_test() {
     }
     assert!(bss_range.contains(&(v.as_ptr() as usize)));
     drop(v);
-    INFO!("[kernel] heap_test passed!");
+    info!("[kernel] heap_test passed!");
 }

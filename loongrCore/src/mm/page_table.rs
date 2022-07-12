@@ -52,11 +52,6 @@ impl fmt::Debug for PageTableEntry {
         )
     }
 }
-impl fmt::Display for PageTableEntry {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_fmt(format_args!("{:#x}", self.bits))
-    }
-}
 
 impl PageTableEntry {
     pub fn new(ppn: PhysPageNum, flags: PTEFlags) -> Self {
@@ -69,13 +64,13 @@ impl PageTableEntry {
     pub fn empty() -> Self {
         PageTableEntry { bits: 0 }
     }
-    // 返回物理页号
+    // 返回物理页号---页表项
     pub fn ppn(&self) -> PhysPageNum {
         self.bits.get_bits(14..PALEN).into()
     }
-
-    pub fn dirty_ppn(&self) -> PhysPageNum {
-        // 在页目录项中存放的是基地址
+    // 返回物理页号---页目录项
+    // 在一级和二级页目录表中目录项存放的是只有下一级的基地址
+    pub fn directory_ppn(&self) -> PhysPageNum {
         (self.bits >> PAGE_SIZE_BITS).into()
     }
     // 返回标志位
@@ -105,7 +100,9 @@ impl PageTableEntry {
     pub fn set_dirty(&mut self) {
         self.bits.set_bit(1, true);
     }
-    //
+    // 用于判断存放的页目录项是否为0
+    // 由于页目录项只保存下一级目录的基地址
+    // 因此判断是否是有效的就只需判断是否为0即可
     pub fn is_zero(&self) -> bool {
         self.bits == 0
     }
@@ -146,12 +143,13 @@ impl PageTable {
             }
             if pte.is_zero() {
                 let frame = frame_alloc().unwrap();
+                // 页目录项只保存地址
                 *pte = PageTableEntry {
                     bits: frame.ppn.0 << PAGE_SIZE_BITS,
                 };
                 self.frames.push(frame);
             }
-            ppn = pte.dirty_ppn();
+            ppn = pte.directory_ppn();
         }
         result
     }
@@ -168,7 +166,7 @@ impl PageTable {
             if pte.is_zero() {
                 return None;
             }
-            ppn = pte.ppn();
+            ppn = pte.directory_ppn();
         }
         result
     }
