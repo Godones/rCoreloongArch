@@ -1,5 +1,5 @@
+use crate::loong_arch::register::csr::{Register, CSR_TICLR};
 use bit_field::BitField;
-use crate::loong_arch::register::csr::{CSR_TICLR, Register};
 
 pub struct Ticlr {
     bits: u32,

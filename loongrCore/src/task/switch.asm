@@ -14,9 +14,6 @@ __switch:
     #     next_task_cx_ptr: *const TaskContext
     # )
     # save kernel stack of current task
-
-
-
     st.d $sp, $a0,8
     # save ra & s0~s19 of current execution
     st.d $ra, $a0,0

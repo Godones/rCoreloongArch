@@ -4,11 +4,11 @@
 // 无论 CSR.TLBRERA.IsTLBR 等于何值，执行 TLBRD 指令都只更新 TLBELO0/1 两寄存器。
 // 无论 CSR.TLBRERA.IsTLBR 等于何值，执行 LDPTE 指令都只更新 TLBRELO0/1 两寄存器
 
+use crate::config::PALEN;
 use crate::loong_arch::register::csr::CSR_TLBRELO;
 use crate::loong_arch::tlb::tlbelo::TLBEL;
 use bit_field::BitField;
 use core::fmt;
-use crate::config::PALEN;
 
 pub struct TlbRelo {
     bits: usize,
@@ -17,16 +17,20 @@ pub struct TlbRelo {
 
 impl fmt::Debug for TlbRelo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "TlbRelo{}: RPLV:{},NX:{},NR:{},PPN:{:#x},G:{},MAT:{},PLV:{},D:{},V:{}",self.index,
-        self.get_rplv(),
-        self.get_not_executable(),
-        self.get_not_readable(),
+        write!(
+            f,
+            "TlbRelo{}: RPLV:{},NX:{},NR:{},PPN:{:#x},G:{},MAT:{},PLV:{},D:{},V:{}",
+            self.index,
+            self.get_rplv(),
+            self.get_not_executable(),
+            self.get_not_readable(),
             self.get_ppn(PALEN),
             self.get_global_flag(),
             self.get_mem_access_type(),
             self.get_plv(),
             self.get_dirty(),
-            self.get_valid())
+            self.get_valid()
+        )
     }
 }
 impl TlbRelo {
@@ -52,8 +56,6 @@ impl TlbRelo {
     }
 }
 impl TLBEL for TlbRelo {
-
-
     // 页表项的有效位（V）
     fn get_valid(&self) -> bool {
         self.bits.get_bit(0)

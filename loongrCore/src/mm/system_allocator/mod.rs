@@ -33,7 +33,6 @@ pub fn init_heap() {
 
 #[allow(unused)]
 pub fn heap_test() {
-    init_heap();
     use alloc::boxed::Box; //使用Box包装器
     use alloc::vec::Vec; //使用vec数组
     extern "C" {
@@ -41,7 +40,7 @@ pub fn heap_test() {
         fn ebss();
     }
 
-    let bss_range = (sbss as usize).get_bits(0..32)..(ebss as usize).get_bits(0..32);
+    let bss_range = ebss as usize..sbss as usize;
 
     let a = Box::new(5);
 

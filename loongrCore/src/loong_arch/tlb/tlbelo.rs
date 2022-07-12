@@ -1,6 +1,6 @@
+use crate::config::PALEN;
 use crate::loong_arch::register::csr::CSR_TLBELO;
 use bit_field::BitField;
-use crate::config::PALEN;
 use core::fmt;
 // TLBELO0 和 TLBELO1 两个寄存器包含了 TLB 指令操作时 TLB 表项低位部分物理页号等相关的信息。因龙
 // 芯架构下 TLB 采用双页结构，所以 TLB 表项的低位信息对应奇偶两个物理页表项，其中偶数页信息在 TLBELO0
@@ -32,16 +32,20 @@ pub struct TLBELO {
 
 impl fmt::Debug for TLBELO {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "TlbElo{}: RPLV:{},NX:{},NR:{},PPN:{:#x},G:{},MAT:{},PLV:{},D:{},V:{}",self.index,
-               self.get_rplv(),
-               self.get_not_executable(),
-               self.get_not_readable(),
-               self.get_ppn(PALEN),
-               self.get_global_flag(),
-               self.get_mem_access_type(),
-               self.get_plv(),
-               self.get_dirty(),
-               self.get_valid())
+        write!(
+            f,
+            "TlbElo{}: RPLV:{},NX:{},NR:{},PPN:{:#x},G:{},MAT:{},PLV:{},D:{},V:{}",
+            self.index,
+            self.get_rplv(),
+            self.get_not_executable(),
+            self.get_not_readable(),
+            self.get_ppn(PALEN),
+            self.get_global_flag(),
+            self.get_mem_access_type(),
+            self.get_plv(),
+            self.get_dirty(),
+            self.get_valid()
+        )
     }
 }
 

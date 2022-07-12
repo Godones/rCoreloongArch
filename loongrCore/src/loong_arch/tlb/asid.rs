@@ -1,5 +1,5 @@
 use crate::loong_arch::register::csr::CSR_ASID;
-use crate::{DEBUG, print_machine_info, Register};
+use crate::Register;
 use bit_field::BitField;
 
 // 该寄存器中包含了用于访存操作和 TLB 指令的地址空间标识符（ASID）信息。ASID 的位宽随着架构规
@@ -15,24 +15,14 @@ impl Register for Asid {
         Self { bits }
     }
     fn write(&mut self) {
-        Asid::manm();
-        unsafe {
-            asm!(
-                "csrwr {},0x18",
-                in(reg)self.bits
-            )
-        }
-
+        unsafe { asm!("csrwr {},{}", in(reg)self.bits,const CSR_ASID) }
     }
 }
 impl Asid {
-    #[no_mangle]
-    fn manm(){}
     pub fn get_asid(&self) -> u32 {
         self.bits.get_bits(0..10)
     }
     pub fn set_asid(&mut self, asid: u32) -> &mut Self {
-        DEBUG!("set_asid: {}", asid);
         self.bits.set_bits(0..10, asid);
         self
     }

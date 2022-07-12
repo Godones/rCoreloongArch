@@ -1,12 +1,10 @@
 use super::{frame_alloc, FrameTracker, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
+use crate::config::{PAGE_SIZE_BITS, PALEN};
 use alloc::vec;
 use alloc::vec::Vec;
 use bit_field::BitField;
-use core::fmt::Formatter;
-use core::fmt::{self,Debug};
-use crate::config::{PAGE_SIZE_BITS, PALEN};
-use crate::DEBUG;
 use bitflags::*;
+use core::fmt::{self};
 
 bitflags! {
     pub struct PTEFlags: usize {
@@ -26,7 +24,7 @@ bitflags! {
 }
 impl PTEFlags {
     fn default() -> Self {
-        PTEFlags::V | PTEFlags::MATL | PTEFlags::P |PTEFlags::W
+        PTEFlags::V | PTEFlags::MATL | PTEFlags::P | PTEFlags::W
     }
 }
 #[derive(Copy, Clone)]
@@ -37,7 +35,9 @@ pub struct PageTableEntry {
 
 impl fmt::Debug for PageTableEntry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "PageTableEntry RPLV:{},NX:{},NR:{},PPN:{:#x},W:{},P:{},G:{},MAT:{},PLV:{},D:{},V:{}",
+        write!(
+            f,
+            "PageTableEntry RPLV:{},NX:{},NR:{},PPN:{:#x},W:{},P:{},G:{},MAT:{},PLV:{},D:{},V:{}",
             self.bits.get_bit(63),
             self.bits.get_bit(62),
             self.bits.get_bit(61),
@@ -48,7 +48,8 @@ impl fmt::Debug for PageTableEntry {
             self.bits.get_bits(4..=5),
             self.bits.get_bits(2..=3),
             self.bits.get_bit(1),
-            self.bits.get_bit(0))
+            self.bits.get_bit(0)
+        )
     }
 }
 impl fmt::Display for PageTableEntry {
@@ -71,6 +72,11 @@ impl PageTableEntry {
     // 返回物理页号
     pub fn ppn(&self) -> PhysPageNum {
         self.bits.get_bits(14..PALEN).into()
+    }
+
+    pub fn dirty_ppn(&self) -> PhysPageNum {
+        // 在页目录项中存放的是基地址
+        (self.bits >> PAGE_SIZE_BITS).into()
     }
     // 返回标志位
     pub fn flags(&self) -> PTEFlags {
@@ -140,12 +146,12 @@ impl PageTable {
             }
             if pte.is_zero() {
                 let frame = frame_alloc().unwrap();
-                *pte = PageTableEntry{
+                *pte = PageTableEntry {
                     bits: frame.ppn.0 << PAGE_SIZE_BITS,
                 };
                 self.frames.push(frame);
             }
-            ppn = pte.ppn();
+            ppn = pte.dirty_ppn();
         }
         result
     }
@@ -170,12 +176,8 @@ impl PageTable {
     pub fn map(&mut self, vpn: VirtPageNum, ppn: PhysPageNum, flags: PTEFlags) {
         let rppn = self.root_ppn.0;
         let pte = self.find_pte_create(vpn).unwrap();
-        DEBUG!("map: root:{:#x}, {:?}, {:?}, flags: {:?}",rppn ,vpn, ppn, flags);
         assert!(!pte.is_valid(), "vpn {:?} is mapped before mapping", vpn);
-        *pte = PageTableEntry::new(
-            ppn,
-            flags | PTEFlags::V | PTEFlags::MATL| PTEFlags::P,
-        );
+        *pte = PageTableEntry::new(ppn, flags | PTEFlags::V | PTEFlags::MATL | PTEFlags::P);
     }
     #[allow(unused)]
     pub fn unmap(&mut self, vpn: VirtPageNum) {

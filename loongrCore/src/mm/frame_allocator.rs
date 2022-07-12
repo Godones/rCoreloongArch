@@ -3,7 +3,7 @@ use crate::config::MEMORY_END;
 use crate::println;
 use crate::sync::UPSafeCell;
 use alloc::vec::Vec;
-use bit_field::BitField;
+
 use core::fmt::{self, Debug, Formatter};
 use lazy_static::*;
 
@@ -95,8 +95,7 @@ pub fn init_frame_allocator() {
         fn ekernel();
     }
     FRAME_ALLOCATOR.exclusive_access().init(
-        //需要对ekernel地址取32位物理地址出来，这是由于地址映射的缘故
-        PhysAddr::from((ekernel as usize).get_bits(0..32)).ceil(),
+        PhysAddr::from(ekernel as usize).ceil(),
         PhysAddr::from(MEMORY_END).floor(),
     );
 }

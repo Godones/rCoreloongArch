@@ -1,8 +1,8 @@
 use super::csr::CSR_ESTAT;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::ecfg::Ecfg;
-use bit_field::BitField;
 use crate::loong_arch::tlb::tlbrera::TLBREra;
+use bit_field::BitField;
 
 // 该寄存器记录例外的状态信息，包括所触发例外的一二级编码，以及各中断的状态
 #[derive(Debug, Clone, Copy)]
@@ -124,7 +124,7 @@ pub enum Exception {
     InstructionNotExist = 0xD,         //指令不合规
     InstructionPrivilegeIllegal = 0xE, //特权指令不合规
     FloatingPointUnavailable = 0xF,    //浮点不可用
-    TLBRFill             //TLB重填
+    TLBRFill,                          //TLB重填
 }
 
 // 中断类型

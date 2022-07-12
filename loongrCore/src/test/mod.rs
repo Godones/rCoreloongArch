@@ -1,8 +1,8 @@
 #![allow(unused_variables)]
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::tcfg::Tcfg;
-use crate::{Dmw0, Dmw1, INFO};
 use crate::loong_arch::tlb::tlbentry::TLBREntry;
+use crate::{Dmw0, Dmw1, INFO};
 
 pub fn color_output_test() {
     extern "C" {
@@ -55,7 +55,7 @@ pub fn test_csr_register() {
     INFO!("pg:{}", pg);
     INFO!("dmwo:{:#x}", Dmw0::read().get_value());
     INFO!("dmw1:{:#x}", Dmw1::read().get_value());
-    INFO!("TLB-reload entry_point :{:#x}",TLBREntry::read().get_val());
+    INFO!("TLB-reload entry_point :{:#x}", TLBREntry::read().get_val());
     // 查看哪些中断被打开了
     for i in 0..13 {
         let interrupt = ecfg.get_lie_with_index(i);

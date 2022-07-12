@@ -43,16 +43,7 @@ use config::FLAG;
 use core::arch::global_asm;
 
 global_asm!(include_str!("link_app.S"));
-
-fn clear_bss() {
-    extern "C" {
-        fn sbss();
-        fn ebss();
-    }
-    (sbss as usize..ebss as usize).for_each(|addr| unsafe {
-        (addr as *mut u8).write_volatile(0);
-    });
-}
+global_asm!(include_str!("head.S"));
 
 #[no_mangle]
 pub extern "C" fn main(
@@ -60,12 +51,7 @@ pub extern "C" fn main(
     _argv: *const *const u8,
     _boot_params_interface: *const BootParamsInterface,
 ) {
-    clear_bss();
     println!("{}", FLAG);
-    // unsafe {
-    //     asm!();
-    // }
-
     INFO!("kernel args: {}", argc);
     INFO!("kernel argv address: {:#x}", _argv as usize);
     INFO!(

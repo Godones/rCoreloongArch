@@ -23,7 +23,7 @@ impl SltbPs {
     pub fn get_page_size(&self) -> u32 {
         self.bits.get_bits(0..=5)
     }
-    pub fn set_page_size(&mut self, page_size: u32)->&mut Self {
+    pub fn set_page_size(&mut self, page_size: u32) -> &mut Self {
         self.bits.set_bits(0..=5, page_size);
         self
     }

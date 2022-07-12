@@ -1,19 +1,22 @@
 OUTPUT_ARCH( "loongarch" )
-ENTRY( main)
+ENTRY( _start)
 
 SECTIONS
 {
   # . = 0x9000_0000_0010_0000;
   # 这里如果设置位0x9000_0000_0010_0000,则这段虚拟内存空间只能在内核态使用，如果我们切换到了用户态，那么就会导致不可用
-   . = 0x9000000000001000;
+   . = 0x0000000000001000;
   # . =  0x92000000;
 
     PROVIDE(etext = .);
   .text : {
+  *(.text.init)
     *(.text .text.*)
     . = ALIGN(0x1000);
     _keentry = .;
     *(k_eentry)
+    . = ALIGN(0x1000);
+    *(tlb_handler)
   }
  PROVIDE(stext = .);
 
