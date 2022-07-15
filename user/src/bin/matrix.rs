@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![allow(clippy::needless_range_loop)]
 
 #[macro_use]
 extern crate user_lib;
@@ -13,6 +12,7 @@ static P: i32 = 10007;
 type Arr = [[i32; N]; N];
 
 fn work(times: isize) {
+    println!("child: {}", getpid());
     let mut a: Arr = Default::default();
     let mut b: Arr = Default::default();
     let mut c: Arr = Default::default();
@@ -22,13 +22,13 @@ fn work(times: isize) {
             b[i][j] = 1;
         }
     }
+    // println!("began yield");
     yield_();
     println!("pid {} is running ({} times)!.", getpid(), times);
     for _ in 0..times {
         for i in 0..N {
             for j in 0..N {
                 c[i][j] = 0;
-                #[allow(clippy::needless_range_loop)]
                 for k in 0..N {
                     c[i][j] = (c[i][j] + a[i][k] * b[k][j]) % P;
                 }

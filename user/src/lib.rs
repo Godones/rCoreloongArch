@@ -27,7 +27,7 @@ pub fn handle_alloc_error(layout: core::alloc::Layout) -> ! {
 #[no_mangle]
 #[link_section = ".text.entry"]
 pub extern "C" fn _start() -> ! {
-    // clear_bss();
+    clear_bss();
     unsafe {
         HEAP.lock()
             .init(HEAP_SPACE.as_ptr() as usize, USER_HEAP_SIZE);
@@ -44,10 +44,10 @@ fn main() -> i32 {
 
 fn clear_bss() {
     extern "C" {
-        fn _bss_start();
-        fn _bss_end();
+        fn ebss();
+        fn sbss();
     }
-    (_bss_start as usize.._bss_end as usize).for_each(|addr| {
+    (ebss as usize..sbss as usize).for_each(|addr| {
         unsafe { (addr as *mut u8).write_volatile(0); }
     });
 }

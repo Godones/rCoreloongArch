@@ -3,7 +3,7 @@ use crate::info;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::dmwn::{Dmw0, Dmw1};
 use crate::loong_arch::register::tcfg::Tcfg;
-use crate::loong_arch::tlb::tlbentry::TLBREntry;
+use crate::loong_arch::tlb::TLBREntry;
 
 pub fn color_output_test() {
     extern "C" {

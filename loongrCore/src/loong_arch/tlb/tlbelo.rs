@@ -71,6 +71,13 @@ impl TLBELO {
         }
     }
 }
+
+impl TLBELO {
+    pub fn set_val(&mut self, val:usize) -> &mut Self {
+        self.bits = val;
+        self
+    }
+}
 impl TLBEL for TLBELO {
     // 页表项的有效位（V）
     fn get_valid(&self) -> bool {
@@ -153,4 +160,5 @@ impl TLBEL for TLBELO {
         self.bits.set_bit(63, rplv);
         self
     }
+
 }

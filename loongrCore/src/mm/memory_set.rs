@@ -5,6 +5,7 @@ use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
+use log::{debug, info};
 
 use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
 
@@ -106,6 +107,7 @@ impl MemorySet {
             None,
         );
         //返回地址空间,用户栈顶,入口地址
+        debug!("elf: {:#x}",elf.header.pt2.entry_point() as usize);
         (
             memory_set,
             user_stack_top,
@@ -182,6 +184,7 @@ impl MapArea {
         let ppn: PhysPageNum;
         let frame = frame_alloc().unwrap();
         ppn = frame.ppn;
+        info!("MapArea::map_one: {:#x}-{:#x}", vpn.0, ppn.0);
         self.data_frames.insert(vpn, frame);
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
         page_table.map(vpn, ppn, pte_flags);

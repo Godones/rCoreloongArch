@@ -1,5 +1,5 @@
-use core::arch::global_asm;
 use crate::task::context::TaskContext;
+use core::arch::global_asm;
 global_asm!(include_str!("switch.asm"));
 
 extern "C" {

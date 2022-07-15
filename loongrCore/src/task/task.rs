@@ -1,17 +1,17 @@
+use crate::config::PAGE_SIZE_BITS;
+use crate::loong_arch::tlb::Pgdl;
 use crate::mm::MemorySet;
 use crate::sync::UPSafeCell;
 use crate::task::context::TaskContext;
 use crate::task::pid::{KernelStack, PidHandle};
 use crate::task::pid_alloc;
 use crate::trap::TrapContext;
+use crate::Register;
 use alloc::sync::Arc;
 use alloc::sync::Weak;
 use alloc::vec::Vec;
 use core::arch::asm;
 use core::cell::RefMut;
-use crate::config::PAGE_SIZE_BITS;
-use crate::loong_arch::tlb::pgdl::Pgdl;
-use crate::Register;
 
 pub struct TaskControlBlock {
     // immutable
@@ -63,7 +63,7 @@ impl TaskControlBlock {
         let task_status = TaskStatus::Ready; //准备指向状态
         let pid = pid_alloc(); //分配pid
         let kernel_stack = KernelStack::new(pid.0); //分配内核栈
-                                               //在内核栈放入trap上下文
+                                                    //在内核栈放入trap上下文
         let kernel_trap_cx =
             kernel_stack.push_on_top(TrapContext::app_init_context(entry_point, user_sp));
         let task_control_block = Self {
@@ -108,8 +108,7 @@ impl TaskControlBlock {
             pid: pid_handle,
             inner: unsafe {
                 // error!("fork trap_cx :{:?}",kernel_stack.get_trap_cx());
-                let inner = UPSafeCell::new(
-                    TaskControlBlockInner {
+                let inner = UPSafeCell::new(TaskControlBlockInner {
                     kernel_stack,
                     base_size: parent_inner.base_size,
                     task_cx: TaskContext::goto_restore(kstack_ptr),
@@ -126,7 +125,10 @@ impl TaskControlBlock {
             },
         });
         // add child
-        task_control_block.inner_exclusive_access().kernel_stack.copy_from_other(&parent_inner.kernel_stack);
+        task_control_block
+            .inner_exclusive_access()
+            .kernel_stack
+            .copy_from_other(&parent_inner.kernel_stack);
         // info!("pid: {}", task_control_block.pid.0);
         // info!("kstack addr: {:#x}",kernel_stack.get_trap_addr());
         // error!("fork trap_cx :{:?}",kernel_stack.get_trap_cx());
@@ -141,7 +143,7 @@ impl TaskControlBlock {
         let mut inner = self.inner_exclusive_access();
         // substitute memory_set
         inner.memory_set = memory_set; //覆盖 memory_set
-        // initialize trap_cx
+                                       // initialize trap_cx
         inner
             .kernel_stack
             .push_on_top(TrapContext::app_init_context(entry_point, user_sp));

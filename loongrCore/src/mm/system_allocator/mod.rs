@@ -62,6 +62,8 @@ pub fn heap_test() {
 
     let v = Box::new([0u8; 500]);
     let x = v.as_ptr() as *mut u8;
-    unsafe {x.write(0xFF);}
+    unsafe {
+        x.write(0xFF);
+    }
     info!("[kernel] heap_test passed!");
 }

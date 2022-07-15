@@ -14,7 +14,7 @@ fn main() {
                                                 // println!("cargo:rustc-link-arg=-no-pie"); //rust默认连接到Scrt1.o，使用动态链接
                                                 //println!("cargo:rustc-link-arg=-Wl,-Map=rust.map");
     println!("cargo:rerun-if-change=linker.ld");
-    println!("cargo:rerun-if-changed=../user/src/");
+    println!("cargo:rerun-if-changed=../user/target/");
     println!("cargo:rerun-if-changed=src/");
     insert_app_data().unwrap();
 }

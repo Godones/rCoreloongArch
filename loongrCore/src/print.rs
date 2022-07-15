@@ -39,6 +39,7 @@ lazy_static! {
 }
 
 pub fn get_char() -> u8 {
+    //todo!根据rcore内部实现推测这里应该是一个阻塞调用
     loop {
         let ch = CONSOLE.lock().get_char();
         if let Some(ch) = ch {

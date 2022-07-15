@@ -1,10 +1,10 @@
+use crate::get_time_ms;
 use crate::loader::get_app_data_by_name;
 use crate::mm::{translated_refmut, translated_str};
 use crate::task::{
     add_task, current_task, current_user_token, exit_current_and_run_next,
     suspend_current_and_run_next,
 };
-use crate::{get_time_ms};
 // use crate::timer::get_time_ms;
 use alloc::sync::Arc;
 
@@ -35,7 +35,7 @@ pub fn sys_fork() -> isize {
     // we do not have to move to next instruction since we have done it before
     // for child process, fork returns 0
     trap_cx.x[4] = 0; //x[4] is return value
-    add_task(new_task);// add new task to scheduler
+    add_task(new_task); // add new task to scheduler
     new_pid as isize
 }
 
@@ -56,12 +56,6 @@ pub fn sys_exec(path: *const u8) -> isize {
 /// Else if there is a child process but it is still running, return -2.
 pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut i32) -> isize {
     let task = current_task().unwrap();
-    // find a child process
-    // ---- access current TCB exclusively
-    // let cpid = task.getpid();
-    // if cpid!=0&&cpid!=1 {
-    //     debug!("wait pid {} over",pid);
-    // }
     let mut inner = task.inner_exclusive_access();
     if !inner
         .children

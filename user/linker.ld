@@ -4,7 +4,7 @@ ENTRY( _start)
 
 SECTIONS
 {
-    . = 0x1000000;
+    . = 0x10000;
   .text : {
     *(.text.entry)
     *(.text .text.*)
@@ -24,14 +24,13 @@ SECTIONS
     *(.data .data.*)
   }
   .bss : {
-    sbss = .;
+    ebss = .;
     . = ALIGN(16);
-    _bss_start = .;
     *(.sbss .sbss.*)
     . = ALIGN(16);
     *(.bss .bss.*)
   }
-    _bss_end = .;
+  sbss = .;
     ekernel = .;
 
   PROVIDE(end = .);

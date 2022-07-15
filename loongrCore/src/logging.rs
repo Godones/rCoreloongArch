@@ -4,8 +4,8 @@
 
 */
 
-use log::{self, Level, LevelFilter, Log, Metadata, Record};
 use crate::println;
+use log::{self, Level, LevelFilter, Log, Metadata, Record};
 
 struct SimpleLogger;
 

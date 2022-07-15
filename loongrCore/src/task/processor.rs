@@ -2,13 +2,14 @@
 use super::__switch;
 use super::{fetch_task, TaskStatus};
 use super::{TaskContext, TaskControlBlock};
+use crate::config::PAGE_SIZE_BITS;
+use crate::loong_arch::tlb::Pgdl;
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
+use crate::Register;
 use alloc::sync::Arc;
 use lazy_static::*;
-use crate::config::PAGE_SIZE_BITS;
-use crate::loong_arch::tlb::pgdl::Pgdl;
-use crate::Register;
+use log::debug;
 
 /// Processor management structure
 pub struct Processor {
@@ -57,8 +58,10 @@ pub fn run_tasks() {
 
             let pid = task.getpid(); //应用进程号
             let pgd = task_inner.get_user_token() << PAGE_SIZE_BITS;
-            // debug!("pid :{}", pid);
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
+            let trap = task_inner.kernel_stack.get_trap_cx();
+            debug!("pid :{} trap: {:?}", pid,trap);
+            //
             drop(task_inner);
             // release coming task TCB manually
             processor.current = Some(task);
@@ -96,7 +99,8 @@ pub fn current_trap_addr() -> usize {
     current_task()
         .unwrap()
         .inner_exclusive_access()
-        .kernel_stack.get_trap_addr()
+        .kernel_stack
+        .get_trap_addr()
 }
 
 ///Return to idle control flow for new scheduling

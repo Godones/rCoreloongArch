@@ -1,6 +1,7 @@
 use super::PageTableEntry;
 use crate::config::{PAGE_SIZE, PAGE_SIZE_BITS};
 use core::fmt::{self, Debug, Formatter};
+use core::ops::Add;
 
 /// 在loongArch平台上，虚拟地址为48位，物理地址为48位
 /// 采用16kb页大小，则使用三级页表
@@ -42,6 +43,14 @@ impl Debug for PhysPageNum {
         f.write_fmt(format_args!("PPN:{:#x}", self.0))
     }
 }
+
+impl Add<usize> for VirtPageNum {
+    type Output = VirtPageNum;
+    fn add(self, rhs: usize) -> Self::Output {
+        VirtPageNum(self.0 + rhs)
+    }
+}
+
 
 /// T: {PhysAddr, VirtAddr, PhysPageNum, VirtPageNum}
 /// T -> usize: T.0

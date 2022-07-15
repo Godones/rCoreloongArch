@@ -17,9 +17,8 @@ pub use context::TaskContext;
 pub use manager::add_task;
 pub use pid::{pid_alloc, KernelStack, PidAllocator, PidHandle};
 pub use processor::{
-    current_task, current_trap_cx, current_user_token, run_tasks, schedule, take_current_task,
-    current_trap_addr,
-    Processor,
+    current_task, current_trap_addr, current_trap_cx, current_user_token, run_tasks, schedule,
+    take_current_task, Processor,
 };
 
 /// Suspend the current 'Running' task and run the next task in task list.
@@ -36,8 +35,8 @@ pub fn suspend_current_and_run_next() {
     // ---- release current PCB
 
     // push back to ready queue.
-    add_task(task);// 放入调度队列后面
-    // jump to scheduling cycle
+    add_task(task); // 放入调度队列后面
+                    // jump to scheduling cycle
     schedule(task_cx_ptr); // 调度切换
 }
 
@@ -75,8 +74,7 @@ pub fn exit_current_and_run_next(exit_code: i32) {
     // we do not have to save task context
     let mut _unused = TaskContext::zero_init();
 
-
-    // 使得原来的TLB表项无效掉，负责下一个进程与当前退出的进程号相同会导致
+    // 使得原来的TLB表项无效掉，否则下一个进程与当前退出的进程号相同会导致
     // 无法正确进行地址转换
     unsafe {
         asm!("invtlb 0x4,{},$r0",in(reg) pid);

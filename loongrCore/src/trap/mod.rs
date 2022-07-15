@@ -8,23 +8,26 @@ use crate::loong_arch::register::time::get_timer_freq;
 use crate::loong_arch::register::{
     crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat, estat::Trap,
 };
-use crate::loong_arch::tlb::pgd::Pgd;
-use crate::loong_arch::tlb::pwch::Pwch;
-use crate::loong_arch::tlb::pwcl::Pwcl;
-use crate::loong_arch::tlb::sltbps::SltbPs;
-use crate::loong_arch::tlb::tlbelo::{TLBEL, TLBELO};
-use crate::loong_arch::tlb::tlbentry::TLBREntry;
-use crate::loong_arch::tlb::tlbidx::TlbIdx;
-use crate::loong_arch::tlb::tlbrbadv::TlbRBadv;
-use crate::loong_arch::tlb::tlbrehi::TlbREhi;
-use crate::loong_arch::tlb::tlbrelo::TlbRelo;
+use crate::loong_arch::tlb::Pgd;
+use crate::loong_arch::tlb::Pwch;
+use crate::loong_arch::tlb::Pwcl;
+use crate::loong_arch::tlb::SltbPs;
+use crate::loong_arch::tlb::{TLBEL, TLBELO};
+use crate::loong_arch::tlb::TLBREntry;
+use crate::loong_arch::tlb::TlbIdx;
+use crate::loong_arch::tlb::TlbRBadv;
+use crate::loong_arch::tlb::TlbREhi;
+use crate::loong_arch::tlb::TlbRelo;
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next};
+use crate::task::{
+    current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next,
+};
 use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
+use crate::loong_arch::register::badv::Badv;
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -55,7 +58,6 @@ pub fn init() {
         .set_dir3_base(36) //第三级页目录表
         .set_dir3_width(0xb) //页目录表宽度为11位
         .write();
-    info!("init trap ok");
 }
 
 pub fn enable_timer_interrupt() {
@@ -91,7 +93,10 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         | Trap::Exception(Exception::StorePageFault)
         | Trap::Exception(Exception::FetchPageFault) => {
             //页面异常
-            println!("[kernel] PageFault in application, core dumped.");
+            tlb_page_fault();
+            let t = estat.cause();
+            let badv = Badv::read().get_value();
+            println!("[kernel] {:?} {:#x} PageFault in application, core dumped.",t,badv);
             exit_current_and_run_next(-2);
         }
         Trap::Exception(Exception::InstructionNotExist) => {
@@ -131,35 +136,36 @@ fn timer_handler() {
 
 // 重填异常处理
 fn tlb_refill_handler() {
-    info!("TLBRFill handler");
+    // info!("TLBRFill handler");
     let badv = TlbRBadv::read().get_val(); //出错虚拟地址
-    info!("badv: {:#x}", badv);
-    let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
-    info!("vppn: {:#x}", vppn);
-    let pgd = Pgd::read().get_val(); //根目录
-    info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
+    // info!("badv: {:#x}", badv);
+    // let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
+    // info!("vppn: {:#x}", vppn);
+    // let pgd = Pgd::read().get_val(); //根目录
+    // info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
     //尝试读出页表项观察
-    extern "C" {
-        pub fn __tlb_rfill();
-    }
-    unsafe {
-        __tlb_rfill();
-    }
     //获取页表项
-    let pte0 = TlbRelo::read(0); //页表项0
-    let pte1 = TlbRelo::read(1); //页表项1
-    info!("pte0: {:?}", pte0);
-    info!("pte1: {:?}", pte1);
-    info!("Calculating self-----------------------------------------------------");
+    // info!("Calculating self-----------------------------------------------------");
     let vpn: VirtAddr = badv.into(); //虚拟地址
     let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
-    info!("{:?}", vpn);
+    // info!("{:?}", vpn);
     let token = current_user_token();
-    info!("token: {:#x}", token);
+    // info!("token: {:#x}", token);
     let page_table = PageTable::from_token(token); //获取用户的页表
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
                                                  // INFO!("{:?},ppn: {:#x}", pte,pte.bits.get_bits(14..PALEN));
-    info!("{:?}", pte);
+    let pte2 = page_table.find_pte(vpn+1).unwrap(); //获取页表项
+    TlbRelo::read(0).set_val(pte.bits).write();
+    TlbRelo::read(1).set_val(pte2.bits).write();
+    TLBELO::read(0).set_val(pte.bits).write();
+    TLBELO::read(1).set_val(pte2.bits).write();
+    // let tlbidx = TlbIdx::read();
+    // info!("tlbidx: ne: {}, ps: {}, ", tlbidx.get_ne(),tlbidx.get_ps());
+    unsafe {
+        llvm_asm!("tlbfill" :::: "volatile");
+    }
+    // info!("{:?}\n{:?}", pte,pte2);
+    // tlb_page_fault();
     // let pmd:usize;
     // unsafe {
     //     asm!(
@@ -170,7 +176,9 @@ fn tlb_refill_handler() {
     //         out(reg) pmd,
     //     )
     // }
-    // INFO!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+    // let pte0 = TlbRelo::read(0); //页表项0
+    // info!("pte0: {:?}", pte0);
+    // info!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
 }
 
 /// Exception(PageModifyFault)的处理
@@ -203,4 +211,21 @@ fn tlb_page_modify_handler() {
     unsafe {
         asm!("tlbwr"); //重新将tlbelo写入tlb
     }
+}
+#[no_mangle]
+fn man(){}
+
+#[no_mangle]
+fn tlb_page_fault(){
+    //检查pagefault相关内容
+    unsafe {
+        asm!(
+            "tlbsrch",
+            "tlbrd",
+        )
+    }
+    let tlbelo0 = TLBELO::read(0);
+    let tlbelo1 = TLBELO::read(1);
+    info!("tlbelo0 :{:?}",tlbelo0);
+    info!("tlbelo1 :{:?}",tlbelo1);
 }

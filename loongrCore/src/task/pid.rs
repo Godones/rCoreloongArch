@@ -1,11 +1,12 @@
 //!Implementation of [`PidAllocator`]
-use alloc::alloc::dealloc;
 use crate::config::{KERNEL_STACK_SIZE, MEMORY_END};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
+use alloc::alloc::dealloc;
 use alloc::vec::Vec;
 use core::alloc::Layout;
 use lazy_static::*;
+
 
 ///Pid Allocator struct
 pub struct PidAllocator {
@@ -51,7 +52,6 @@ pub struct PidHandle(pub usize);
 
 impl Drop for PidHandle {
     fn drop(&mut self) {
-        //println!("drop pid {}", self.0);
         PID_ALLOCATOR.exclusive_access().dealloc(self.0);
     }
 }
@@ -62,17 +62,20 @@ pub fn pid_alloc() -> PidHandle {
 
 /// Kernelstack for app
 #[repr(align(4096))]
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct KernelStack {
-    pid:usize,
-    data_ptr:usize
+    pid: usize,
+    data_ptr: usize,
 }
 
-impl Drop for KernelStack{
+impl Drop for KernelStack {
     fn drop(&mut self) {
         let data = self.data_ptr as *mut u8;
-        unsafe{
-            dealloc(data,Layout::from_size_align(KERNEL_STACK_SIZE,4096).unwrap());
+        unsafe {
+            dealloc(
+                data,
+                Layout::from_size_align(KERNEL_STACK_SIZE, 4096).unwrap(),
+            );
         }
     }
 }
@@ -83,20 +86,16 @@ impl KernelStack {
     /// 内核态并不处于页表翻译模式，而是以类似于直接管理物理内存的方式管理
     /// 因此这里会直接申请对应大小的内存空间
     /// 但这也会造成内核栈无法被保护的状态
-    pub fn new(pid:usize) -> Self {
-        let layout = {
-            Layout::from_size_align(KERNEL_STACK_SIZE, 4096).unwrap()
-        };
-        let data = unsafe {
-            alloc::alloc::alloc(layout)
-        };
-        Self{
+    pub fn new(pid: usize) -> Self {
+        let layout = { Layout::from_size_align(KERNEL_STACK_SIZE, 4096).unwrap() };
+        let data = unsafe { alloc::alloc::alloc(layout) };
+        Self {
             pid,
-            data_ptr:data as usize
+            data_ptr: data as usize,
         }
     }
 
-    pub fn copy_from_other(&mut self, kernel_stack: &KernelStack)->&mut Self {
+    pub fn copy_from_other(&mut self, kernel_stack: &KernelStack) -> &mut Self {
         //需要从kernel_stack复制到self
         let trap_context = kernel_stack.get_trap_cx().clone();
         self.push_on_top(trap_context);
