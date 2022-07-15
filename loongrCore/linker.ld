@@ -4,7 +4,7 @@ ENTRY( main)
 SECTIONS
 {
   #  . = 0x9000000001034804;
-  . = 0x00100000;
+  . = 0x0090100000;
 
     PROVIDE(etext = .);
   .text : {
