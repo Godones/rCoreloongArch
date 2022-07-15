@@ -11,18 +11,10 @@ bit_field = "0.10.1"
 rlibc = "1.0.0"
 bitflags = "1.3.2"
 xmas-elf = "0.8.0"
+log = "0.4.14"
 
-
+buddy_system_allocator = "0.8.0"
 
 [dependencies.lazy_static]
 version = "1.4.0"
 features = ["spin_no_std"] #禁止链接标准库
-
-[features]
-default =[]
-board_qemu = []
-ERROR = []
-WARN = []
-INFO = []
-DEBUG = []
-TRACE = []

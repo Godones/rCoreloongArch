@@ -1,3 +1,4 @@
+use core::arch::global_asm;
 use crate::task::context::TaskContext;
 global_asm!(include_str!("switch.asm"));
 

@@ -38,8 +38,13 @@ lazy_static! {
     pub static ref CONSOLE: Mutex<Console> = Mutex::new(Console::new(UART));
 }
 
-pub fn get_char() -> Option<u8> {
-    CONSOLE.lock().get_char()
+pub fn get_char() -> u8 {
+    loop {
+        let ch = CONSOLE.lock().get_char();
+        if let Some(ch) = ch {
+            return ch;
+        }
+    }
 }
 
 pub fn _print(arg: Arguments) {
@@ -55,57 +60,4 @@ macro_rules! print {
 macro_rules! println {
     () => ($crate::print!("\n"));
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
-}
-
-///彩色输出，用于不同信息之间的分隔
-///表示发生严重错误，很可能或者已经导致程序崩溃
-#[macro_export]
-macro_rules! error {
-    () => ($crate::print!("\n"));
-    ($($arg:tt)*) => {
-        ($crate::print!("\x1b[31m[ERROR]{}\x1b[0m\n", format_args!($($arg)*)));
-    }
-}
-
-// 表示发生不常见情况，但是并不一定导致系统错误
-#[macro_export]
-macro_rules! warn {
-    () => (
-        #[cfg(any(feature = "WARN", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
-        $crate::print!("\n");
-        $crate::print!("");
-    );
-    ($($arg:tt)*) => {
-        #[cfg(any(feature = "WARN", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
-        ($crate::print!("\x1b[93m[WARN]{}\x1b[0m\n", format_args!($($arg)*)));
-        $crate::print!("");
-    }
-}
-
-// 比较中庸的选项，输出比较重要的信息，比较常用
-#[macro_export]
-macro_rules! info {
-    () => {
-        #[cfg(any(feature = "INFO",feature = "DEBUG", feature = "TRACE"))]
-        $crate::print!("[INFO]\n");
-        $crate::print!("");
-    };
-    ($($arg:tt)*) => {
-        #[cfg(any(feature = "INFO",feature = "DEBUG", feature = "TRACE"))]
-        ($crate::print!("\x1b[34m[INFO]{}\x1b[0m\n", format_args!($($arg)*)));
-        $crate::print!("");
-    }
-}
-#[macro_export]
-macro_rules! debug {
-    () => {
-        #[cfg(any(feature = "DEBUG", feature = "TRACE"))]
-        $crate::print!("\n")
-        $crate::print!("");
-    };
-    ($($arg:tt)*) => {
-        #[cfg(any(feature = "DEBUG", feature = "TRACE"))]
-        ($crate::print!("\x1b[32m[DEBUG]{}\x1b[0m\n", format_args!($($arg)*)));
-        $crate::print!("");
-    }
 }

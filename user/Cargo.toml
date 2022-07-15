@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 rlibc = "1.0.0"
+buddy_system_allocator = "0.6.0"

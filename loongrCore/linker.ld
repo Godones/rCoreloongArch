@@ -40,6 +40,7 @@ PROVIDE(edata = .);
 PROVIDE(sdata = .);
 
   .bss : {
+  *(.bss.stack)
     ebss = .;
 . = ALIGN(16);
     *(.sbss .sbss.*)

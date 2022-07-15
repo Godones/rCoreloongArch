@@ -32,7 +32,7 @@ kernel:
 	@cd ../user && make build
 	@#cd ../fs-test && make run
 	@echo Platform: $(BOARD)
-	@cargo build --$(MODE) --features $(INFO)
+	@cargo build --$(MODE)
 
 clean:
 	@cargo clean

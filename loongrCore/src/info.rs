@@ -3,14 +3,14 @@ use crate::loong_arch::cpu::{
     get_support_rplv, get_support_rva, get_support_rva_len, get_valen,
 };
 use crate::loong_arch::register::crmd::Crmd;
+use crate::loong_arch::register::dmwn::{Dmw0, Dmw1};
 use crate::loong_arch::register::prcfg2::Prcfg2;
 use crate::loong_arch::register::prcfg3::Prcfg3;
 use crate::loong_arch::tlb::pwch::Pwch;
 use crate::loong_arch::tlb::tlbentry::TLBREntry;
 use crate::loong_arch::tlb::tlbrehi::TlbREhi;
 use crate::loong_arch::tlb::{pwcl::Pwcl, sltbps::SltbPs};
-use crate::{Dmw0, Dmw1};
-use crate::{Register, info};
+use crate::{info, Register};
 // 打印硬件的相关信息
 pub fn print_machine_info() {
     info!("PALEN: {}", get_palen()); //支持的物理地址范围

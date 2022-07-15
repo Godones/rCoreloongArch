@@ -1,11 +1,12 @@
 use super::{PhysAddr, PhysPageNum};
-use crate::config::MEMORY_END;
+use crate::config::{MEMORY_END};
 use crate::println;
 use crate::sync::UPSafeCell;
 use alloc::vec::Vec;
 
 use core::fmt::{self, Debug, Formatter};
 use lazy_static::*;
+use log::info;
 
 pub struct FrameTracker {
     pub ppn: PhysPageNum,
@@ -94,6 +95,7 @@ pub fn init_frame_allocator() {
     extern "C" {
         fn ekernel();
     }
+    info!("frame range: {:#x}-{:#x}", ekernel as usize, MEMORY_END as usize);
     FRAME_ALLOCATOR.exclusive_access().init(
         PhysAddr::from(ekernel as usize).ceil(),
         PhysAddr::from(MEMORY_END).floor(),

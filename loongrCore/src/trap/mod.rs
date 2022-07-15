@@ -1,5 +1,4 @@
 pub mod context;
-
 use crate::config::{PAGE_SIZE_BITS, TICKS_PER_SEC, VALEN};
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::estat::{Exception, Interrupt};
@@ -21,10 +20,11 @@ use crate::loong_arch::tlb::tlbrehi::TlbREhi;
 use crate::loong_arch::tlb::tlbrelo::TlbRelo;
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{current_user_token, exit_current_run_next, suspend_current_run_next};
-use crate::{println, info};
+use crate::task::{current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next};
+use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
+use core::arch::{asm, global_asm};
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -71,7 +71,7 @@ pub fn enable_timer_interrupt() {
 }
 
 #[no_mangle]
-pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
+pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
     let estat = Estat::read();
     let crmd = Crmd::read();
     if crmd.get_ie() {
@@ -83,24 +83,26 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
             //系统调用
             cx.sepc += 4;
             // INFO!("call id:{}, {} {} {}",cx.x[11], cx.x[4], cx.x[5], cx.x[6]);
-            cx.x[4] = syscall(cx.x[11], [cx.x[4], cx.x[5], cx.x[6]]) as usize;
+            let result = syscall(cx.x[11], [cx.x[4], cx.x[5], cx.x[6]]) as usize;
+            cx = current_trap_cx();
+            cx.x[4] = result;
         }
         Trap::Exception(Exception::LoadPageFault)
         | Trap::Exception(Exception::StorePageFault)
         | Trap::Exception(Exception::FetchPageFault) => {
             //页面异常
             println!("[kernel] PageFault in application, core dumped.");
-            exit_current_run_next();
+            exit_current_and_run_next(-2);
         }
         Trap::Exception(Exception::InstructionNotExist) => {
             //指令不存在
             println!("[kernel] InstructionNotExist in application, core dumped.");
-            exit_current_run_next();
+            exit_current_and_run_next(-3);
         }
         Trap::Exception(Exception::InstructionPrivilegeIllegal) => {
             //指令权限不足
             println!("[kernel] InstructionPrivilegeIllegal in application, core dumped.");
-            exit_current_run_next();
+            exit_current_and_run_next(-3);
         }
         Trap::Interrupt(Interrupt::Timer) => {
             //时钟中断
@@ -124,7 +126,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
 fn timer_handler() {
     let mut ticlr = Ticlr::read();
     ticlr.clear_timer().write(); //清除时钟中断
-    suspend_current_run_next();
+    suspend_current_and_run_next();
 }
 
 // 重填异常处理
