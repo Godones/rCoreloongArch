@@ -1,5 +1,6 @@
 pub mod context;
 
+use core::arch::{asm, global_asm};
 use crate::config::{PAGE_SIZE_BITS, TICKS_PER_SEC, VALEN};
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::estat::{Exception, Interrupt};
@@ -28,17 +29,18 @@ pub use context::TrapContext;
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
+global_asm!(include_str!("trap_kernel.S"));
 pub fn init() {
     extern "C" {
         fn __alltraps();
         fn __tlb_rfill();
+        fn kernel_trap_entry();
     }
-    Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read().set_enable(false).write();
     Ecfg::read().set_lie_with_index(11, false).write();
     Crmd::read().set_ie(false).write(); //关闭全局中断
-    Eentry::read().set_eentry(__alltraps as usize).write(); //设置普通异常和中断入口
-                                                            //设置TLB重填异常地址
+    Eentry::read().set_eentry(kernel_trap_entry as usize).write(); //设置普通异常和中断入口
+                                                               //设置TLB重填异常地址
     TLBREntry::read()
         .set_val((__tlb_rfill as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
@@ -55,6 +57,9 @@ pub fn init() {
         .set_dir3_base(36) //第三级页目录表
         .set_dir3_width(0xb) //页目录表宽度为11位
         .write();
+    unsafe {
+        asm!("invtlb 0,$r0,$r0"); //清除TLB
+    }
     info!("init trap ok");
 }
 
@@ -68,6 +73,25 @@ pub fn enable_timer_interrupt() {
         .write(); //设置计时器的配置
     Ecfg::read().set_lie_with_index(11, true).write();
     Crmd::read().set_ie(true).write(); //开启全局中断
+}
+
+pub fn set_user_trap_entry(){
+    // 初始化
+    extern "C" {
+        fn __alltraps();
+    }
+    Eentry::read().set_eentry(__alltraps as usize).write(); //设置普通异常和中断入口
+}
+
+#[no_mangle]
+pub fn trap_return(){
+    set_user_trap_entry();
+    extern  "C"{
+        fn __restore();
+    }
+    unsafe{
+        asm!("bl __restore")
+    }
 }
 
 #[no_mangle]
@@ -89,7 +113,8 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
         | Trap::Exception(Exception::StorePageFault)
         | Trap::Exception(Exception::FetchPageFault) => {
             //页面异常
-            println!("[kernel] PageFault in application, core dumped.");
+            let fault = estat.cause();
+            println!("[kernel] {:?} PageFault in application, core dumped.",fault);
             exit_current_run_next();
         }
         Trap::Exception(Exception::InstructionNotExist) => {
@@ -120,6 +145,32 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
     }
     cx
 }
+
+/// 当在内核态发生异常或中断时处理
+/// 这里主要时处理时钟中断
+/// 由于主函数开启时钟中断后会进行加载任务操作
+/// 而加载任务的时间可能会触发时钟中断
+/// 在正常运行后系统在从用户态trap进入内核态后是不会触发中断的
+#[no_mangle]
+pub fn trap_handler_kernel(){
+    let estat = Estat::read();
+    let crmd = Crmd::read();
+    if crmd.get_plv() !=0{
+        // 只有在内核态才会触发中断
+        panic!("{:?}", estat.cause());
+    }
+    match estat.cause() {
+        Trap::Interrupt(Interrupt::Timer) => {
+            //时钟中断
+            Ticlr::read().clear_timer().write(); //清除时钟专断
+        }
+        _ => {
+            panic!("{:?}", estat.cause());
+        }
+    }
+
+}
+
 
 fn timer_handler() {
     let mut ticlr = Ticlr::read();
@@ -158,17 +209,17 @@ fn tlb_refill_handler() {
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
                                                  // INFO!("{:?},ppn: {:#x}", pte,pte.bits.get_bits(14..PALEN));
     info!("{:?}", pte);
-    // let pmd:usize;
-    // unsafe {
-    //     asm!(
-    //         "csrrd $t0, 0x1B",
-    //         "lddir $t0, $t0, 4",
-    //         "lddir $t0, $t0, 2",
-    //         "move {}, $t0",
-    //         out(reg) pmd,
-    //     )
-    // }
-    // INFO!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+    let pmd:usize;
+    unsafe {
+        asm!(
+            "csrrd $t0, 0x1B",
+            "lddir $t0, $t0, 4",
+            "lddir $t0, $t0, 2",
+            "move {}, $t0",
+            out(reg) pmd,
+        )
+    }
+    info!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
 }
 
 /// Exception(PageModifyFault)的处理

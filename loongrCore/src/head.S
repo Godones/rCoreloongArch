@@ -18,5 +18,4 @@ _start:
     addi.d $t0, $t0, 8
     bltu $t0, $t1, 2b
 3:
-    #la.global $sp, _stack
     bl main

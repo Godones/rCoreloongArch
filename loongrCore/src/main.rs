@@ -24,6 +24,7 @@ mod test;
 mod timer;
 mod trap;
 mod uart;
+mod logging;
 
 
 extern crate alloc;
@@ -34,17 +35,18 @@ extern crate rlibc;
 extern crate xmas_elf;
 
 
+
 // use log::info;
 use crate::boot_param::boot_params_interface::BootParamsInterface;
 use crate::info::print_machine_info;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::dmwn::{Dmw0, Dmw1};
-use crate::test::{print_range, test_csr_register};
+use crate::test::{print_range};
 use crate::timer::get_time_ms;
 use crate::trap::enable_timer_interrupt;
 use config::FLAG;
 use core::arch::global_asm;
-
+pub use log::{debug, error, info, trace, warn};
 global_asm!(include_str!("link_app.S"));
 global_asm!(include_str!("head.S"));
 
@@ -55,6 +57,7 @@ pub extern "C" fn main(
     _boot_params_interface: *const BootParamsInterface,
 ) {
     println!("{}", FLAG);
+    logging::init();
     print_range();
     info!("kernel args: {}", argc);
     info!("kernel argv address: {:#x}", _argv as usize);
@@ -66,6 +69,7 @@ pub extern "C" fn main(
     trap::init();
     print_machine_info();
     //运行程序
+    enable_timer_interrupt(); //开启时钟中断
     task::run_first_task();
     panic!("main end");
 }

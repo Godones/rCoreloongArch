@@ -1,3 +1,4 @@
+use rlibc::memcmp;
 use crate::config::*;
 use crate::trap::context::TrapContext;
 
@@ -57,4 +58,9 @@ pub fn get_app_data(app_id: usize) -> &'static [u8] {
             app_start[app_id + 1] - app_start[app_id],
         )
     }
+}
+/// 编译器会报出找不到bcmp的错误，这里将其实现为memcmp
+#[no_mangle]
+pub unsafe extern "C" fn bcmp(s1: *const u8, s2: *const u8, n: usize) -> i32 {
+    memcmp(s1, s2, n)
 }

@@ -2,7 +2,7 @@ use crate::config::{BIG_STRIDE, PAGE_SIZE_BITS};
 use crate::loader::{get_app_data, get_num_app};
 use crate::loong_arch::tlb::pgdl::Pgdl;
 use crate::sync::UPSafeCell;
-use crate::{enable_timer_interrupt, Register, info};
+use crate::{Register, info};
 use alloc::vec::Vec;
 use context::TaskContext;
 use lazy_static::lazy_static;
@@ -107,8 +107,6 @@ impl TaskManager {
     }
 
     fn run_first_task(&self) -> ! {
-        enable_timer_interrupt(); //开启时钟中断
-
         let mut inner = self.inner.borrow();
         let mut task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;

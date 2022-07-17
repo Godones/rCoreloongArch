@@ -10,13 +10,15 @@ SECTIONS
 
     PROVIDE(etext = .);
   .text : {
-  *(.text.init)
+    *(.text.init)
     *(.text .text.*)
     . = ALIGN(0x1000);
     _keentry = .;
     *(k_eentry)
     . = ALIGN(0x1000);
     *(tlb_handler)
+    . = ALIGN(0x1000);
+    *(k1_eentry)
   }
  PROVIDE(stext = .);
 
