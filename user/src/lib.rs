@@ -9,6 +9,8 @@ pub mod console;
 mod syscall;
 mod lang_items;
 use buddy_system_allocator::LockedHeap;
+use rlibc::memcmp;
+
 extern crate rlibc;
 extern crate buddy_system_allocator;
 
@@ -106,4 +108,9 @@ pub fn sleep(period_ms: usize) {
     while sys_get_time() < start + period_ms as isize {
         sys_yield();
     }
+}
+/// 编译器会报出找不到bcmp的错误，这里将其实现为memcmp
+#[no_mangle]
+pub unsafe extern "C" fn bcmp(s1: *const u8, s2: *const u8, n: usize) -> i32 {
+    memcmp(s1, s2, n)
 }
