@@ -97,7 +97,7 @@ pub fn init_frame_allocator() {
     }
     info!(
         "frame range: {:#x}-{:#x}",
-        ekernel as usize, MEMORY_END as usize
+        PhysAddr::from(ekernel as usize).ceil().0, PhysAddr::from(MEMORY_END).floor().0
     );
     FRAME_ALLOCATOR.exclusive_access().init(
         PhysAddr::from(ekernel as usize).ceil(),

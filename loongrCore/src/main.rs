@@ -74,7 +74,7 @@ pub extern "C" fn main(
     //运行程序
     add_initproc(); //添加初始化程序
     loader::list_apps(); //列出所有程序
-    // enable_timer_interrupt();
+    enable_timer_interrupt();
     task::run_tasks(); //运行程序
     panic!("main end");
 }

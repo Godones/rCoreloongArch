@@ -1,3 +1,5 @@
+use crate::trap::trap_return;
+
 /// 任务上下文
 /// 对于一般的函数，编译器会在函数的起始位置自动生成代码保存 被调用者保存寄存器
 /// _switch函数不会被编译器特殊处理，因此我们需要手动保存这些寄存器
@@ -26,11 +28,8 @@ impl TaskContext {
         }
     }
     pub fn goto_restore(kstack_ptr: usize) -> Self {
-        extern "C" {
-            fn __restore();
-        }
         Self {
-            ra: __restore as usize,
+            ra: trap_return  as usize,
             sp: kstack_ptr, //存放了trap上下文后的栈地址,内核栈地址
             s: [0; 10],
         }

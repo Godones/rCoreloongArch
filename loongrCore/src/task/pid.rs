@@ -119,6 +119,7 @@ impl KernelStack {
     fn get_top(&self) -> usize {
         // let (_,top) = kernel_stack_position(self.pid);
         let top = self.data_ptr + KERNEL_STACK_SIZE;
+        // let top = self.test.as_ptr() as usize + KERNEL_STACK_SIZE;
         top
     }
 
