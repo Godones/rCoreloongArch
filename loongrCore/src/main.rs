@@ -43,7 +43,7 @@ use crate::test::print_range;
 use crate::timer::get_time_ms;
 use crate::trap::enable_timer_interrupt;
 use config::FLAG;
-use core::arch::global_asm;
+use core::arch::{asm, global_asm};
 
 pub use log::{debug, error, info, trace, warn};
 

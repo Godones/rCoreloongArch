@@ -5,7 +5,7 @@ use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
-use log::{debug, info};
+use log::{debug};
 
 use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
 
@@ -184,7 +184,7 @@ impl MapArea {
         let ppn: PhysPageNum;
         let frame = frame_alloc().unwrap();
         ppn = frame.ppn;
-        info!("MapArea::map_one: {:#x}-{:#x}", vpn.0, ppn.0);
+        // info!("MapArea::map_one: {:#x}-{:#x}", vpn.0, ppn.0);
         self.data_frames.insert(vpn, frame);
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
         page_table.map(vpn, ppn, pte_flags);

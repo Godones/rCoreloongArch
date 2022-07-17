@@ -14,7 +14,7 @@ pub const MAX_APP_NUM: usize = 32;
 pub const USER_STACK_SIZE: usize = 4096 * 2; //用户栈大小
 pub const KERNEL_STACK_SIZE: usize = 4096 * 2; //内核栈大小
 
-pub const KERNEL_HEAP_SIZE: usize = 0x30_0000; //内核的可分配堆大小3MB
+pub const KERNEL_HEAP_SIZE: usize = 0x40_0000; //内核的可分配堆大小3MB
 
 pub const BIG_STRIDE: usize = 1000;
 

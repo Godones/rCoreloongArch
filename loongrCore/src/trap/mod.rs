@@ -17,7 +17,6 @@ use crate::loong_arch::tlb::TLBREntry;
 use crate::loong_arch::tlb::TlbIdx;
 use crate::loong_arch::tlb::TlbRBadv;
 use crate::loong_arch::tlb::TlbREhi;
-use crate::loong_arch::tlb::TlbRelo;
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
 use crate::task::{
@@ -101,6 +100,7 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         }
         Trap::Exception(Exception::InstructionNotExist) => {
             //指令不存在
+            tlb_page_fault();
             println!("[kernel] InstructionNotExist in application, core dumped.");
             exit_current_and_run_next(-3);
         }
@@ -121,6 +121,11 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             tlb_refill_handler()
         }
         Trap::Exception(Exception::PageModifyFault) => tlb_page_modify_handler(),
+        Trap::Exception(Exception::PagePrivilegeIllegal) => {
+            //页权限不足
+            tlb_page_fault();
+            panic!("[kernel] PagePrivilegeIllegal in application, core dumped.");
+        }
         _ => {
             panic!("{:?}", estat.cause());
         }
@@ -136,36 +141,26 @@ fn timer_handler() {
 
 // 重填异常处理
 fn tlb_refill_handler() {
-    // info!("TLBRFill handler");
+    info!("TLBRFill handler");
     let badv = TlbRBadv::read().get_val(); //出错虚拟地址
-    // info!("badv: {:#x}", badv);
-    // let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
-    // info!("vppn: {:#x}", vppn);
-    // let pgd = Pgd::read().get_val(); //根目录
-    // info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
+    info!("badv: {:#x}", badv);
+    let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
+    info!("vppn: {:#x}", vppn);
+    let pgd = Pgd::read().get_val(); //根目录
+    info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
     //尝试读出页表项观察
     //获取页表项
-    // info!("Calculating self-----------------------------------------------------");
+    info!("Calculating self-----------------------------------------------------");
     let vpn: VirtAddr = badv.into(); //虚拟地址
     let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
-    // info!("{:?}", vpn);
+    info!("{:?}", vpn);
     let token = current_user_token();
-    // info!("token: {:#x}", token);
+    info!("token: {:#x}", token);
     let page_table = PageTable::from_token(token); //获取用户的页表
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
                                                  // INFO!("{:?},ppn: {:#x}", pte,pte.bits.get_bits(14..PALEN));
-    let pte2 = page_table.find_pte(vpn+1).unwrap(); //获取页表项
-    TlbRelo::read(0).set_val(pte.bits).write();
-    TlbRelo::read(1).set_val(pte2.bits).write();
-    TLBELO::read(0).set_val(pte.bits).write();
-    TLBELO::read(1).set_val(pte2.bits).write();
-    // let tlbidx = TlbIdx::read();
-    // info!("tlbidx: ne: {}, ps: {}, ", tlbidx.get_ne(),tlbidx.get_ps());
-    unsafe {
-        llvm_asm!("tlbfill" :::: "volatile");
-    }
-    // info!("{:?}\n{:?}", pte,pte2);
-    // tlb_page_fault();
+    info!("{:?}", pte);
+
     // let pmd:usize;
     // unsafe {
     //     asm!(
