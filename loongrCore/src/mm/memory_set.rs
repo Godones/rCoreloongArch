@@ -5,7 +5,6 @@ use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
-use log::{debug};
 
 use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
 
@@ -107,7 +106,6 @@ impl MemorySet {
             None,
         );
         //返回地址空间,用户栈顶,入口地址
-        debug!("elf: {:#x}",elf.header.pt2.entry_point() as usize);
         (
             memory_set,
             user_stack_top,

@@ -4,6 +4,7 @@
 use crate::mm::system_allocator::common::{align_up, Locked};
 use core::alloc::GlobalAlloc;
 use core::{alloc::Layout, result};
+use log::debug;
 
 struct ListNode {
     size: usize,
@@ -34,6 +35,7 @@ impl LinkedListAllocator {
     }
     pub fn init(&mut self, heap_start: usize, heap_size: usize) {
         //初始化堆
+        debug!("heap_start: {:x}, heap_size: {:x}", heap_start, heap_size);
         unsafe {
             self.push(heap_start, heap_size);
         }
@@ -41,10 +43,11 @@ impl LinkedListAllocator {
     unsafe fn push(&mut self, address: usize, size: usize) {
         //判断是否满足对齐要求
         //是否满足大小要求
-        assert_eq!(
-            align_up(address, core::mem::align_of::<ListNode>()),
-            address
-        );
+        // assert_eq!(
+        //     align_up(address, core::mem::align_of::<ListNode>()),
+        //     address
+        // );
+        let address = align_up(address, core::mem::align_of::<ListNode>());
         assert!(size >= core::mem::size_of::<ListNode>());
         let mut node = ListNode::new(size);
         node.next = self.head.next.take();

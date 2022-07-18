@@ -20,8 +20,8 @@ fn work(times: isize) {
             b[i][j] = 1;
         }
     }
+    println!("yield began");
     yield_();
-    println!("yield over");
     println!("pid {} is running ({} times)!.", getpid(), times);
     for _ in 0..times {
         for i in 0..N {

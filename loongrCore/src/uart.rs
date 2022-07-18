@@ -1,7 +1,6 @@
 // uart.rs
 // UART routines and driver
 
-use core::convert::TryInto;
 use core::fmt::Error;
 use core::fmt::Write;
 
@@ -22,6 +21,7 @@ impl Uart {
     pub fn new(base_address: usize) -> Self {
         Uart { base_address }
     }
+
     pub fn put(&mut self, c: u8) {
         let mut ptr = self.base_address as *mut u8;
         loop {

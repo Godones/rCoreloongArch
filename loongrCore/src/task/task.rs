@@ -62,7 +62,7 @@ impl TaskControlBlock {
         let (memory_set, user_sp, entry_point) = MemorySet::from_elf(elf_data);
         let task_status = TaskStatus::Ready; //准备指向状态
         let pid = pid_alloc(); //分配pid
-        let kernel_stack = KernelStack::new(pid.0); //分配内核栈
+        let kernel_stack = KernelStack::new(); //分配内核栈
                                                     //在内核栈放入trap上下文
         let kernel_trap_cx =
             kernel_stack.push_on_top(TrapContext::app_init_context(entry_point, user_sp));
@@ -97,7 +97,7 @@ impl TaskControlBlock {
         // alloc a pid and a kernel stack in kernel space
         let pid_handle = pid_alloc();
         //需要保证子进程与父进程的内核栈信息一样
-        let kernel_stack = KernelStack::new(pid_handle.0);
+        let kernel_stack = KernelStack::new();
         // kernel_stack = *kernel_stack.copy_from_other(&parent_inner.kernel_stack);
         let kstack_ptr = kernel_stack.get_trap_addr();
         // todo!(未知bug)
@@ -129,9 +129,6 @@ impl TaskControlBlock {
             .inner_exclusive_access()
             .kernel_stack
             .copy_from_other(&parent_inner.kernel_stack);
-        // info!("pid: {}", task_control_block.pid.0);
-        // info!("kstack addr: {:#x}",kernel_stack.get_trap_addr());
-        // error!("fork trap_cx :{:?}",kernel_stack.get_trap_cx());
         parent_inner.children.push(task_control_block.clone());
         task_control_block
     }

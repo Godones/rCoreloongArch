@@ -160,12 +160,12 @@ impl PageTable {
         let mut result: Option<&mut PageTableEntry> = None;
         for i in 0..3 {
             let pte = &mut ppn.get_pte_array()[idxs[i]];
+            if pte.is_zero() {
+                return None;
+            }
             if i == 2 {
                 result = Some(pte);
                 break;
-            }
-            if pte.is_zero() {
-                return None;
             }
             ppn = pte.directory_ppn();
         }

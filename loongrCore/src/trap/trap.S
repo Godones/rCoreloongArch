@@ -3,10 +3,8 @@
     .globl __restore
     .align 4
 __alltraps:
-    # csrrw sp, sscratch, sp
     #需要交换 sp 与 0x502 寄存器的值
     csrwr $sp, 0x502
-
     addi.d  $sp, $sp, -272
     #保存通用寄存器
     st.d $r0, $sp, 0
@@ -103,10 +101,4 @@ __restore:
     addi.d $sp, $sp, 272
 
     csrwr $sp, 0x502 #将用户栈指针与内核栈指针交换
-    #这个位置仍然会造成特权级指令访问错误
-    #一个方法是在这里修改PRMD 的PPLV值，这里ertn会将其恢复到CRMD中,刚好达到切换特权级的作用
-
     ertn
-
-
-#1000f54 100d8d0
