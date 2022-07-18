@@ -62,9 +62,6 @@ pub fn run_tasks() {
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             let trap = task_inner.kernel_stack.get_trap_cx();
             debug!("pid :{} trap: {:?}", pid,trap);
-            unsafe {
-                asm!("invtlb 0,$r0,$r0");
-            }
             drop(task_inner);
             // release coming task TCB manually
             processor.current = Some(task);

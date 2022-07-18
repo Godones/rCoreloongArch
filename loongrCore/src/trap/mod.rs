@@ -26,6 +26,7 @@ use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
+use log::trace;
 use crate::loong_arch::register::badv::Badv;
 
 global_asm!(include_str!("trap.S"));
@@ -66,7 +67,7 @@ pub fn enable_timer_interrupt() {
     Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read()
         .set_enable(true)
-        .set_loop(true)
+        .set_loop(false)
         .set_tval(timer_freq / TICKS_PER_SEC)
         .write(); //设置计时器的配置
     Ecfg::read().set_lie_with_index(11, true).write();
@@ -89,6 +90,9 @@ pub fn set_kernel_trap_entry(){
 #[no_mangle]
 pub fn trap_return(){
     set_user_trap_entry();
+    unsafe {
+        asm!("ibar 0");
+    }
     extern  "C"{
         fn __restore();
     }
@@ -100,7 +104,7 @@ pub fn trap_return(){
 
 #[no_mangle]
 pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
-
+    set_kernel_trap_entry();
     let estat = Estat::read();
     let crmd = Crmd::read();
     if crmd.get_ie() {
@@ -158,12 +162,14 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             panic!("{:?}", estat.cause());
         }
     }
+    set_user_trap_entry();
     cx
 }
 
 fn timer_handler() {
-    let mut ticlr = Ticlr::read();
-    ticlr.clear_timer().write(); //清除时钟中断
+    trace!("timer interrupt from user");
+    Ticlr::read().clear_timer().write(); //清除时钟中断
+    Tcfg::read().set_enable(true).write(); //使能时钟中断
     suspend_current_and_run_next();
 }
 
@@ -184,6 +190,7 @@ pub fn trap_handler_kernel(){
     match estat.cause() {
         Trap::Interrupt(Interrupt::Timer) => {
             //时钟中断
+            trace!("timer interrupt from kernel");
             Ticlr::read().clear_timer().write(); //清除时钟专断
         }
         _ => {
@@ -192,8 +199,6 @@ pub fn trap_handler_kernel(){
     }
 
 }
-
-
 
 
 // 重填异常处理

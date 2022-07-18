@@ -22,6 +22,8 @@ pub const TICKS_PER_SEC: usize = 100;
 pub const MSEC_PER_SEC: usize = 1000;
 
 pub const MEMORY_END: usize = 0x000000000_1000_0000;
+// pub const MEMORY_END: usize = 0x180000000;
+
 pub const PAGE_SIZE: usize = 0x4000; //16kB
 pub const PAGE_SIZE_BITS: usize = 14; //16kB
 pub const PALEN: usize = 48;

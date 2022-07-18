@@ -8,6 +8,7 @@ use core::fmt::{self, Debug, Formatter};
 use lazy_static::*;
 use log::info;
 
+#[derive(Clone)]
 pub struct FrameTracker {
     pub ppn: PhysPageNum,
 }
@@ -62,16 +63,19 @@ impl FrameAllocator for StackFrameAllocator {
         }
     }
     fn alloc(&mut self) -> Option<PhysPageNum> {
+        let ans:Option<PhysPageNum>;
         if let Some(ppn) = self.recycled.pop() {
-            Some(ppn.into())
+            ans = Some(ppn.into())
         } else {
             if self.current == self.end {
-                None
+                ans = None
             } else {
                 self.current += 1;
-                Some((self.current - 1).into())
+                ans = Some((self.current - 1).into())
             }
         }
+        // info!("alloc: {:#x}", ans.unwrap().0);
+        ans
     }
     fn dealloc(&mut self, ppn: PhysPageNum) {
         let ppn = ppn.0;
@@ -80,6 +84,7 @@ impl FrameAllocator for StackFrameAllocator {
             panic!("Frame ppn={:#x} has not been allocated!", ppn);
         }
         // recycle
+        // info!("dealloc: {:#x}", ppn);
         self.recycled.push(ppn);
     }
 }

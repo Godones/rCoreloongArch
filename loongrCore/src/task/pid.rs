@@ -1,11 +1,11 @@
 //!Implementation of [`PidAllocator`]
-use crate::config::{KERNEL_STACK_SIZE, MEMORY_END};
+use crate::config::{KERNEL_STACK_SIZE, MEMORY_END, PAGE_SIZE};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use alloc::alloc::dealloc;
 use alloc::vec::Vec;
-use core::alloc::Layout;
 use lazy_static::*;
+use crate::mm::{frame_alloc, FrameTracker, PhysAddr};
 
 
 ///Pid Allocator struct
@@ -61,24 +61,11 @@ pub fn pid_alloc() -> PidHandle {
 }
 
 /// Kernelstack for app
-#[repr(align(4096))]
 #[derive(Clone, Debug)]
 pub struct KernelStack {
-    pid: usize,
-    data_ptr: usize,
+    frame:FrameTracker,
 }
 
-impl Drop for KernelStack {
-    fn drop(&mut self) {
-        let data = self.data_ptr as *mut u8;
-        unsafe {
-            dealloc(
-                data,
-                Layout::from_size_align(KERNEL_STACK_SIZE, 4096).unwrap(),
-            );
-        }
-    }
-}
 
 impl KernelStack {
     /// Create a kernelstack
@@ -86,12 +73,9 @@ impl KernelStack {
     /// 内核态并不处于页表翻译模式，而是以类似于直接管理物理内存的方式管理
     /// 因此这里会直接申请对应大小的内存空间
     /// 但这也会造成内核栈无法被保护的状态
-    pub fn new(pid: usize) -> Self {
-        let layout = { Layout::from_size_align(KERNEL_STACK_SIZE, 4096).unwrap() };
-        let data = unsafe { alloc::alloc::alloc(layout) };
+    pub fn new() -> Self {
         Self {
-            pid,
-            data_ptr: data as usize,
+            frame: frame_alloc().unwrap(),
         }
     }
 
@@ -117,9 +101,8 @@ impl KernelStack {
     }
     ///Get the value on the top of kernelstack
     fn get_top(&self) -> usize {
-        // let (_,top) = kernel_stack_position(self.pid);
-        let top = self.data_ptr + KERNEL_STACK_SIZE;
-        // let top = self.test.as_ptr() as usize + KERNEL_STACK_SIZE;
+        let top :PhysAddr= self.frame.ppn.into();
+        let top = top.0 + PAGE_SIZE;
         top
     }
 
@@ -140,7 +123,6 @@ impl KernelStack {
 fn kernel_stack_position(app_id: usize) -> (usize, usize) {
     let top = MEMORY_END - app_id * KERNEL_STACK_SIZE;
     // 对齐到8k
-    // let top = (top & !0xfff) + 0x1000;
     let bottom = top - KERNEL_STACK_SIZE;
     (bottom, top)
 }
