@@ -8,12 +8,14 @@
 pub mod console;
 mod syscall;
 mod lang_items;
+
+use bitflags::bitflags;
 use buddy_system_allocator::LockedHeap;
 use rlibc::memcmp;
 
 extern crate rlibc;
 extern crate buddy_system_allocator;
-
+extern crate bitflags;
 
 const USER_HEAP_SIZE: usize = 0x4000;
 static mut HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
@@ -114,3 +116,18 @@ pub fn sleep(period_ms: usize) {
 pub unsafe extern "C" fn bcmp(s1: *const u8, s2: *const u8, n: usize) -> i32 {
     memcmp(s1, s2, n)
 }
+
+bitflags! {
+    pub struct OpenFlags: u32 {
+        const RDONLY = 0;
+        const WRONLY = 1 << 0;
+        const RDWR = 1 << 1;
+        const CREATE = 1 << 9;
+        const TRUNC = 1 << 10;
+    }
+}
+
+pub fn open(path: &str, flags: OpenFlags) -> isize {
+    sys_open(path, flags.bits)
+}
+pub fn close(fd: usize) -> isize { sys_close(fd) }

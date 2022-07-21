@@ -10,15 +10,19 @@ use core::ops::Add;
 
 /// Definitions
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[repr(C)]
 pub struct PhysAddr(pub usize);
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[repr(C)]
 pub struct VirtAddr(pub usize);
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[repr(C)]
 pub struct PhysPageNum(pub usize);
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[repr(C)]
 pub struct VirtPageNum(pub usize);
 
 /// Debugging
@@ -187,7 +191,11 @@ impl StepByOne for VirtPageNum {
         self.0 += 1;
     }
 }
-
+impl StepByOne for PhysPageNum {
+    fn step(&mut self) {
+        self.0 += 1;
+    }
+}
 #[derive(Copy, Clone)]
 pub struct SimpleRange<T>
 where

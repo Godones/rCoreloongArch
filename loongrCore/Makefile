@@ -4,9 +4,12 @@ MODE := release
 KERNEL_ELF := target/$(TARGET)/$(MODE)/loongrCore
 KERNEL_BIN := $(KERNEL_ELF).bin
 DISASM_TMP := target/$(TARGET)/$(MODE)/asm
-INFO := DEBUG
+
+
+
 #文件模拟块设备
 FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
+
 # BOARD
 BOARD ?= qemu
 SBI ?= rustsbi
@@ -30,9 +33,10 @@ env:
 
 kernel:
 	@cd ../user && make build
-	@#cd ../fs-test && make run
+	@rm -f $(FS_IMG)
+	@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/$(TARGET)/release/
 	@echo Platform: $(BOARD)
-	@cargo build --$(MODE)
+	@cargo build --$(MODE) --features "board_$(BOARD)"
 
 clean:
 	@cargo clean

@@ -25,6 +25,8 @@ mod test;
 mod timer;
 mod trap;
 mod uart;
+mod drivers;
+mod fs;
 
 extern crate alloc;
 extern crate bit_field;

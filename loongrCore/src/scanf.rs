@@ -13,7 +13,7 @@ pub fn scanf() -> u8 {
                 print!("{}{}{}", ch as char, ' ', ch as char);
             }
             LF | CR => {
-                println!();
+                println!("");
             }
             //转义字符
             0x1b => {
@@ -22,11 +22,11 @@ pub fn scanf() -> u8 {
                     let n_next_char = get_char();
                     if n_next_char != 0 {
                         match n_next_char as char {
-                            'A' => println!("↑"),
-                            'B' => println!("↓"),
-                            'C' => println!("→"),
-                            'D' => println!("←"),
-                            _ => println!("{}", n_next_char),
+                            'A' => { println!("↑");}
+                            'B' => {println!("↓");}
+                            'C' => {println!("→");}
+                            'D' => {println!("←");}
+                            _ => {println!("{}", n_next_char);}
                         }
                     }
                 }

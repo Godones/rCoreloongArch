@@ -22,15 +22,20 @@ pub fn _print(arg: Arguments) {
 ///借用标准库的print!实现
 /// $crate 变量使得我们不必在使用println!时导入宏
 #[macro_export]
+/// print string macro
 macro_rules! print {
-    ($($arg:tt)*) => ($crate::console::_print(format_args!($($arg)*)));
-}
-#[macro_export]
-macro_rules! println {
-    () => ($crate::print!("\n"));
-    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+    ($fmt: literal $(, $($arg: tt)+)?) => {
+        $crate::console::_print(format_args!($fmt $(, $($arg)+)?));
+    }
 }
 
+#[macro_export]
+/// println string macro
+macro_rules! println {
+    ($fmt: literal $(, $($arg: tt)+)?) => {
+        $crate::console::_print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
+    }
+}
 
 pub fn getchar() -> u8 {
     let mut c = [0u8; 1];

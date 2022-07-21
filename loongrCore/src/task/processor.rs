@@ -3,14 +3,13 @@ use super::__switch;
 use super::{fetch_task, TaskStatus};
 use super::{TaskContext, TaskControlBlock};
 use crate::config::PAGE_SIZE_BITS;
-use crate::loong_arch::tlb::Pgdl;
+use crate::loong_arch::tlb::{Asid, Pgdl};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use crate::Register;
 use alloc::sync::Arc;
-use core::arch::asm;
 use lazy_static::*;
-use log::debug;
+use log::{error};
 
 /// Processor management structure
 pub struct Processor {
@@ -60,8 +59,9 @@ pub fn run_tasks() {
             let pid = task.getpid(); //应用进程号
             let pgd = task_inner.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
-            let trap = task_inner.kernel_stack.get_trap_cx();
-            debug!("pid :{} trap: {:?}", pid,trap);
+            Asid::read().set_asid(pid as u32).write(); //设置ASID
+            // let trap = task_inner.kernel_stack.get_trap_cx();
+            error!("task_pid:{}, ASID:{}, pgd:{:#x}", pid,Asid::read().get_asid() , pgd>> PAGE_SIZE_BITS);
             drop(task_inner);
             // release coming task TCB manually
             processor.current = Some(task);

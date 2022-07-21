@@ -14,7 +14,13 @@ xmas-elf = "0.8.0"
 log = "0.4.14"
 
 buddy_system_allocator = "0.6.0"
+easy-fs = {path = "../easy-fs"}
+virtio-drivers = { git = "https://github.com/rcore-os/virtio-drivers" }
 
 [dependencies.lazy_static]
 version = "1.4.0"
 features = ["spin_no_std"] #禁止链接标准库
+
+
+[features]
+board_qemu = []

@@ -8,7 +8,7 @@ use crate::loong_arch::register::time::get_timer_freq;
 use crate::loong_arch::register::{
     crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat, estat::Trap,
 };
-use crate::loong_arch::tlb::Pgd;
+use crate::loong_arch::tlb::{Asid, Pgd};
 use crate::loong_arch::tlb::Pwch;
 use crate::loong_arch::tlb::Pwcl;
 use crate::loong_arch::tlb::SltbPs;
@@ -26,7 +26,7 @@ use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
-use log::trace;
+use log::{error, trace};
 use crate::loong_arch::register::badv::Badv;
 
 global_asm!(include_str!("trap.S"));
@@ -45,7 +45,7 @@ pub fn init() {
     Eentry::read().set_eentry(kernel_trap_entry  as usize).write(); //设置普通异常和中断入口
                                                             //设置TLB重填异常地址
     TLBREntry::read()
-        .set_val((__tlb_rfill as usize).get_bits(0..32))
+        .set_val((__alltraps as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
     SltbPs::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
     TlbREhi::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
@@ -150,7 +150,7 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             // 这部分只是用于Debug
             // 将TLB重填例外设置为这个入口，会导致速度变慢，但同时由于lddir与ldpte指令的原因
             // 页表项和页目录项的区别将会与riscv大不相同
-            tlb_refill_handler()
+            tlb_refill_handler();
         }
         Trap::Exception(Exception::PageModifyFault) => tlb_page_modify_handler(),
         Trap::Exception(Exception::PagePrivilegeIllegal) => {
@@ -203,13 +203,14 @@ pub fn trap_handler_kernel(){
 
 // 重填异常处理
 fn tlb_refill_handler() {
-    info!("TLBRFill handler");
+    error!("TLBRFill handler");
     let badv = TlbRBadv::read().get_val(); //出错虚拟地址
     info!("badv: {:#x}", badv);
     let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
     info!("vppn: {:#x}", vppn);
     let pgd = Pgd::read().get_val(); //根目录
     info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
+    info!("ASID: {}",Asid::read().get_asid());
     //尝试读出页表项观察
     //获取页表项
     info!("Calculating self-----------------------------------------------------");
@@ -227,13 +228,19 @@ fn tlb_refill_handler() {
     unsafe {
         asm!(
             "csrrd $t0, 0x1B",
-            "lddir $t0, $t0, 4",
-            "lddir $t0, $t0, 2",
+            "lddir $t0, $t0, 3",
+            "lddir $t0, $t0, 1",
             "move {}, $t0",
             out(reg) pmd,
         )
     }
     info!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+    extern "C"{
+        fn __tlb_rfill();
+    }
+    unsafe {
+        __tlb_rfill();
+    }
 }
 
 /// Exception(PageModifyFault)的处理
