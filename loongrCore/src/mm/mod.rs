@@ -5,7 +5,6 @@ mod page_table;
 pub mod system_allocator;
 mod cache;
 
-use log::debug;
 use crate::mm::system_allocator::{heap_test, init_heap};
 pub use address::{PhysAddr, PhysPageNum, StepByOne, VPNRange, VirtAddr, VirtPageNum};
 pub use frame_allocator::frame_allocator_test;

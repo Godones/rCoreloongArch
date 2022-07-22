@@ -2,7 +2,6 @@
 use crate::config::{KERNEL_STACK_SIZE, MEMORY_END, PAGE_SIZE};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
-use alloc::alloc::dealloc;
 use alloc::vec::Vec;
 use lazy_static::*;
 use crate::mm::{frame_alloc, FrameTracker, PhysAddr};

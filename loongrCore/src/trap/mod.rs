@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 pub mod context;
 use crate::config::{PAGE_SIZE_BITS, TICKS_PER_SEC, VALEN};
 use crate::loong_arch::register::csr::Register;
@@ -8,7 +9,7 @@ use crate::loong_arch::register::time::get_timer_freq;
 use crate::loong_arch::register::{
     crmd::Crmd, ecfg::Ecfg, eentry::Eentry, estat::Estat, estat::Trap,
 };
-use crate::loong_arch::tlb::Pgd;
+use crate::loong_arch::tlb::{Asid, Pgd};
 use crate::loong_arch::tlb::Pwch;
 use crate::loong_arch::tlb::Pwcl;
 use crate::loong_arch::tlb::SltbPs;
@@ -26,7 +27,7 @@ use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
-use log::trace;
+use log::{trace};
 use crate::loong_arch::register::badv::Badv;
 
 global_asm!(include_str!("trap.S"));
@@ -45,7 +46,7 @@ pub fn init() {
     Eentry::read().set_eentry(kernel_trap_entry  as usize).write(); //设置普通异常和中断入口
                                                             //设置TLB重填异常地址
     TLBREntry::read()
-        .set_val((__tlb_rfill as usize).get_bits(0..32))
+        .set_val((__alltraps as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
     SltbPs::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
     TlbREhi::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
@@ -124,7 +125,7 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         | Trap::Exception(Exception::StorePageFault)
         | Trap::Exception(Exception::FetchPageFault) => {
             //页面异常
-            tlb_page_fault();
+            // tlb_page_fault();
             let t = estat.cause();
             let badv = Badv::read().get_value();
             println!("[kernel] {:?} {:#x} PageFault in application, core dumped.",t,badv);
@@ -132,7 +133,7 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         }
         Trap::Exception(Exception::InstructionNotExist) => {
             //指令不存在
-            tlb_page_fault();
+            // tlb_page_fault();
             println!("[kernel] InstructionNotExist in application, core dumped.");
             exit_current_and_run_next(-3);
         }
@@ -203,37 +204,42 @@ pub fn trap_handler_kernel(){
 
 // 重填异常处理
 fn tlb_refill_handler() {
-    info!("TLBRFill handler");
-    let badv = TlbRBadv::read().get_val(); //出错虚拟地址
-    info!("badv: {:#x}", badv);
-    let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
-    info!("vppn: {:#x}", vppn);
-    let pgd = Pgd::read().get_val(); //根目录
-    info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
-    //尝试读出页表项观察
-    //获取页表项
-    info!("Calculating self-----------------------------------------------------");
-    let vpn: VirtAddr = badv.into(); //虚拟地址
-    let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
-    info!("{:?}", vpn);
-    let token = current_user_token();
-    info!("token: {:#x}", token);
-    let page_table = PageTable::from_token(token); //获取用户的页表
-    let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
-                                                 // INFO!("{:?},ppn: {:#x}", pte,pte.bits.get_bits(14..PALEN));
-    info!("{:?}", pte);
-
-    let pmd:usize;
-    unsafe {
-        asm!(
-            "csrrd $t0, 0x1B",
-            "lddir $t0, $t0, 4",
-            "lddir $t0, $t0, 2",
-            "move {}, $t0",
-            out(reg) pmd,
-        )
+    // info!("TLBRFill handler");
+    // let badv = TlbRBadv::read().get_val(); //出错虚拟地址
+    // info!("badv: {:#x}", badv);
+    // let vppn = TlbREhi::read().get_vppn(VALEN); //虚拟地址的虚双页号
+    // info!("vppn: {:#x}", vppn);
+    // let pgd = Pgd::read().get_val(); //根目录
+    // info!("pgd: {:#x}", pgd >> PAGE_SIZE_BITS);
+    // //尝试读出页表项观察
+    // //获取页表项
+    // info!("Calculating self-----------------------------------------------------");
+    // let vpn: VirtAddr = badv.into(); //虚拟地址
+    // let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
+    // info!("{:?}", vpn);
+    // let token = current_user_token();
+    // info!("token: {:#x}", token);
+    // info!("ASID: {}",Asid::read().get_asid());
+    // let page_table = PageTable::from_token(token); //获取用户的页表
+    // let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
+    // info!("{:?}", pte);
+    // let pmd:usize;
+    // unsafe {
+    //     asm!(
+    //         "csrrd $t0, 0x1B",
+    //         "lddir $t0, $t0, 3",
+    //         "lddir $t0, $t0, 1",
+    //         "move {}, $t0",
+    //         out(reg) pmd,
+    //     )
+    // }
+    // info!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+    extern "C"{
+        fn __tlb_rfill();
     }
-    info!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+    unsafe {
+        __tlb_rfill();
+    }
 }
 
 /// Exception(PageModifyFault)的处理
@@ -261,8 +267,6 @@ fn tlb_page_modify_handler() {
     tlbelo0.set_dirty(true).write();
     tlbelo1.set_dirty(true).write();
 
-    // INFO!("{:?}",tlbelo0);
-    // INFO!("{:?}",tlbelo1);
     unsafe {
         asm!("tlbwr"); //重新将tlbelo写入tlb
     }

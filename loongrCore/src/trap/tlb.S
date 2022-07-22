@@ -12,5 +12,5 @@ __tlb_rfill:
     #取回奇数号页表项
     tlbfill
     csrrd $t0, CSR_TLBRSAVE
-    #jr $ra
-    ertn
+    jr $ra
+    #ertn

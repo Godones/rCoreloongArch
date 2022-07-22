@@ -17,7 +17,6 @@ mod logging;
 mod loong_arch;
 mod mm;
 mod print;
-mod scanf;
 mod sync;
 mod syscall;
 mod task;

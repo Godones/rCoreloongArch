@@ -85,7 +85,6 @@ impl TaskControlBlock {
             },
         };
         // prepare TrapContext in user space
-        // info!("kstack addr: {:#x}",kernel_stack.get_trap_addr());
         task_control_block
     }
 
@@ -107,7 +106,6 @@ impl TaskControlBlock {
         let task_control_block = Arc::new(TaskControlBlock {
             pid: pid_handle,
             inner: unsafe {
-                // error!("fork trap_cx :{:?}",kernel_stack.get_trap_cx());
                 let inner = UPSafeCell::new(TaskControlBlockInner {
                     kernel_stack,
                     base_size: parent_inner.base_size,
