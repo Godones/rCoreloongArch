@@ -6,7 +6,6 @@ use crate::loong_arch::{
 };
 use bit_field::BitField;
 
-
 /// 初始化外部中断
 pub fn extioi_init() {
     let mut enable = 0;

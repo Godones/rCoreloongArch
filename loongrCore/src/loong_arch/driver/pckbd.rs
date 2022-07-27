@@ -32,14 +32,14 @@ pub fn i8042_init() {
     // 禁用第二个接口
     ls7a_write_b(LS7A_I8042_COMMAND, 0xA7);
     // 清空缓冲区
-    let mut data = ls7a_read_b(LS7A_I8042_DATA);
+    ls7a_read_b(LS7A_I8042_DATA);
 
     // 测试 PS/2 控制器
     // 返回值
     // 0x55:pass
     // 0xFC:fail
     ls7a_write_b(LS7A_I8042_COMMAND, 0xAA);
-    data = ls7a_read_b(LS7A_I8042_DATA);
+    let mut data = ls7a_read_b(LS7A_I8042_DATA);
     info!("keyboard reponse {:#x}", data);
     assert_eq!(data, 0x55, "test keyboard fail");
 

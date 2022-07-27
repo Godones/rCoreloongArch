@@ -1,7 +1,7 @@
-use log::info;
-use pci::*;
 use crate::config::PAGE_SIZE;
 use crate::loong_arch::AHCIDriver;
+use log::info;
+use pci::*;
 // Register	Offset	Bits 31-24	Bits 23-16	Bits 15-8	Bits 7-0
 // 0x0	0x0	    Device ID	Vendor ID
 // 0x1	0x4	    Status	Command
@@ -19,7 +19,6 @@ use crate::loong_arch::AHCIDriver;
 // 0xD	0x34	Reserved	Capabilities Pointer
 // 0xE	0x38	Reserved
 // 0xF	0x3C	Max latency	Min Grant	Interrupt PIN	Interrupt Line
-
 
 const PCI_CONFIG_ADDRESS: usize = 0x2000_0000;
 const PCI_COMMAND: u16 = 0x04;
@@ -106,7 +105,7 @@ unsafe fn enable(loc: Location) {
         am.write32(ops, loc, PCI_COMMAND, (orig | 0xf) as u32);
     }
 }
-pub fn pci_init()->Option<AHCIDriver>  {
+pub fn pci_init() -> Option<AHCIDriver> {
     for dev in unsafe {
         scan_bus(
             &UnusedPort,
@@ -126,11 +125,11 @@ pub fn pci_init()->Option<AHCIDriver>  {
             dev.pic_interrupt_line,
             dev.interrupt_pin
         );
-        dev.bars.iter().enumerate().for_each(|(index,bar)| {
+        dev.bars.iter().enumerate().for_each(|(index, bar)| {
             if let Some(BAR::Memory(pa, len, _, t)) = bar {
-                info!("\tbar#{} (MMIO) {:#x} [{:#x}] [{:?}]", index,pa,len,t);
-            }else if let Some(BAR::IO(pa, len)) = bar {
-                info!("\tbar#{} (IO) {:#x} [{:#x}]", index,pa,len);
+                info!("\tbar#{} (MMIO) {:#x} [{:#x}] [{:?}]", index, pa, len, t);
+            } else if let Some(BAR::IO(pa, len)) = bar {
+                info!("\tbar#{} (IO) {:#x} [{:#x}]", index, pa, len);
             }
         });
         if dev.id.class == 0x01 && dev.id.subclass == 0x06 {
@@ -138,12 +137,12 @@ pub fn pci_init()->Option<AHCIDriver>  {
             if let Some(BAR::Memory(pa, len, _, _)) = dev.bars[5] {
                 info!("Found AHCI device");
                 // 检查status的第五位是否为1，如果是，则说明该设备存在能力链表
-                if dev.status | Status::CAPABILITIES_LIST ==Status::empty(){
+                if dev.status | Status::CAPABILITIES_LIST == Status::empty() {
                     info!("\tNo capabilities list");
                     return None;
                 }
                 unsafe { enable(dev.loc) };
-                assert!((len as usize) < PAGE_SIZE );
+                assert!((len as usize) < PAGE_SIZE);
                 if let Some(x) = AHCIDriver::new(pa as usize, len as usize) {
                     return Some(x);
                 }

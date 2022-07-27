@@ -9,11 +9,11 @@ use core::marker::PhantomData;
 use core::mem::size_of;
 use core::slice;
 
+use crate::provider::Provider;
+use crate::*;
 use bit_field::*;
 use bitflags::*;
 use volatile::Volatile;
-use crate::*;
-use crate::provider::Provider;
 
 ///
 pub struct AHCI<P: Provider> {

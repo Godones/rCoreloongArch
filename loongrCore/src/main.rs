@@ -11,11 +11,9 @@
 mod base_define;
 mod boot_param;
 mod config;
-mod drivers;
 mod fs;
 mod info;
 mod lang_items;
-mod loader;
 mod logging;
 mod loong_arch;
 mod mm;
@@ -33,14 +31,11 @@ extern crate alloc;
 extern crate bit_field;
 extern crate bitflags;
 extern crate buddy_system_allocator;
+extern crate isomorphic_drivers;
 extern crate lazy_static;
 extern crate pci;
 extern crate rlibc;
 extern crate xmas_elf;
-extern crate isomorphic_drivers;
-
-
-
 
 // use log::info;
 use crate::boot_param::boot_params_interface::BootParamsInterface;
@@ -53,7 +48,10 @@ use crate::trap::enable_timer_interrupt;
 use config::FLAG;
 use core::arch::{asm, global_asm};
 
-use crate::loong_arch::{ahci_init, block_device_test, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read};
+use crate::fs::list_apps;
+use crate::loong_arch::{
+    ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read,
+};
 pub use log::{debug, error, info, trace, warn};
 
 global_asm!(include_str!("link_app.S"));
@@ -70,11 +68,11 @@ pub extern "C" fn main(
     }
     println!("{}", FLAG);
     logging::init();
-    extioi_init();
+    // extioi_init();
     rtc_init();
     info!("CURRENT TIME {:?}", rtc_time_read());
-    ls7a_intc_init();
-    i8042_init(); //键盘驱动初始化
+    // ls7a_intc_init();
+    // i8042_init(); //键盘驱动初始化
     print_range();
     info!("kernel args: {}", argc);
     info!("kernel argv address: {:#x}", _argv as usize);
@@ -83,16 +81,14 @@ pub extern "C" fn main(
         _boot_params_interface as usize
     );
     mm::init();
-    info!("Block device init");
-    ahci_init();
-    block_device_test();
     trap::init();
     print_machine_info();
+    info!("Block device init");
+    ahci_init();
     //运行程序
     add_initproc(); //添加初始化程序
-    loader::list_apps(); //列出所有程序
+    list_apps(); //列出所有程序
     enable_timer_interrupt();
-    // info!("ready to run");
     task::run_tasks(); //运行程序
     panic!("main end");
 }

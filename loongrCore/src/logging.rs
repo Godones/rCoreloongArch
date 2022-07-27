@@ -4,8 +4,8 @@
 
 */
 
-use isomorphic_drivers::log_init;
 use crate::println;
+use isomorphic_drivers::log_init;
 use log::{self, Level, LevelFilter, Log, Metadata, Record};
 
 struct SimpleLogger;

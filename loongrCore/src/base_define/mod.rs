@@ -1,4 +1,6 @@
 use core::fmt::{Debug, Formatter};
+use rlibc::memcmp;
+
 pub struct RtcTime {
     pub year: u32,
     pub month: u32,
@@ -16,4 +18,10 @@ impl Debug for RtcTime {
             self.year, self.month, self.day, self.hour, self.minute, self.second
         )
     }
+}
+
+/// 编译器会报出找不到bcmp的错误，这里将其实现为memcmp
+#[no_mangle]
+pub unsafe extern "C" fn bcmp(s1: *const u8, s2: *const u8, n: usize) -> i32 {
+    memcmp(s1, s2, n)
 }

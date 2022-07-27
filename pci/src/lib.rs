@@ -32,7 +32,6 @@ extern crate bitflags;
 
 use core::fmt::{Debug, Formatter};
 
-
 /// A trait defining port I/O operations.
 ///
 /// All port I/O operations are parametric over this trait. This allows operating systems to use
@@ -254,14 +253,14 @@ pub enum Type {
     Bits64,
 }
 
-impl Debug for Type{
+impl Debug for Type {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match self {
             Type::Bits32 => {
-                write!(f,"32-bit")
+                write!(f, "32-bit")
             }
             Type::Bits64 => {
-                write!(f,"64-bit")
+                write!(f, "64-bit")
             }
         }
     }

@@ -16,7 +16,7 @@ mod logging;
 pub mod block;
 pub mod net;
 pub mod provider;
-pub use log::{info,trace,debug,error,warn};
+pub use log::{debug, error, info, trace, warn};
 
 pub fn log_init(loger: &'static dyn Log) {
     log::set_logger(loger).unwrap();

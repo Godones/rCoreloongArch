@@ -4,12 +4,12 @@ use core::marker::PhantomData;
 use core::mem::size_of;
 use core::sync::atomic::{fence, Ordering};
 
+use crate::net::ethernet::structs::EthernetAddress;
+use crate::provider::Provider;
+use crate::*;
 use bit_field::*;
 use bitflags::*;
 use volatile::Volatile;
-use crate::*;
-use crate::net::ethernet::structs::EthernetAddress;
-use crate::provider::Provider;
 
 // At the beginning, all transmit descriptors have there status non-zero,
 // so we need to track whether we are using the descriptor for the first time.

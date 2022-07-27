@@ -3,6 +3,7 @@
 
 use super::super::structs::EthernetAddress;
 use crate::provider::Provider;
+use crate::*;
 use alloc::vec::Vec;
 use bit_field::*;
 use bitflags::*;
@@ -12,7 +13,6 @@ use core::mem::{size_of, MaybeUninit};
 use core::slice;
 use core::sync::atomic::{fence, Ordering};
 use volatile::Volatile;
-use crate::*;
 // On linux, use ip link set <dev> mtu <MTU - 18>
 const IXGBE_MTU: usize = 8000;
 const IXGBE_BUFFER_SIZE: usize = 8192;

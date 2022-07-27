@@ -14,4 +14,4 @@ pub use loongson::*;
 pub use ls7a::*;
 pub use rtc::{check_rtc, rtc_init, rtc_time_read};
 
-pub use driver::ahci_init;
+pub use driver::{ahci_init, BLOCK_DEVICE};

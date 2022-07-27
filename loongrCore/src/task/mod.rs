@@ -5,7 +5,6 @@ mod processor;
 mod switch;
 mod task;
 
-use crate::loader::get_app_data_by_name;
 use alloc::sync::Arc;
 use core::arch::asm;
 use lazy_static::*;
@@ -13,6 +12,7 @@ pub use manager::{fetch_task, TaskManager};
 use switch::__switch;
 use task::{TaskControlBlock, TaskStatus};
 
+use crate::fs::{open_file, OpenFlags};
 pub use context::TaskContext;
 pub use manager::add_task;
 pub use pid::{pid_alloc, KernelStack, PidAllocator, PidHandle};
@@ -84,9 +84,11 @@ pub fn exit_current_and_run_next(exit_code: i32) {
 
 lazy_static! {
     ///Globle process that init user shell
-    pub static ref INITPROC: Arc<TaskControlBlock> = Arc::new(TaskControlBlock::new(
-        get_app_data_by_name("initproc").unwrap()
-    ));
+    pub static ref INITPROC: Arc<TaskControlBlock> = Arc::new({
+        let inode = open_file("initproc", OpenFlags::RDONLY).unwrap();
+        let v = inode.read_all();
+        TaskControlBlock::new(v.as_slice())
+    });
 }
 ///Add init process to the manager
 pub fn add_initproc() {

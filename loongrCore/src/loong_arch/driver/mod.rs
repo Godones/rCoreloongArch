@@ -1,8 +1,10 @@
+mod ahci;
 pub mod pci;
 /// !键盘驱动
 mod pckbd;
-mod ahci;
 
+use crate::loong_arch::pci::pci_init;
+pub use ahci::AHCIDriver;
 use alloc::sync::Arc;
 use core::cell::UnsafeCell;
 use core::mem::transmute;
@@ -10,21 +12,19 @@ use core::ops::{Deref, DerefMut};
 use easy_fs::BlockDevice;
 use log::info;
 pub use pckbd::{i8042_init, kbd_has_data, kbd_read_scancode};
-pub use ahci::AHCIDriver;
-use crate::loong_arch::pci::pci_init;
-use crate::sync::UPSafeCell;
-
 
 /// Used only for initialization hacks.
-pub const DUMMY_BLOCK_DEVICE: *const dyn BlockDevice = unsafe { transmute(&0 as *const _ as *const ahci::AHCIDriver as *const dyn BlockDevice) };
+pub const DUMMY_BLOCK_DEVICE: *const dyn BlockDevice =
+    unsafe { transmute(&0 as *const _ as *const ahci::AHCIDriver as *const dyn BlockDevice) };
 
 pub static BLOCK_DEVICE: Cell<Arc<dyn BlockDevice>> = unsafe { transmute(DUMMY_BLOCK_DEVICE) };
 
 pub fn ahci_init() {
-    unsafe { (BLOCK_DEVICE.get() as *mut Arc<dyn BlockDevice>).write(Arc::new(pci_init().unwrap())); }
+    unsafe {
+        (BLOCK_DEVICE.get() as *mut Arc<dyn BlockDevice>).write(Arc::new(pci_init().unwrap()));
+    }
 }
 
-#[track_caller]
 pub fn block_device_test() {
     info!("Block device test...");
     let block_device = BLOCK_DEVICE.get().clone();
@@ -40,8 +40,6 @@ pub fn block_device_test() {
     }
     info!("block device test passed!");
 }
-
-
 
 #[derive(Debug, Default)]
 #[repr(transparent)]
@@ -66,10 +64,14 @@ impl<T> Cell<T> {
 impl<T> Deref for Cell<T> {
     type Target = T;
     #[inline(always)]
-    fn deref(&self) -> &Self::Target { self.get() }
+    fn deref(&self) -> &Self::Target {
+        self.get()
+    }
 }
 
 impl<T> DerefMut for Cell<T> {
     #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target { self.get() }
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.get()
+    }
 }
