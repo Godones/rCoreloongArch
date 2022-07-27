@@ -6,16 +6,16 @@
 #![feature(alloc_error_handler)]
 #[macro_use]
 pub mod console;
-mod syscall;
 mod lang_items;
+mod syscall;
 
 use bitflags::bitflags;
 use buddy_system_allocator::LockedHeap;
 use rlibc::memcmp;
 
-extern crate rlibc;
-extern crate buddy_system_allocator;
 extern crate bitflags;
+extern crate buddy_system_allocator;
+extern crate rlibc;
 
 const USER_HEAP_SIZE: usize = 0x4000;
 static mut HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
@@ -26,7 +26,6 @@ static HEAP: LockedHeap = LockedHeap::empty();
 pub fn handle_alloc_error(layout: core::alloc::Layout) -> ! {
     panic!("Heap allocation error, layout = {:?}", layout);
 }
-
 
 #[no_mangle]
 #[link_section = ".text.entry"]
@@ -51,8 +50,8 @@ fn clear_bss() {
         fn ebss();
         fn sbss();
     }
-    (ebss as usize..sbss as usize).for_each(|addr| {
-        unsafe { (addr as *mut u8).write_volatile(0); }
+    (ebss as usize..sbss as usize).for_each(|addr| unsafe {
+        (addr as *mut u8).write_volatile(0);
     });
 }
 
@@ -61,14 +60,18 @@ pub fn read(fd: usize, buf: &mut [u8]) -> isize {
     sys_read(fd, buf)
 }
 pub fn write(fd: usize, buf: &[u8]) -> isize {
-    sys_write(fd, buf) }
+    sys_write(fd, buf)
+}
 pub fn exit(exit_code: i32) -> isize {
     sys_exit(exit_code)
 }
 
-pub fn yield_() -> isize { sys_yield() }
-pub fn get_time() -> isize { sys_get_time() }
-
+pub fn yield_() -> isize {
+    sys_yield()
+}
+pub fn get_time() -> isize {
+    sys_get_time()
+}
 
 pub fn getpid() -> isize {
     sys_getpid()
@@ -130,4 +133,6 @@ bitflags! {
 pub fn open(path: &str, flags: OpenFlags) -> isize {
     sys_open(path, flags.bits)
 }
-pub fn close(fd: usize) -> isize { sys_close(fd) }
+pub fn close(fd: usize) -> isize {
+    sys_close(fd)
+}

@@ -4,7 +4,6 @@
 #[macro_use]
 extern crate user_lib;
 
-
 const LEN: usize = 100;
 
 #[no_mangle]

@@ -12,19 +12,16 @@ const SYSCALL_WAITPID: usize = 260;
 const SYSCALL_OPEN: usize = 56;
 const SYSCALL_CLOSE: usize = 57;
 
-
 global_asm!(include_str!("syscall.asm"));
 
-pub fn syscall(id: usize, args0: usize,args1:usize,args2:usize,) -> isize {
+pub fn syscall(id: usize, args0: usize, args1: usize, args2: usize) -> isize {
     extern "C" {
-        fn do_syscall(id: usize, args0: usize,args1:usize,args2:usize) -> isize;
+        fn do_syscall(id: usize, args0: usize, args1: usize, args2: usize) -> isize;
     }
-    unsafe {
-        do_syscall(id, args0,args1,args2,)
-    }
+    unsafe { do_syscall(id, args0, args1, args2) }
 }
 pub fn sys_read(fd: usize, buffer: &mut [u8]) -> isize {
-    syscall(SYSCALL_READ, fd, buffer.as_mut_ptr() as usize, buffer.len(), )
+    syscall(SYSCALL_READ, fd, buffer.as_mut_ptr() as usize, buffer.len())
 }
 
 pub fn sys_write(fd: usize, buffer: &[u8]) -> isize {
@@ -70,7 +67,6 @@ pub fn sys_exec(path: &str) -> isize {
 pub fn sys_waitpid(pid: isize, exit_code: *mut i32) -> isize {
     syscall(SYSCALL_WAITPID, pid as usize, exit_code as usize, 0)
 }
-
 
 /// 功能：打开一个常规文件，并返回可以访问它的文件描述符。
 /// 参数：path 描述要打开的文件的文件名（简单起见，文件系统不需要支持目录，所有的文件都放在根目录 / 下），
