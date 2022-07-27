@@ -44,6 +44,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "isomorphic_drivers"
+version = "0.1.0"
+dependencies = [
+ "bit_field",
+ "bitflags",
+ "log",
+ "spin 0.9.3",
+ "volatile",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -79,12 +90,22 @@ dependencies = [
  "bitflags",
  "buddy_system_allocator",
  "easy-fs",
+ "isomorphic_drivers",
  "lazy_static",
  "log",
+ "pci",
  "rlibc",
  "spin 0.9.3",
  "virtio-drivers",
  "xmas-elf",
+]
+
+[[package]]
+name = "pci"
+version = "0.0.1"
+dependencies = [
+ "bit_field",
+ "bitflags",
 ]
 
 [[package]]

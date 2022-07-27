@@ -63,7 +63,7 @@ impl FrameAllocator for StackFrameAllocator {
         }
     }
     fn alloc(&mut self) -> Option<PhysPageNum> {
-        let ans:Option<PhysPageNum>;
+        let ans: Option<PhysPageNum>;
         if let Some(ppn) = self.recycled.pop() {
             ans = Some(ppn.into())
         } else {
@@ -102,7 +102,8 @@ pub fn init_frame_allocator() {
     }
     info!(
         "frame range: {:#x}-{:#x}",
-        PhysAddr::from(ekernel as usize).ceil().0, PhysAddr::from(MEMORY_END).floor().0
+        PhysAddr::from(ekernel as usize).ceil().0,
+        PhysAddr::from(MEMORY_END).floor().0
     );
     FRAME_ALLOCATOR.exclusive_access().init(
         PhysAddr::from(ekernel as usize).ceil(),

@@ -29,7 +29,7 @@ impl TaskContext {
     }
     pub fn goto_restore(kstack_ptr: usize) -> Self {
         Self {
-            ra: trap_return  as usize,
+            ra: trap_return as usize,
             sp: kstack_ptr, //存放了trap上下文后的栈地址,内核栈地址
             s: [0; 10],
         }

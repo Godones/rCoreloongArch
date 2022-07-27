@@ -27,7 +27,7 @@ impl Uart {
         loop {
             unsafe {
                 let c = ptr.add(5).read_volatile();
-                if c & (1<<5)!=0{
+                if c & (1 << 5) != 0 {
                     break;
                 }
             }

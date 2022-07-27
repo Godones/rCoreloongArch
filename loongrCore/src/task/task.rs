@@ -63,7 +63,7 @@ impl TaskControlBlock {
         let task_status = TaskStatus::Ready; //准备指向状态
         let pid = pid_alloc(); //分配pid
         let kernel_stack = KernelStack::new(); //分配内核栈
-                                                    //在内核栈放入trap上下文
+                                               //在内核栈放入trap上下文
         let kernel_trap_cx =
             kernel_stack.push_on_top(TrapContext::app_init_context(entry_point, user_sp));
         let task_control_block = Self {

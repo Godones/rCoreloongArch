@@ -22,11 +22,21 @@ pub fn scanf() -> u8 {
                     let n_next_char = get_char();
                     if n_next_char != 0 {
                         match n_next_char as char {
-                            'A' => { println!("↑");}
-                            'B' => {println!("↓");}
-                            'C' => {println!("→");}
-                            'D' => {println!("←");}
-                            _ => {println!("{}", n_next_char);}
+                            'A' => {
+                                println!("↑");
+                            }
+                            'B' => {
+                                println!("↓");
+                            }
+                            'C' => {
+                                println!("→");
+                            }
+                            'D' => {
+                                println!("←");
+                            }
+                            _ => {
+                                println!("{}", n_next_char);
+                            }
                         }
                     }
                 }

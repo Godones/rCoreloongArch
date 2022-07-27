@@ -2,10 +2,10 @@ mod virtio_blk;
 
 pub use virtio_blk::VirtIOBlock;
 
+use crate::println;
 use alloc::sync::Arc;
 use easy_fs::BlockDevice;
 use lazy_static::*;
-use crate::println;
 #[cfg(feature = "board_qemu")]
 type BlockDeviceImpl = virtio_blk::VirtIOBlock;
 

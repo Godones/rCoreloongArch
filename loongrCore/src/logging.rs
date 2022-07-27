@@ -4,6 +4,7 @@
 
 */
 
+use isomorphic_drivers::log_init;
 use crate::println;
 use log::{self, Level, LevelFilter, Log, Metadata, Record};
 
@@ -36,7 +37,7 @@ impl Log for SimpleLogger {
 
 pub fn init() {
     static LOGGER: SimpleLogger = SimpleLogger;
-    log::set_logger(&LOGGER).unwrap();
+    log_init(&LOGGER);
     log::set_max_level(match option_env!("LOG") {
         Some("ERROR") => LevelFilter::Error,
         Some("WARN") => LevelFilter::Warn,

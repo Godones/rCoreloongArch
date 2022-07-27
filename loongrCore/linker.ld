@@ -11,6 +11,7 @@ SECTIONS
     PROVIDE(etext = .);
   .text : {
     *(.text.init)
+    . = ALIGN(0x1000);
     *(.text .text.*)
     . = ALIGN(0x1000);
     _keentry = .;

@@ -25,7 +25,7 @@ pub use pwch::Pwch;
 pub use pwcl::Pwcl;
 pub use sltbps::SltbPs;
 pub use tlbehi::TlbEHi;
-pub use tlbelo::{TLBELO,TLBEL};
+pub use tlbelo::{TLBEL, TLBELO};
 pub use tlbentry::TLBREntry;
 pub use tlbidx::TlbIdx;
 pub use tlbrbadv::TlbRBadv;

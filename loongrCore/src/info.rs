@@ -1,14 +1,17 @@
-use crate::loong_arch::cpu::{get_mmu_support_page, get_palen, get_support_execution_protection, get_support_lspw, get_support_read_forbid, get_support_rplv, get_support_rva, get_support_rva_len, get_valen};
+use crate::loong_arch::cpu::{
+    get_mmu_support_page, get_palen, get_support_execution_protection, get_support_lspw,
+    get_support_read_forbid, get_support_rplv, get_support_rva, get_support_rva_len, get_valen,
+};
 use crate::loong_arch::register::crmd::Crmd;
 use crate::loong_arch::register::dmwn::{Dmw0, Dmw1};
 use crate::loong_arch::register::prcfg2::Prcfg2;
 use crate::loong_arch::register::prcfg3::Prcfg3;
+use crate::loong_arch::register::Misc;
 use crate::loong_arch::tlb::Pwch;
 use crate::loong_arch::tlb::TLBREntry;
 use crate::loong_arch::tlb::TlbREhi;
-use crate::loong_arch::tlb::{Pwcl,SltbPs};
+use crate::loong_arch::tlb::{Pwcl, SltbPs};
 use crate::{info, Register};
-use crate::loong_arch::register::Misc;
 
 // 打印硬件的相关信息
 pub fn print_machine_info() {
@@ -24,7 +27,7 @@ pub fn print_machine_info() {
     info!("Support RVA: {}", get_support_rva()); //是否支持虚拟地址缩减
     info!("Support RVAMAX :{}", get_support_rva_len()); //支持的虚拟地址缩减的长度
     info!("Support Page-Size: {:#b}", Prcfg2::read().get_val()); //支持的页大小,
-    info!("Support LSPW: {}",get_support_lspw());
+    info!("Support LSPW: {}", get_support_lspw());
     match Prcfg3::read().get_tlb_type() {
         0 => {
             info!("No TLB");
@@ -66,7 +69,7 @@ pub fn print_machine_info() {
     let crmd = Crmd::read();
     info!("DA: {}", crmd.get_da()); //是否支持DA模式
     info!("PG :{}", crmd.get_pg()); //是否支持PG模式
-    info!("DTMA :{}" ,crmd.get_datm()); //是否支持DTMA模式
+    info!("DTMA :{}", crmd.get_datm()); //是否支持DTMA模式
     let misc = Misc::read().get_enable_32_in_plv3();
     info!("MISC: enable_32_in_plv3 :{}", misc); //是否支持32位在PLV3模式下运行
     info!("dmwo: {:#x}", Dmw0::read().get_value());

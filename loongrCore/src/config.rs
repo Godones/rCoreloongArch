@@ -33,6 +33,4 @@ pub const MEMORY_HIGH_START: usize = 0x9000_0000;
 pub const MEMORY_HIGH_END: usize = 0x18000_0000;
 
 #[cfg(feature = "board_qemu")]
-pub const MMIO: &[(usize, usize)] = &[
-    (0x10001000, 0x1000),
-];
+pub const MMIO: &[(usize, usize)] = &[(0x10001000, 0x1000)];

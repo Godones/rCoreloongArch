@@ -55,7 +55,6 @@ impl Add<usize> for VirtPageNum {
     }
 }
 
-
 /// T: {PhysAddr, VirtAddr, PhysPageNum, VirtPageNum}
 /// T -> usize: T.0
 /// usize -> T: usize.into()

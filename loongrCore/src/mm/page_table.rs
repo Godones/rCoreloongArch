@@ -254,7 +254,6 @@ pub fn translated_refmut<T>(token: usize, ptr: *mut T) -> &'static mut T {
         .get_mut()
 }
 
-
 pub struct UserBuffer {
     ///U8 vec
     pub buffers: Vec<&'static mut [u8]>,

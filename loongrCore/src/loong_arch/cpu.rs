@@ -63,7 +63,7 @@ pub fn get_support_rva_len() -> usize {
     let cfg = CPUCFG::read(3);
     cfg.get_bits(13, 16) + 1
 }
-pub fn get_support_lspw()->bool{
-    let cfg= CPUCFG::read(2);
+pub fn get_support_lspw() -> bool {
+    let cfg = CPUCFG::read(2);
     cfg.get_bit(21)
 }

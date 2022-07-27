@@ -1,11 +1,10 @@
 //!Implementation of [`PidAllocator`]
 use crate::config::{KERNEL_STACK_SIZE, MEMORY_END, PAGE_SIZE};
+use crate::mm::{frame_alloc, FrameTracker, PhysAddr};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use alloc::vec::Vec;
 use lazy_static::*;
-use crate::mm::{frame_alloc, FrameTracker, PhysAddr};
-
 
 ///Pid Allocator struct
 pub struct PidAllocator {
@@ -62,9 +61,8 @@ pub fn pid_alloc() -> PidHandle {
 /// Kernelstack for app
 #[derive(Clone, Debug)]
 pub struct KernelStack {
-    frame:FrameTracker,
+    frame: FrameTracker,
 }
-
 
 impl KernelStack {
     /// Create a kernelstack
@@ -100,7 +98,7 @@ impl KernelStack {
     }
     ///Get the value on the top of kernelstack
     fn get_top(&self) -> usize {
-        let top :PhysAddr= self.frame.ppn.into();
+        let top: PhysAddr = self.frame.ppn.into();
         let top = top.0 + PAGE_SIZE;
         top
     }

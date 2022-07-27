@@ -1,7 +1,6 @@
 use super::BlockDevice;
 use crate::mm::{
-    frame_alloc, frame_dealloc, FrameTracker, PhysAddr, PhysPageNum,
-    StepByOne, VirtAddr,
+    frame_alloc, frame_dealloc, FrameTracker, PhysAddr, PhysPageNum, StepByOne, VirtAddr,
 };
 use crate::sync::UPSafeCell;
 use alloc::vec::Vec;

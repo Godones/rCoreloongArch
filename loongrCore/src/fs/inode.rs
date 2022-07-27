@@ -7,13 +7,13 @@
 use super::File;
 use crate::drivers::BLOCK_DEVICE;
 use crate::mm::UserBuffer;
+use crate::println;
 use crate::sync::UPSafeCell;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use bitflags::*;
 use easy_fs::{EasyFileSystem, Inode};
 use lazy_static::*;
-use crate::println;
 
 /// A wrapper around a filesystem inode
 /// to implement File trait atop

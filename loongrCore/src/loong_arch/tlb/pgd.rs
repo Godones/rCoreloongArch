@@ -1,9 +1,9 @@
 // 该寄存器是一个只读寄存器，其内容是当前上下文中出错虚地址所对应的全局目录基址信息。该寄存
 // 器的只读信息，不仅用于 CSR 类指令的读返回值，也用于 LDDIR 指令访问全局目录时所需的基址信息
 
-use core::arch::asm;
 use crate::loong_arch::register::csr::CSR_PGD;
 use crate::Register;
+use core::arch::asm;
 
 pub struct Pgd {
     pub pgd: usize,
