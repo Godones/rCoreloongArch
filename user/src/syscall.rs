@@ -1,3 +1,4 @@
+use crate::SignalAction;
 use core::arch::global_asm;
 
 const SYSCALL_DUP: usize = 24;
@@ -65,7 +66,9 @@ pub fn sys_fork() -> isize {
 pub fn sys_exec(path: &str, args: &[*const u8]) -> isize {
     syscall(
         SYSCALL_EXEC,
-        path.as_ptr() as usize, args.as_ptr() as usize, 0,
+        path.as_ptr() as usize,
+        args.as_ptr() as usize,
+        0,
     )
 }
 
@@ -95,7 +98,6 @@ pub fn sys_close(fd: usize) -> isize {
     syscall(SYSCALL_CLOSE, fd, 0, 0)
 }
 
-
 /// 功能：为当前进程打开一个管道。
 /// 参数：pipe 表示应用地址空间中的一个长度为 2 的 usize 数组的起始地址，内核需要按顺序将管道读端
 /// 和写端的文件描述符写入到数组中。
@@ -105,12 +107,46 @@ pub fn sys_pipe(pipe: &mut [usize]) -> isize {
     syscall(SYSCALL_PIPE, pipe.as_mut_ptr() as usize, 0, 0)
 }
 
-
 /// 功能：将进程中一个已经打开的文件复制一份并分配到一个新的文件描述符中。
 /// 参数：fd 表示进程中一个已经打开的文件的文件描述符。
 /// 返回值：如果出现了错误则返回 -1，否则能够访问已打开文件的新文件描述符。
 /// 可能的错误原因是：传入的 fd 并不对应一个合法的已打开文件。
 /// syscall ID：24
-pub fn sys_dup(fd: usize) -> isize{
-    syscall(SYSCALL_DUP,fd,0,0)
+pub fn sys_dup(fd: usize) -> isize {
+    syscall(SYSCALL_DUP, fd, 0, 0)
+}
+
+// 设置信号处理例程
+// signum：指定信号
+// action：新的信号处理配置
+// old_action：老的的信号处理配置
+pub fn sys_sigaction(
+    signum: i32,
+    action: *const SignalAction,
+    old_action: *const SignalAction,
+) -> isize {
+    syscall(
+        SYSCALL_SIGACTION,
+        signum as usize,
+        action as usize,
+        old_action as usize,
+    )
+}
+
+// 设置要阻止的信号
+// mask：信号掩码
+pub fn sys_sigprocmask(mask: u32) -> isize {
+    syscall(SYSCALL_SIGPROCMASK, mask as usize, 0, 0)
+}
+
+// 清除堆栈帧，从信号处理例程返回
+pub fn sys_sigreturn() -> isize {
+    syscall(SYSCALL_SIGRETURN, 0, 0, 0)
+}
+
+// 将某信号发送给某进程
+// pid：进程pid
+// signal：信号的整数码
+pub fn sys_kill(pid: usize, signal: i32) -> isize {
+    syscall(SYSCALL_KILL, pid, signal as usize, 0)
 }

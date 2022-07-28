@@ -32,7 +32,6 @@ struct Provider;
 impl provider::Provider for Provider {
     const PAGE_SIZE: usize = PAGE_SIZE;
     fn alloc_dma(size: usize) -> (usize, usize) {
-        info!("alloc_dma_size: {:#x}", size);
         let pages = size / PAGE_SIZE;
         let mut base = 0;
         for i in 0..pages {

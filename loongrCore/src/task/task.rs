@@ -1,11 +1,12 @@
+use super::context::TaskContext;
+use super::pid::{KernelStack, PidHandle};
+use super::{pid_alloc, SignalFlags};
 use crate::config::PAGE_SIZE_BITS;
 use crate::fs::{File, Stdin, Stdout};
 use crate::loong_arch::tlb::Pgdl;
 use crate::mm::{translated_refmut, MemorySet};
 use crate::sync::UPSafeCell;
-use crate::task::context::TaskContext;
-use crate::task::pid::{KernelStack, PidHandle};
-use crate::task::pid_alloc;
+use crate::task::action::SignalActions;
 use crate::trap::TrapContext;
 use crate::Register;
 use alloc::string::String;
@@ -35,6 +36,13 @@ pub struct TaskControlBlockInner {
     pub stride: usize, //已走步长
     pub pass: usize,   //每一步的步长，只与特权级相关
     pub fd_table: Vec<Option<Arc<dyn File + Send + Sync>>>,
+    pub signals: SignalFlags,                 // 要响应的信号
+    pub signal_mask: SignalFlags,             // 要屏蔽的信号
+    pub handling_sig: isize,                  // 正在处理的信号
+    pub signal_actions: SignalActions,        // 信号处理例程表
+    pub killed: bool,                         // 任务是否已经被杀死了
+    pub frozen: bool,                         // 任务是否已经被暂停了
+    pub trap_ctx_backup: Option<TrapContext>, //被打断的trap上下文
 }
 
 impl TaskControlBlockInner {
@@ -101,6 +109,13 @@ impl TaskControlBlock {
                         // 2 -> stderr
                         Some(Arc::new(Stdout)),
                     ],
+                    signals: SignalFlags::empty(),
+                    signal_mask: SignalFlags::empty(),
+                    handling_sig: -1,
+                    signal_actions: SignalActions::default(),
+                    killed: false,
+                    frozen: false,
+                    trap_ctx_backup: None,
                 })
             },
         };
@@ -150,6 +165,14 @@ impl TaskControlBlock {
                     stride: 0,
                     pass: 0,
                     fd_table: new_fd_table,
+                    signals: SignalFlags::empty(),
+                    // inherit the signal_mask and signal_action
+                    signal_mask: parent_inner.signal_mask,
+                    handling_sig: -1,
+                    signal_actions: parent_inner.signal_actions.clone(),
+                    killed: false,
+                    frozen: false,
+                    trap_ctx_backup: None,
                 });
 
                 inner

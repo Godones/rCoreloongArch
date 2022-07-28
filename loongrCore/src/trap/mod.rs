@@ -26,7 +26,8 @@ use crate::loong_arch::{
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
 use crate::task::{
-    current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next,
+    check_signals_error_of_current, current_add_signal, current_trap_cx, current_user_token,
+    exit_current_and_run_next, handle_signals, suspend_current_and_run_next, SignalFlags,
 };
 use crate::{info, println};
 use bit_field::BitField;
@@ -134,27 +135,20 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         }
         Trap::Exception(Exception::LoadPageFault)
         | Trap::Exception(Exception::StorePageFault)
-        | Trap::Exception(Exception::FetchPageFault) => {
+        | Trap::Exception(Exception::FetchPageFault)
+        | Trap::Exception(Exception::InstructionNotExist) => {
             //页面异常
-            tlb_page_fault();
+            // tlb_page_fault();
             let t = estat.cause();
             let badv = Badv::read().get_value();
-            println!(
-                "[kernel] {:?} {:#x} PageFault in application, core dumped.",
-                t, badv
-            );
-            panic!("PageFault in application, core dumped.");
-        }
-        Trap::Exception(Exception::InstructionNotExist) => {
-            //指令不存在
-            tlb_page_fault();
-            println!("[kernel] InstructionNotExist in application, core dumped.");
-            exit_current_and_run_next(-3);
+            println!("[kernel] {:?} {:#x} in application, core dumped.", t, badv);
+            // 设置SIGSEGV信号
+            current_add_signal(SignalFlags::SIGSEGV);
         }
         Trap::Exception(Exception::InstructionPrivilegeIllegal) => {
             //指令权限不足
             println!("[kernel] InstructionPrivilegeIllegal in application, core dumped.");
-            exit_current_and_run_next(-3);
+            current_add_signal(SignalFlags::SIGILL);
         }
         Trap::Interrupt(Interrupt::Timer) => {
             //时钟中断
@@ -181,6 +175,16 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             panic!("{:?}", estat.cause());
         }
     }
+    // handle signals (handle the sent signal)
+    //println!("[K] trap_handler:: handle_signals");
+    handle_signals();
+
+    // check error signals (if error then exit)
+    if let Some((errno, msg)) = check_signals_error_of_current() {
+        println!("[kernel] {}", msg);
+        exit_current_and_run_next(errno);
+    }
+
     set_user_trap_entry();
     cx
 }

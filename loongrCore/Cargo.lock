@@ -96,7 +96,6 @@ dependencies = [
  "pci",
  "rlibc",
  "spin 0.9.3",
- "virtio-drivers",
  "xmas-elf",
 ]
 
@@ -139,16 +138,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c530c2b0d0bf8b69304b39fe2001993e267461948b890cd037d8ad4293fa1a0d"
 dependencies = [
  "lock_api",
-]
-
-[[package]]
-name = "virtio-drivers"
-version = "0.1.0"
-source = "git+https://github.com/rcore-os/virtio-drivers#3b24d363d64927416123ed5e6ea95e535ce4f9eb"
-dependencies = [
- "bitflags",
- "log",
- "volatile",
 ]
 
 [[package]]

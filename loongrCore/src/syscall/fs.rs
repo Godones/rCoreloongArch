@@ -1,7 +1,7 @@
-use alloc::sync::Arc;
 use crate::fs::{make_pipe, open_file, OpenFlags};
 use crate::mm::{translated_byte_buffer, translated_refmut, translated_str, UserBuffer};
 use crate::task::{current_task, current_user_token};
+use alloc::sync::Arc;
 
 const FD_STDOUT: usize = 1;
 const FD_STDIN: usize = 0;
@@ -100,4 +100,3 @@ pub fn sys_dup(fd: usize) -> isize {
     inner.fd_table[new_fd] = Some(Arc::clone(inner.fd_table[fd].as_ref().unwrap()));
     new_fd as isize
 }
-

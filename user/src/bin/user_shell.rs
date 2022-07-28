@@ -50,7 +50,7 @@ impl ProcessArguments {
         {
             input = args_copy[idx + 1].clone();
             args_copy.drain(idx..=idx + 1);
-        }// 找到输入文件
+        } // 找到输入文件
 
         // redirect output
         let mut output = String::new();
@@ -61,7 +61,7 @@ impl ProcessArguments {
         {
             output = args_copy[idx + 1].clone();
             args_copy.drain(idx..=idx + 1);
-        }//找到输出文件
+        } //找到输出文件
 
         let mut args_addr: Vec<*const u8> = args_copy.iter().map(|arg| arg.as_ptr()).collect();
         args_addr.push(core::ptr::null::<u8>());
@@ -140,8 +140,8 @@ pub fn main() -> i32 {
                                         return -4;
                                     }
                                     let input_fd = input_fd as usize;
-                                    close(0);//关闭标准输入
-                                    assert_eq!(dup(input_fd), 0);//替换成文件输入 fd=0 被替换为 input_fd
+                                    close(0); //关闭标准输入
+                                    assert_eq!(dup(input_fd), 0); //替换成文件输入 fd=0 被替换为 input_fd
                                     close(input_fd);
                                 }
                                 // redirect output
