@@ -1,8 +1,8 @@
 [package]
 name = "user_lib"
 version = "0.1.0"
-authors = ["Yifan Wu <shinbokuow@163.com>"]
-edition = "2018"
+authors = ["Chenlinfeng <1925466036@qq.com>"]
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,3 +10,9 @@ edition = "2018"
 rlibc = "1.0.0"
 buddy_system_allocator = "0.6.0"
 bitflags = "1.3.2"
+
+[profile.dev]
+panic = "abort" #关闭默认的panic栈回溯功能，裸机环境没有这个功能，直接abort
+
+[profile.release]
+panic = "abort" #关闭默认的panic栈回溯功能，裸机环境没有这个功能，直接abort

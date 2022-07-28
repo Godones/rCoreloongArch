@@ -1,13 +1,14 @@
 use crate::config::PAGE_SIZE_BITS;
 use crate::fs::{File, Stdin, Stdout};
 use crate::loong_arch::tlb::Pgdl;
-use crate::mm::MemorySet;
+use crate::mm::{translated_refmut, MemorySet};
 use crate::sync::UPSafeCell;
 use crate::task::context::TaskContext;
 use crate::task::pid::{KernelStack, PidHandle};
 use crate::task::pid_alloc;
 use crate::trap::TrapContext;
 use crate::Register;
+use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::sync::Weak;
 use alloc::vec;
@@ -163,22 +164,54 @@ impl TaskControlBlock {
         task_control_block
     }
 
-    pub fn exec(&self, elf_data: &[u8]) {
+    pub fn exec(&self, elf_data: &[u8], args: Vec<String>) {
         // memory_set with elf program headers/trampoline/trap context/user stack
-        let (memory_set, user_sp, entry_point) = MemorySet::from_elf(elf_data);
+        let (memory_set, mut user_sp, entry_point) = MemorySet::from_elf(elf_data);
+        // push arguments on user stack
+        user_sp -= (args.len() + 1) * core::mem::size_of::<usize>();
+        let argv_base = user_sp;
+        let mut argv: Vec<_> = (0..=args.len())
+            .map(|arg| {
+                translated_refmut(
+                    memory_set.token(),
+                    (argv_base + arg * core::mem::size_of::<usize>()) as *mut usize,
+                )
+            })
+            .collect(); //分配所有参数的位置
+        *argv[args.len()] = 0; //最后一个参数为空
+        for i in 0..args.len() {
+            user_sp -= args[i].len() + 1;
+            *argv[i] = user_sp;
+            let mut p = user_sp;
+            for c in args[i].as_bytes() {
+                *translated_refmut(memory_set.token(), p as *mut u8) = *c;
+                p += 1;
+            }
+            *translated_refmut(memory_set.token(), p as *mut u8) = 0;
+        }
+        // make the user_sp aligned to 8B for k210 platform
+        user_sp -= user_sp % core::mem::size_of::<usize>();
+
         // **** access inner exclusively
         let mut inner = self.inner_exclusive_access();
         // substitute memory_set
         inner.memory_set = memory_set; //覆盖 memory_set
                                        // initialize trap_cx
-        inner
+        let trap_cx = inner
             .kernel_stack
             .push_on_top(TrapContext::app_init_context(entry_point, user_sp));
+        // 修改返回值，a0为参数个数，a1为参数指针
+        unsafe {
+            (*trap_cx).x[4] = args.len();
+            (*trap_cx).x[5] = argv_base;
+        }
+
         //由于切换了地址空间，因此之前的ASID对应的地址空间将不会再有用，因此这里需要将TLB中的内容无效掉
         let pid = self.getpid();
         unsafe {
             asm!("invtlb 0x4,{},$r0",in(reg) pid);
         }
+        // 设置新的pgdl
         let pgd = inner.get_user_token() << PAGE_SIZE_BITS;
         Pgdl::read().set_val(pgd).write();
         // **** release inner automatically

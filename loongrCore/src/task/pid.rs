@@ -59,7 +59,7 @@ pub fn pid_alloc() -> PidHandle {
 }
 
 /// Kernelstack for app
-#[derive(Clone, Debug)]
+
 pub struct KernelStack {
     frame: FrameTracker,
 }

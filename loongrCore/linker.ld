@@ -8,10 +8,9 @@ SECTIONS
    . = 0x0000000000001000;
   # . =  0x90100000;
 
-    PROVIDE(etext = .);
+   PROVIDE(etext = .);
   .text : {
     *(.text.init)
-    . = ALIGN(0x1000);
     *(.text .text.*)
     . = ALIGN(0x1000);
     _keentry = .;

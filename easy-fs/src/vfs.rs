@@ -152,6 +152,7 @@ impl Inode {
                 );
                 v.push(String::from(dirent.name()));
             }
+            v.sort();
             v
         })
     }
