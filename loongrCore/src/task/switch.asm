@@ -32,5 +32,8 @@ __switch:
     .endr
     ld.d  $fp,$a1,(9+2)*8
     # restore kernel stack of next task
-    ld.d $sp, $a1, 8
+    ld.d  $sp, $a1, 8
+
+    csrwr $a2,0x18 #切换任务
+
     jr $ra

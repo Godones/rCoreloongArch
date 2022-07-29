@@ -1,38 +1,36 @@
 pub const FLAG: &str = "
+██╗      ██████╗  ██████╗ ███╗   ██╗ ██████╗ ██████╗  ██████╗ ██████╗ ██████╗ ███████╗
+██║     ██╔═══██╗██╔═══██╗████╗  ██║██╔════╝ ██╔══██╗██╔════╝██╔═══██╗██╔══██╗██╔════╝
+██║     ██║   ██║██║   ██║██╔██╗ ██║██║  ███╗██████╔╝██║     ██║   ██║██████╔╝█████╗
+██║     ██║   ██║██║   ██║██║╚██╗██║██║   ██║██╔══██╗██║     ██║   ██║██╔══██╗██╔══╝
+███████╗╚██████╔╝╚██████╔╝██║ ╚████║╚██████╔╝██║  ██║╚██████╗╚██████╔╝██║  ██║███████╗
+╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
 
- ██████╗ ███╗   ██╗███████╗ ██████╗ ███████╗
-██╔═══██╗████╗  ██║██╔════╝██╔═══██╗██╔════╝
-██║   ██║██╔██╗ ██║█████╗  ██║   ██║███████╗
-██║   ██║██║╚██╗██║██╔══╝  ██║   ██║╚════██║
-╚██████╔╝██║ ╚████║███████╗╚██████╔╝███████║
- ╚═════╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚══════╝
 ";
-
 pub const UART: usize = 0x1FE001E0;
 
-const LOONGARCH_CSR_DMWIN0: u32 = 0x180;
-const LOONGARCH_CSR_DMWIN1: u32 = 0x181;
-const LOONGARCH_CSR_DMWIN2: u32 = 0x182;
-const LOONGARCH_CSR_DMWIN3: u32 = 0x183;
+pub const MAX_APP_NUM: usize = 32;
 
-pub const MAX_APP_NUM: usize = 10;
-pub const APP_BASE_ADDRESS: usize = 0x00200000; //应用程序起始地址
-pub const APP_SIZE_LIMIT: usize = 0x20000; //应用程序的空间限制
-pub const USER_STACK_SIZE: usize = 4096 * 2; //用户栈大小
-pub const KERNEL_STACK_SIZE: usize = 4096 * 2; //内核栈大小
+pub const USER_STACK_SIZE: usize = PAGE_SIZE; //用户栈大小
+pub const KERNEL_STACK_SIZE: usize = PAGE_SIZE; //内核栈大小
+
+pub const KERNEL_HEAP_SIZE: usize = 0xf0_0000; //内核的可分配堆大小3MB
 
 pub const BIG_STRIDE: usize = 1000;
 
-pub const CLOCK_FREQ: usize = 12500000; //qemu时钟频率
 pub const TICKS_PER_SEC: usize = 100;
 pub const MSEC_PER_SEC: usize = 1000;
 
+pub const MEMORY_END: usize = 0x000000000_1000_0000;
+// pub const MEMORY_END: usize = 0x180000000;
 
-pub const HWI_VEC: usize = 0x3fc;
-pub const TI_VEC: usize = 0x1 << 11;
-pub const CSR_ECFG_VS_SHIFT: usize = 16;
-pub const CSR_TCFG_EN: usize = 1 << 0;
-pub const CSR_TCFG_PER: usize = 0x1 << 1;
-pub const CSR_TICLR_CLR: usize = 0x1 << 0; //清除时钟中断
+pub const PAGE_SIZE: usize = 0x4000; //16kB
+pub const PAGE_SIZE_BITS: usize = 14; //16kB
+pub const PALEN: usize = 48;
+pub const VALEN: usize = 48;
 
-pub const PRMD_PPLV: usize = 3; //判断属于哪个级别
+pub const MEMORY_HIGH_START: usize = 0x9000_0000;
+pub const MEMORY_HIGH_END: usize = 0x18000_0000;
+
+#[cfg(feature = "board_qemu")]
+pub const MMIO: &[(usize, usize)] = &[(0x10001000, 0x1000)];

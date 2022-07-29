@@ -1,172 +1,298 @@
-use crate::config::{BIG_STRIDE, MAX_APP_NUM};
-use crate::loader::{get_num_app, init_app_cx};
-use crate::sync::UPSafeCell;
-use context::TaskContext;
-use lazy_static::lazy_static;
-use switch::__switch;
-use task::{TaskControlBlock, TaskStatus};
-/// 为了更好地完成任务上下文切换，需要对任务处于什么状态做明确划分
-///任务的运行状态：未初始化->准备执行->正在执行->已退出
-pub mod context;
+// mod context;
+// mod manager;
+// mod processor;
+// mod signal;
+// mod switch;
+// mod task;
+// mod id;
+// mod process;
+//
+// use alloc::sync::Arc;
+// use core::arch::asm;
+// use lazy_static::*;
+// pub use manager::{fetch_task, TaskManager};
+// use switch::__switch;
+// use task::{TaskControlBlock, TaskStatus};
+//
+// pub use process::{ProcessControlBlock,ProcessControlBlockInner};
+// pub use id::{KernelStack,kstack_alloc,pid_alloc,TaskUserRes,PidHandle};
+// use crate::fs::{open_file, OpenFlags};
+// use crate::println;
+// pub use action::SignalAction;
+// pub use context::TaskContext;
+// pub use manager::{add_task, pid2task, remove_from_pid2task};
+// pub use pid::{pid_alloc, KernelStack, PidAllocator, PidHandle};
+// pub use processor::{
+//     current_task, current_trap_addr, current_trap_cx, current_user_token, run_tasks, schedule,
+//     take_current_task, Processor,
+// };
+// pub use signal::{SignalFlags, MAX_SIG};
+//
+// /// Suspend the current 'Running' task and run the next task in task list.
+// pub fn suspend_current_and_run_next() {
+//     // There must be an application running.
+//     let task = take_current_task().unwrap();
+//
+//     // ---- access current TCB exclusively
+//     let mut task_inner = task.inner_exclusive_access();
+//     let task_cx_ptr = &mut task_inner.task_cx as *mut TaskContext;
+//     // Change status to Ready
+//     task_inner.task_status = TaskStatus::Ready;
+//     drop(task_inner);
+//     // ---- release current PCB
+//
+//     // push back to ready queue.
+//     add_task(task); // 放入调度队列后面
+//                     // jump to scheduling cycle
+//     schedule(task_cx_ptr); // 调度切换
+// }
+//
+// /// Exit the current 'Running' task and run the next task in task list.
+// pub fn exit_current_and_run_next(exit_code: i32) {
+//     // take from Processor
+//     let task = take_current_task().unwrap();
+//     let pid = task.getpid();
+//     remove_from_pid2task(task.getpid()); // 删除pid2task中的task
+//     // **** access current TCB exclusively
+//
+//     let mut inner = task.inner_exclusive_access();
+//     // Change status to Zombie
+//     inner.task_status = TaskStatus::Zombie;
+//     // Record exit code
+//     inner.exit_code = exit_code;
+//     // do not move to its parent but under initproc
+//
+//     // ++++++ access initproc TCB exclusively
+//     {
+//         // 将结束的进程的子进程挂载到initproc的子进程链表上
+//         let mut initproc_inner = INITPROC.inner_exclusive_access();
+//         for child in inner.children.iter() {
+//             child.inner_exclusive_access().parent = Some(Arc::downgrade(&INITPROC));
+//             initproc_inner.children.push(child.clone());
+//         }
+//     }
+//     // ++++++ release parent PCB
+//
+//     inner.children.clear();
+//     // deallocate user space
+//     inner.memory_set.recycle_data_pages();
+//     inner.fd_table.clear();
+//     drop(inner);
+//     // **** release current PCB
+//     // drop task manually to maintain rc correctly
+//     drop(task);
+//     // we do not have to save task context
+//     let mut _unused = TaskContext::zero_init();
+//
+//     // 使得原来的TLB表项无效掉，否则下一个进程与当前退出的进程号相同会导致
+//     // 无法正确进行地址转换
+//     unsafe {
+//         asm!("invtlb 0x4,{},$r0",in(reg) pid);
+//     }
+//     schedule(&mut _unused as *mut _);
+// }
+//
+// lazy_static! {
+//     ///Globle process that init user shell
+//     pub static ref INITPROC: Arc<TaskControlBlock> = Arc::new({
+//         let inode = open_file("initproc", OpenFlags::RDONLY).unwrap();
+//         let v = inode.read_all();
+//         TaskControlBlock::new(v.as_slice())
+//     });
+// }
+// ///Add init process to the manager
+// pub fn add_initproc() {
+//     add_task(INITPROC.clone());
+// }
+//
+// pub fn current_add_signal(signal: SignalFlags) {
+//     let task = current_task().unwrap();
+//     let mut task_inner = task.inner_exclusive_access();
+//     task_inner.signals |= signal;
+//     // println!(
+//     //     "[K] current_add_signal:: current task sigflag {:?}",
+//     //     task_inner.signals
+//     // );
+// }
+//
+//
+//
+//
+//
+mod context;
+mod id;
+mod manager;
+mod process;
+mod processor;
+mod signal;
 mod switch;
+#[allow(clippy::module_inception)]
 mod task;
 
-//管理各个任务的任务管理器
-pub struct TaskManager {
-    num_app: usize,
-    //应用数量
-    inner: UPSafeCell<TaskManagerInner>,
+use self::id::TaskUserRes;
+use crate::fs::{open_file, OpenFlags};
+use alloc::{sync::Arc, vec::Vec};
+use core::arch::asm;
+use lazy_static::*;
+use manager::fetch_task;
+use process::ProcessControlBlock;
+use switch::__switch;
+
+
+pub use context::TaskContext;
+pub use id::{kstack_alloc, pid_alloc, KernelStack, PidHandle, IDLE_PID};
+pub use manager::{add_task, remove_task, pid2process, remove_from_pid2process};
+pub use processor::{
+    current_process, current_task, current_trap_cx,
+    current_user_token, run_tasks, schedule, take_current_task,current_kstack_top
+};
+pub use signal::SignalFlags;
+pub use task::{TaskControlBlock, TaskStatus};
+use crate::println;
+use crate::timer::remove_timer;
+
+
+pub fn block_current_and_run_next() {
+    let task = take_current_task().unwrap();
+    let mut task_inner = task.inner_exclusive_access();
+    let task_cx_ptr = &mut task_inner.task_cx as *mut TaskContext;
+    task_inner.task_status = TaskStatus::Blocking;
+    drop(task_inner);
+    schedule(task_cx_ptr);
 }
 
-struct TaskManagerInner {
-    current_task: usize,
-    //当前任务
-    tasks: [TaskControlBlock; MAX_APP_NUM],
+pub fn suspend_current_and_run_next() {
+    // There must be an application running.
+    let task = take_current_task().unwrap();
+
+    // ---- access current TCB exclusively
+    let mut task_inner = task.inner_exclusive_access();
+    let task_cx_ptr = &mut task_inner.task_cx as *mut TaskContext;
+    // Change status to Ready
+    task_inner.task_status = TaskStatus::Ready;
+    drop(task_inner);
+    // ---- release current TCB
+
+    // push back to ready queue.
+    add_task(task);
+    // jump to scheduling cycle
+    schedule(task_cx_ptr);
 }
 
-unsafe impl Sync for TaskManager {}
 
+pub fn exit_current_and_run_next(exit_code: i32) {
+    let task = take_current_task().unwrap();
+    let mut task_inner = task.inner_exclusive_access();
+    let process = task.process.upgrade().unwrap();
+    let tid = task_inner.res.as_ref().unwrap().tid;
+    // record exit code
+    task_inner.exit_code = Some(exit_code);
+    task_inner.res = None;
+    // here we do not remove the thread since we are still using the kstack
+    // it will be deallocated when sys_waittid is called
+    drop(task_inner);
+    drop(task);
+    // however, if this is the main thread of current process
+    // the process should terminate at once
+    if tid == 0 {
+        let pid = process.getpid();
+        if pid == IDLE_PID {
+            println!(
+                "[kernel] Idle process exit with exit_code {} ...",
+                exit_code
+            );
+            // 0号进程退出
+            panic!("Idle process exit with exit_code {}", exit_code);
+        }
+        remove_from_pid2process(pid); //移除对应关系，防止信号添加发生错误
+        let mut process_inner = process.inner_exclusive_access();
+        // mark this process as a zombie process
+        process_inner.is_zombie = true;
+        // record exit code of main process
+        process_inner.exit_code = exit_code;
+
+        {
+            // move all child processes under init process
+            let mut initproc_inner = INITPROC.inner_exclusive_access();
+            for child in process_inner.children.iter() {
+                child.inner_exclusive_access().parent = Some(Arc::downgrade(&INITPROC));
+                initproc_inner.children.push(child.clone());
+            }
+        }
+
+        // deallocate user res (including tid/trap_cx/ustack) of all threads
+        // it has to be done before we dealloc the whole memory_set
+        // otherwise they will be deallocated twice
+        let mut recycle_res = Vec::<TaskUserRes>::new();
+        for task in process_inner.tasks.iter().filter(|t| t.is_some()) {
+            let task = task.as_ref().unwrap();
+            // if other tasks are Ready in TaskManager or waiting for a timer to be
+            // expired, we should remove them.
+            //
+            // Mention that we do not need to consider Mutex/Semaphore since they
+            // are limited in a single process. Therefore, the blocked tasks are
+            // removed when the PCB is deallocated.
+            remove_inactive_task(Arc::clone(&task));
+            let mut task_inner = task.inner_exclusive_access();
+            if let Some(res) = task_inner.res.take() {
+                recycle_res.push(res);
+            }
+        }
+        // dealloc_tid and dealloc_user_res require access to PCB inner, so we
+        // need to collect those user res first, then release process_inner
+        // for now to avoid deadlock/double borrow problem.
+        drop(process_inner);
+        recycle_res.clear();
+
+        let mut process_inner = process.inner_exclusive_access();
+        process_inner.children.clear();
+        // deallocate other data in user space i.e. program code/data section
+        process_inner.memory_set.recycle_data_pages();
+        // drop file descriptors
+        process_inner.fd_table.clear();
+        // remove all tasks
+        // 这里会释放掉所有的线程
+        process_inner.tasks.clear();
+
+
+        // 使得原来的TLB表项无效掉，否则下一个进程与当前退出的进程号相同会导致
+        // 无法正确进行地址转换
+        unsafe {
+            asm!("invtlb 0x4,{},$r0",in(reg) pid);
+        }
+    }
+    drop(process);
+    // we do not have to save task context
+    let mut _unused = TaskContext::zero_init();
+    schedule(&mut _unused as *mut _);
+}
 
 lazy_static! {
-    /// 初始化任务管理器
-    /// 将各个应用的内核初始化完成 --- init_app_cx
-    /// 将各个任务的状态改变为初始化完成状态
-    pub static ref TASK_MANAGER: TaskManager = {
-        let num_app = get_num_app();
-        let mut tasks = [
-            TaskControlBlock {
-                task_cx_ptr: TaskContext::zero_init(),
-                task_status: TaskStatus::Uninit,
-                pass:0,
-                stride:0
-            };
-            MAX_APP_NUM
-        ];
-        for i in 0..num_app {
-            tasks[i].task_cx_ptr = TaskContext::goto_restore(init_app_cx(i));
-            tasks[i].task_status = TaskStatus::Ready;
-        }
-        TaskManager {
-            num_app,
-            inner: unsafe { UPSafeCell::new(TaskManagerInner {
-                tasks,
-                current_task: 0,
-            })},
-        }
+    pub static ref INITPROC: Arc<ProcessControlBlock> = {
+        let inode = open_file("initproc", OpenFlags::RDONLY).unwrap();
+        let v = inode.read_all();
+        ProcessControlBlock::new(v.as_slice())
     };
 }
-impl TaskManager {
-    fn mark_current_suspended(&self) {
-        //将当前任务变成暂停状态
-        let current_task = self.inner.borrow().current_task;
-        self.inner.borrow().tasks[current_task].task_status = TaskStatus::Ready;
-    }
-    fn mark_current_exited(&self) {
-        // 退出当前任务
-        let current_task = self.inner.borrow().current_task;
-        self.inner.borrow().tasks[current_task].task_status = TaskStatus::Exited;
-    }
-    fn set_priority(&self, priority: usize) -> isize {
-        //设置优先级就等价于更改增长量
-        let mut inner = self.inner.borrow();
-        let current_task = inner.current_task;
-        inner.tasks[current_task].pass = BIG_STRIDE / priority;
-        priority as isize
-    }
-    fn rr(&self) -> Option<usize> {
-        //这个是简单的时间片轮转法
-        let inner = self.inner.borrow();
-        let current_task = inner.current_task;
-        (current_task + 1..current_task + self.num_app + 1)
-            .map(|x| x % self.num_app)
-            .find(|index| {
-                //找到处于准备状态的任务
-                inner.tasks[*index].task_status == TaskStatus::Ready
-            })
-    }
 
-    fn stride(&self) -> Option<usize> {
-        //stride调度算法
-        let mut miniest = usize::MAX;
-        let mut index = 0;
-        for i in 0..self.num_app {
-            if self.inner.borrow().tasks[i].stride < miniest
-                && self.inner.borrow().tasks[i].task_status == TaskStatus::Ready
-            {
-                miniest = self.inner.borrow().tasks[i].stride;
-                index = i;
-            }
-        }
-        // DEBUG!("[kernel debug] {} {}",miniest,index);
-        Some(index)
-    }
-
-    fn find_next_task(&self) -> Option<usize> {
-        //寻找下一个可行的任务
-        self.rr()
-        // self.stride()
-    }
-    fn run_first_task(&self)->! {
-        let mut inner = self.inner.borrow();
-        let mut task0 = &mut inner.tasks[0];
-        task0.task_status = TaskStatus::Running;
-        // task0.stride += inner.tasks[0].pass;
-        let next_task_cx_ptr = &task0.task_cx_ptr as *const TaskContext;
-        let mut _unused = TaskContext::zero_init();
-        drop(inner);
-        unsafe {
-            __switch(&mut _unused as *mut TaskContext, next_task_cx_ptr);
-        }
-        panic!("unreachable in first_task");
-    }
-    fn run_next_task(&self){
-        if let Some(next) = self.find_next_task() {
-            //查询是否有处于准备的任务，如果有就运行
-            let mut inner = self.inner.borrow();
-            let current_task = inner.current_task;
-            inner.current_task = next;
-            inner.tasks[next].task_status = TaskStatus::Running;
-            // inner.tasks[next].stride += inner.tasks[next].pass;
-            //获取两个任务的task上下文指针
-            let current_task_cx_ptr = &mut inner.tasks[current_task].task_cx_ptr as *mut TaskContext;
-            let next_task_cx_ptr2 = &inner.tasks[next].task_cx_ptr as *const TaskContext;
-            //释放可变借用，否则进入下一个任务后将不能获取到inner的使用权
-            drop(inner);
-            unsafe {
-                __switch(current_task_cx_ptr, next_task_cx_ptr2);
-            }
-        } else {
-            panic!("There are no tasks!");
-        }
-    }
+pub fn add_initproc() {
+    let _initproc = INITPROC.clone();
 }
 
-pub fn suspend_current_run_next() {
-    mark_current_suspended(); //标记
-    run_next_task(); //运行下一个
+pub fn check_signals_of_current() -> Option<(i32, &'static str)> {
+    let process = current_process();
+    let process_inner = process.inner_exclusive_access();
+    process_inner.signals.check_error()
 }
 
-pub fn exit_current_run_next() {
-    mark_current_exited();
-    run_next_task();
+pub fn current_add_signal(signal: SignalFlags) {
+    let process = current_process();
+    let mut process_inner = process.inner_exclusive_access();
+    process_inner.signals |= signal;
 }
 
-pub fn set_priority(priority: usize) -> isize {
-    //设置特权级
-    TASK_MANAGER.set_priority(priority)
-}
-pub fn run_first_task() {
-    TASK_MANAGER.run_first_task();
-}
-
-fn mark_current_suspended() {
-    TASK_MANAGER.mark_current_suspended();
-}
-
-fn mark_current_exited() {
-    TASK_MANAGER.mark_current_exited();
-}
-
-fn run_next_task() {
-    TASK_MANAGER.run_next_task();
+pub fn remove_inactive_task(task: Arc<TaskControlBlock>) {
+    remove_task(Arc::clone(&task));
+    remove_timer(Arc::clone(&task));
+    //将主线程退出的那些处于等待的子线程也删除掉
 }

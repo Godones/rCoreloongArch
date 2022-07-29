@@ -27,7 +27,6 @@ Help()
 MEM="1G"
 # 1-4
 CPUS="1"
-#BIOS="./loongarch_bios_0310.bin"
 BIOS="./loongarch_bios_0310.bin"
 KERNEL="./vmlinux"
 INITRD="busybox-rootfs.img"
@@ -74,5 +73,5 @@ else
 fi
 
 set -x
-$QEMU -m $MEM -smp $CPUS -bios $BIOS -kernel $KERNEL $GRAPHIC $DEBUG -serial mon:stdio
+$QEMU -m $MEM -smp $CPUS -bios $BIOS -kernel $KERNEL $GRAPHIC $DEBUG -serial mon:stdio -drive file=$(FS_IMG),if=none,format=raw,id=x0
 # -initrd $INITRD -append "$CMDLINE" $GRAPHIC $DEBUG

@@ -4,13 +4,16 @@ MODE := release
 KERNEL_ELF := target/$(TARGET)/$(MODE)/loongrCore
 KERNEL_BIN := $(KERNEL_ELF).bin
 DISASM_TMP := target/$(TARGET)/$(MODE)/asm
-INFO := DEBUG
+
+
+
 #文件模拟块设备
 FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
+
 # BOARD
 BOARD ?= qemu
 SBI ?= rustsbi
-BOOTLOADER := ./loongarch_bios_0310.bin
+BOOTLOADER := ./qemu-loongarch-runenv/loongarch_bios_0310.bin
 
 #内核入口地址
 
@@ -27,15 +30,13 @@ build: kernel
 env:
 	cargo install cargo-binutils
 
-$(KERNEL_BIN): kernel
-	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
 
 kernel:
 	@cd ../user && make build
-	@#cd ../fs-test && make run
+	@rm -f $(FS_IMG)
+	@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/$(TARGET)/release/
 	@echo Platform: $(BOARD)
-	@cargo build --release --features TRACE
-
+	@cargo build --$(MODE) --features "board_$(BOARD)"
 
 clean:
 	@cargo clean
@@ -51,11 +52,34 @@ disasm-vim: kernel
 run: run-inner
 
 doc:
-	@cargo doc --open --features "board_$(BOARD)" --features"$(INFO)" --no-deps
+	@cargo doc --open --features"$(INFO)" --no-deps
 
 run-inner: build
 ifeq ($(BOARD),qemu)
-	 cd qemu-loongarch-runenv&& ./run_loongarch.sh -k ../$(KERNEL_ELF)
+#	 cd qemu-loongarch-runenv&& ./run_loongarch.sh -k ../$(KERNEL_ELF)
+	@qemu-system-loongarch64 \
+		-m 1G \
+		-smp 1 \
+		-bios $(BOOTLOADER) \
+		-kernel $(KERNEL_ELF) \
+		-vga none -nographic \
+		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
+		-device ahci,id=ahci0 \
+		-device ide-hd,drive=x0,bus=ahci0.0
+endif
+
+debug: build
+ifeq ($(BOARD),qemu)
+	@qemu-system-loongarch64 \
+		-m 1G \
+		-smp 1 \
+		-bios $(BOOTLOADER) \
+		-kernel $(KERNEL_ELF) \
+		-vga none -nographic \
+		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
+		-device ahci,id=ahci0 \
+		-device ide-hd,drive=x0,bus=ahci0.0 \
+		-s -S
 endif
 
 #qemu-system-loongarch64 -bios /home/proj93/loongrCore/qemu-loongarch-runenv/loongarch_bios_0310_debug.bin -kernel /home/proj93/loongrCore/target/loongarch64-unknown-linux-gnu/release/loongrCore -m 1G -smp 1 -vga none -nographic -s -serial mon:stdio

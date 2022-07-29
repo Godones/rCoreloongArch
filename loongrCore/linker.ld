@@ -1,19 +1,28 @@
 OUTPUT_ARCH( "loongarch" )
-ENTRY( main)
+ENTRY( _start)
 
 SECTIONS
 {
-    . = 0x9000000001000000;
-  #. = 0x00100000;
 
-    PROVIDE(etext = .);
+  # . = 0x9000_0000_0010_0000;
+  # 这里如果设置位0x9000_0000_0010_0000,则这段虚拟内存空间只能在内核态使用，如果我们切换到了用户态，那么就会导致不可用
+   . = 0x0000000000001000;
+  # . =  0x90100000;
+
+   PROVIDE(etext = .);
   .text : {
+    *(.text.init)
     *(.text .text.*)
     . = ALIGN(0x1000);
     _keentry = .;
     *(k_eentry)
+    . = ALIGN(0x1000);
+    *(tlb_handler)
+    . = ALIGN(0x1000);
+    *(k1_eentry)
   }
- PROVIDE(stext = .);
+  . = ALIGN(4K);
+  PROVIDE(stext = .);
 
   PROVIDE(erodata = .);
   .rodata : {
@@ -22,9 +31,10 @@ SECTIONS
     . = ALIGN(16);
     *(.rodata .rodata.*)
   }
-PROVIDE(srodata = .);
+  . = ALIGN(4K);
+  PROVIDE(srodata = .);
 
-PROVIDE(edata = .);
+  PROVIDE(edata = .);
 
   .data : {
 . = ALIGN(16);
@@ -32,18 +42,20 @@ PROVIDE(edata = .);
 . = ALIGN(16);
     *(.data .data.*)
   }
+  . = ALIGN(4K);
 PROVIDE(sdata = .);
 
-
   .bss : {
-    sbss = .;
+  *(.bss.stack)
+    ebss = .;
 . = ALIGN(16);
     *(.sbss .sbss.*)
 . = ALIGN(16);
     *(.bss .bss.*)
   }
+  . = ALIGN(4K);
 
-    ebss = .;
+    sbss = .;
     ekernel = .;
   PROVIDE(end = .);
 }

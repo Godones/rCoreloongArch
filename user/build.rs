@@ -1,8 +1,8 @@
 use std::env;
-use std::path::Path;
 use std::fs::{self};
 use std::include_bytes;
-use std::io::{Write};
+use std::io::Write;
+use std::path::Path;
 
 fn main() {
     let outdir = env::var("OUT_DIR").unwrap();
@@ -10,8 +10,8 @@ fn main() {
     let mut script = fs::File::create(&link_script).unwrap();
     script.write_all(include_bytes!("linker.ld")).unwrap();
     println!("cargo:rustc-link-arg=-T{}", &link_script.display());
-    println!("cargo:rustc-link-arg=-nostdlib");//关闭gcc的默认链接
-    // println!("cargo:rustc-link-arg=-no-pie"); //rust默认连接到Scrt1.o，使用动态链接
-    //println!("cargo:rustc-link-arg=-Wl,-Map=rust.map");
+    println!("cargo:rustc-link-arg=-nostdlib"); //关闭gcc的默认链接
+                                                // println!("cargo:rustc-link-arg=-no-pie"); //rust默认连接到Scrt1.o，使用动态链接
+                                                //println!("cargo:rustc-link-arg=-Wl,-Map=rust.map");
     println!("cargo:rerun-if-change=linker.ld");
 }
