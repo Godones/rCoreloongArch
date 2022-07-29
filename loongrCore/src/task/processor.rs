@@ -9,6 +9,7 @@ use crate::trap::TrapContext;
 use crate::Register;
 use alloc::sync::Arc;
 use lazy_static::*;
+use crate::task::process::ProcessControlBlock;
 
 /// Processor management structure
 pub struct Processor {
@@ -51,21 +52,24 @@ pub fn run_tasks() {
         if let Some(task) = fetch_task() {
             let idle_task_cx_ptr = processor.get_idle_task_cx_ptr();
             // access coming task TCB exclusively
+
+            let pid = task.process.upgrade().unwrap().getpid(); //应用进程号
+            let pgd = task.get_user_token() << PAGE_SIZE_BITS;
+            Pgdl::read().set_val(pgd).write(); //设置根页表基地址
+            Asid::read().set_asid(pid as u32).write(); //设置ASID
+            // let trap = task_inner.kernel_stack.get_trap_cx();
+            // error!(
+            //     "task_pid:{}, ASID:{}, pgd:{:#x}",
+            //     pid,
+            //     Asid::read().get_asid(),
+            //     pgd >> PAGE_SIZE_BITS
+            // );
+
             let mut task_inner = task.inner_exclusive_access();
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
 
-            let pid = task.getpid(); //应用进程号
-            let pgd = task_inner.get_user_token() << PAGE_SIZE_BITS;
-            Pgdl::read().set_val(pgd).write(); //设置根页表基地址
-            Asid::read().set_asid(pid as u32).write(); //设置ASID
-                                                       // let trap = task_inner.kernel_stack.get_trap_cx();
-                                                       // error!(
-                                                       //     "task_pid:{}, ASID:{}, pgd:{:#x}",
-                                                       //     pid,
-                                                       //     Asid::read().get_asid(),
-                                                       //     pgd >> PAGE_SIZE_BITS
-                                                       // );
+
             drop(task_inner);
             // release coming task TCB manually
             processor.current = Some(task);
@@ -85,10 +89,15 @@ pub fn take_current_task() -> Option<Arc<TaskControlBlock>> {
 pub fn current_task() -> Option<Arc<TaskControlBlock>> {
     PROCESSOR.exclusive_access().current()
 }
+
+pub fn current_process() -> Arc<ProcessControlBlock> {
+    current_task().unwrap().process.upgrade().unwrap()
+}
+
 ///Get token of the address space of current task
 pub fn current_user_token() -> usize {
     let task = current_task().unwrap();
-    let token = task.inner_exclusive_access().get_user_token();
+    let token = task.get_user_token();
     token
 }
 
@@ -98,12 +107,14 @@ pub fn current_trap_cx() -> &'static mut TrapContext {
         .inner_exclusive_access()
         .get_trap_cx()
 }
+pub fn current_kstack_top() -> usize {
+    current_task().unwrap().inner_exclusive_access().kstack.get_trap_addr()
+}
 
 pub fn current_trap_addr() -> usize {
     current_task()
         .unwrap()
         .inner_exclusive_access()
-        .kernel_stack
         .get_trap_addr()
 }
 

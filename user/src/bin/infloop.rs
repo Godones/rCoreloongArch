@@ -1,4 +1,3 @@
-
 #![no_std]
 #![no_main]
 #![allow(clippy::empty_loop)]

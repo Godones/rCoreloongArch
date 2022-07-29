@@ -10,6 +10,7 @@
 pub mod console;
 mod lang_items;
 mod syscall;
+mod thread;
 
 use alloc::vec::Vec;
 use bitflags::bitflags;
@@ -20,6 +21,10 @@ extern crate alloc;
 extern crate bitflags;
 extern crate buddy_system_allocator;
 extern crate rlibc;
+
+
+pub use thread::*;
+
 
 const USER_HEAP_SIZE: usize = 0x4000;
 static mut HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
@@ -276,3 +281,5 @@ pub fn sigprocmask(mask: u32) -> isize {
 pub fn sigreturn() -> isize {
     sys_sigreturn()
 }
+
+

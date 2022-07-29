@@ -8,6 +8,8 @@
 #![feature(const_mut_refs)]
 #![feature(stmt_expr_attributes)]
 #![feature(llvm_asm)]
+#![feature(lang_items)]
+
 mod base_define;
 mod boot_param;
 mod config;
@@ -85,8 +87,8 @@ pub extern "C" fn main(
     info!("Block device init");
     ahci_init();
     //运行程序
-    add_initproc(); //添加初始化程序
     list_apps(); //列出所有程序
+    add_initproc(); //添加初始化程序
     enable_timer_interrupt();
     info!("task init");
     task::run_tasks(); //运行程序

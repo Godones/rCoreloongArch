@@ -1,8 +1,13 @@
+use core::arch::asm;
 use crate::{print, println};
 
 /// 这个函数将在 panic 时被调用
+///
+#[lang = "eh_personality"]
 #[no_mangle]
-extern "C" fn eh_personality() {}
+pub extern "C" fn eh_personality() {}
+#[no_mangle]
+pub extern "C" fn _Unwind_Resume() {}
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     print!("Aborting: ");
@@ -14,7 +19,7 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
             info.message().unwrap()
         );
     } else {
-        println!("no information available.");
+        println!("[kernel] Panicked: {}", info.message().unwrap());
     }
     abort();
 }

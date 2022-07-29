@@ -19,6 +19,19 @@ const SYSCALL_FORK: usize = 220;
 const SYSCALL_EXEC: usize = 221;
 const SYSCALL_WAITPID: usize = 260;
 
+const SYSCALL_THREAD_CREATE: usize = 1000;
+const SYSCALL_GETTID: usize = 1001;
+const SYSCALL_WAITTID: usize = 1002;
+const SYSCALL_MUTEX_CREATE: usize = 1010;
+const SYSCALL_MUTEX_LOCK: usize = 1011;
+const SYSCALL_MUTEX_UNLOCK: usize = 1012;
+const SYSCALL_SEMAPHORE_CREATE: usize = 1020;
+const SYSCALL_SEMAPHORE_UP: usize = 1021;
+const SYSCALL_SEMAPHORE_DOWN: usize = 1022;
+const SYSCALL_CONDVAR_CREATE: usize = 1030;
+const SYSCALL_CONDVAR_SIGNAL: usize = 1031;
+const SYSCALL_CONDVAR_WAIT: usize = 1032;
+
 global_asm!(include_str!("syscall.asm"));
 
 pub fn syscall(id: usize, args0: usize, args1: usize, args2: usize) -> isize {
@@ -149,4 +162,22 @@ pub fn sys_sigreturn() -> isize {
 // signal：信号的整数码
 pub fn sys_kill(pid: usize, signal: i32) -> isize {
     syscall(SYSCALL_KILL, pid, signal as usize, 0)
+}
+
+
+
+/// 功能：当前进程创建一个新的线程
+/// 参数：entry 表示线程的入口函数地址
+/// 参数：arg：表示线程的一个参数
+pub fn sys_thread_create(entry: usize, arg: usize) -> isize{
+    syscall(SYSCALL_THREAD_CREATE,entry,arg,0)
+}
+/// 参数：tid表示线程id
+/// 返回值：如果线程不存在，返回-1；如果线程还没退出，返回-2；其他情况下，返回结束线程的退出码
+pub fn sys_gettid() -> isize {
+    syscall(SYSCALL_GETTID,0,0,0)
+}
+
+pub fn sys_waittid(tid: usize) -> isize {
+    syscall(SYSCALL_WAITTID, tid, 0, 0)
 }

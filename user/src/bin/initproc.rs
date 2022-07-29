@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-#[macro_use]
 extern crate user_lib;
 
 use user_lib::{exec, fork, wait, yield_};
@@ -18,10 +17,13 @@ fn main() -> i32 {
                 yield_();
                 continue;
             }
+            /*
             println!(
                 "[initproc] Released a zombie process, pid={}, exit_code={}",
-                pid, exit_code,
+                pid,
+                exit_code,
             );
+            */
         }
     }
     0
