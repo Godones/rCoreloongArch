@@ -134,7 +134,6 @@ use crate::fs::{open_file, OpenFlags};
 use alloc::{sync::Arc, vec::Vec};
 use core::arch::asm;
 use lazy_static::*;
-use log::{info, warn};
 use manager::fetch_task;
 use process::ProcessControlBlock;
 use switch::__switch;
@@ -150,6 +149,17 @@ pub use processor::{
 pub use signal::SignalFlags;
 pub use task::{TaskControlBlock, TaskStatus};
 use crate::println;
+use crate::timer::remove_timer;
+
+
+pub fn block_current_and_run_next() {
+    let task = take_current_task().unwrap();
+    let mut task_inner = task.inner_exclusive_access();
+    let task_cx_ptr = &mut task_inner.task_cx as *mut TaskContext;
+    task_inner.task_status = TaskStatus::Blocking;
+    drop(task_inner);
+    schedule(task_cx_ptr);
+}
 
 pub fn suspend_current_and_run_next() {
     // There must be an application running.
@@ -283,5 +293,6 @@ pub fn current_add_signal(signal: SignalFlags) {
 
 pub fn remove_inactive_task(task: Arc<TaskControlBlock>) {
     remove_task(Arc::clone(&task));
-    // remove_timer(Arc::clone(&task));
+    remove_timer(Arc::clone(&task));
+    //将主线程退出的那些处于等待的子线程也删除掉
 }

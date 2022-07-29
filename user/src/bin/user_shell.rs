@@ -132,7 +132,7 @@ pub fn main() -> i32 {
                                 if !input.is_empty() {
                                     let input_fd = open(input.as_str(), OpenFlags::RDONLY);
                                     if input_fd == -1 {
-                                        println!("Error when opening file {}", input);
+                                        println!("Error when opening fs {}", input);
                                         return -4;
                                     }
                                     let input_fd = input_fd as usize;
@@ -147,7 +147,7 @@ pub fn main() -> i32 {
                                         OpenFlags::CREATE | OpenFlags::WRONLY,
                                     );
                                     if output_fd == -1 {
-                                        println!("Error when opening file {}", output);
+                                        println!("Error when opening fs {}", output);
                                         return -4;
                                     }
                                     let output_fd = output_fd as usize;

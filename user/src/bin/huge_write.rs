@@ -14,7 +14,7 @@ pub fn main() -> i32 {
     }
     let f = open("testf\0", OpenFlags::CREATE | OpenFlags::WRONLY);
     if f < 0 {
-        panic!("Open test file failed!");
+        panic!("Open test fs failed!");
     }
     let f = f as usize;
     let start = get_time();

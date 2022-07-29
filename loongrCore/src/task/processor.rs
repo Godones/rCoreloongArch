@@ -52,7 +52,7 @@ pub fn run_tasks() {
         if let Some(task) = fetch_task() {
             let idle_task_cx_ptr = processor.get_idle_task_cx_ptr();
             // access coming task TCB exclusively
-
+            // info!("Switch to task {}", task.inner_exclusive_access().res.as_ref().unwrap().tid);
             let pid = task.process.upgrade().unwrap().getpid(); //应用进程号
             let pgd = task.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址

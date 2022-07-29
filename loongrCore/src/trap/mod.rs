@@ -31,6 +31,7 @@ use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
 use log::{error, trace};
+use crate::timer::check_timer;
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -185,8 +186,9 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
 
 fn timer_handler() {
     trace!("timer interrupt from user");
+    check_timer();//释放那些处于等待的任务
     Ticlr::read().clear_timer().write(); //清除时钟中断
-    Tcfg::read().set_enable(true).write(); //使能时钟中断
+    Tcfg::read().set_enable(true).write(); //使能时钟中断,继续下一轮运转
     suspend_current_and_run_next();
 }
 

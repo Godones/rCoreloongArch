@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 
 use core::fmt::{self, Debug, Formatter};
 use lazy_static::*;
-use log::{info, warn};
+use log::{info};
 
 #[derive(Clone)]
 pub struct FrameTracker {

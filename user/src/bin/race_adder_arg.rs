@@ -37,7 +37,7 @@ pub fn main(argc: usize, argv: &[&str]) -> i32 {
         println!("ERROR in argv");
         exit(-1);
     }
-
+    println!("count: {}", count);
     let start = get_time();
     let mut v = Vec::new();
     for _ in 0..THREAD_COUNT {

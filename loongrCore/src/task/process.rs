@@ -15,7 +15,7 @@ use core::cell::RefMut;
 use crate::config::PAGE_SIZE_BITS;
 use crate::loong_arch::tlb::Pgdl;
 use crate::Register;
-use crate::sync::UPSafeCell;
+use crate::sync::{Condvar, Mutex, Semaphore, UPSafeCell};
 
 // 进程控制块
 pub struct ProcessControlBlock {
@@ -35,6 +35,9 @@ pub struct ProcessControlBlockInner {
     pub signals: SignalFlags, //信号
     pub tasks: Vec<Option<Arc<TaskControlBlock>>>, //线程控制块
     pub task_res_allocator: RecycleAllocator, //资源分配器
+    pub mutex_list: Vec<Option<Arc<dyn Mutex>>>, //互斥锁列表
+    pub semaphore_list: Vec<Option<Arc<Semaphore>>>, //信号量列表
+    pub condvar_list: Vec<Option<Arc<Condvar>>>, //条件变量列表
 }
 
 impl ProcessControlBlockInner {
@@ -99,6 +102,9 @@ impl ProcessControlBlock {
                     signals: SignalFlags::empty(),
                     tasks: Vec::new(),
                     task_res_allocator: RecycleAllocator::new(),
+                    mutex_list: Vec::new(),
+                    semaphore_list: Vec::new(),
+                    condvar_list: Vec::new(),
                 })
             },
         });
@@ -220,6 +226,9 @@ impl ProcessControlBlock {
                     signals: SignalFlags::empty(),
                     tasks: Vec::new(),
                     task_res_allocator: RecycleAllocator::new(),
+                    mutex_list: Vec::new(),
+                    semaphore_list: Vec::new(),
+                    condvar_list: Vec::new(),
                 })
             },
         });

@@ -1,4 +1,3 @@
-use crate::SignalAction;
 use core::arch::global_asm;
 
 const SYSCALL_DUP: usize = 24;
@@ -8,11 +7,9 @@ const SYSCALL_PIPE: usize = 59;
 const SYSCALL_READ: usize = 63;
 const SYSCALL_WRITE: usize = 64;
 const SYSCALL_EXIT: usize = 93;
+const SYSCALL_SLEEP: usize = 101;
 const SYSCALL_YIELD: usize = 124;
 const SYSCALL_KILL: usize = 129;
-const SYSCALL_SIGACTION: usize = 134;
-const SYSCALL_SIGPROCMASK: usize = 135;
-const SYSCALL_SIGRETURN: usize = 139;
 const SYSCALL_GET_TIME: usize = 169;
 const SYSCALL_GETPID: usize = 172;
 const SYSCALL_FORK: usize = 220;
@@ -31,6 +28,7 @@ const SYSCALL_SEMAPHORE_DOWN: usize = 1022;
 const SYSCALL_CONDVAR_CREATE: usize = 1030;
 const SYSCALL_CONDVAR_SIGNAL: usize = 1031;
 const SYSCALL_CONDVAR_WAIT: usize = 1032;
+const SYSCALL_LS: usize = 1040;//list files in a directory
 
 global_asm!(include_str!("syscall.asm"));
 
@@ -129,34 +127,6 @@ pub fn sys_dup(fd: usize) -> isize {
     syscall(SYSCALL_DUP, fd, 0, 0)
 }
 
-// 设置信号处理例程
-// signum：指定信号
-// action：新的信号处理配置
-// old_action：老的的信号处理配置
-pub fn sys_sigaction(
-    signum: i32,
-    action: *const SignalAction,
-    old_action: *const SignalAction,
-) -> isize {
-    syscall(
-        SYSCALL_SIGACTION,
-        signum as usize,
-        action as usize,
-        old_action as usize,
-    )
-}
-
-// 设置要阻止的信号
-// mask：信号掩码
-pub fn sys_sigprocmask(mask: u32) -> isize {
-    syscall(SYSCALL_SIGPROCMASK, mask as usize, 0, 0)
-}
-
-// 清除堆栈帧，从信号处理例程返回
-pub fn sys_sigreturn() -> isize {
-    syscall(SYSCALL_SIGRETURN, 0, 0, 0)
-}
-
 // 将某信号发送给某进程
 // pid：进程pid
 // signal：信号的整数码
@@ -164,20 +134,60 @@ pub fn sys_kill(pid: usize, signal: i32) -> isize {
     syscall(SYSCALL_KILL, pid, signal as usize, 0)
 }
 
-
-
 /// 功能：当前进程创建一个新的线程
 /// 参数：entry 表示线程的入口函数地址
 /// 参数：arg：表示线程的一个参数
-pub fn sys_thread_create(entry: usize, arg: usize) -> isize{
-    syscall(SYSCALL_THREAD_CREATE,entry,arg,0)
+pub fn sys_thread_create(entry: usize, arg: usize) -> isize {
+    syscall(SYSCALL_THREAD_CREATE, entry, arg, 0)
 }
 /// 参数：tid表示线程id
 /// 返回值：如果线程不存在，返回-1；如果线程还没退出，返回-2；其他情况下，返回结束线程的退出码
 pub fn sys_gettid() -> isize {
-    syscall(SYSCALL_GETTID,0,0,0)
+    syscall(SYSCALL_GETTID, 0, 0, 0)
 }
 
 pub fn sys_waittid(tid: usize) -> isize {
     syscall(SYSCALL_WAITTID, tid, 0, 0)
+}
+
+pub fn sys_sleep(ms: usize) -> isize {
+    syscall(SYSCALL_SLEEP, ms, 0, 0)
+}
+
+pub fn sys_mutex_create(blocking: bool) -> isize {
+    syscall(SYSCALL_MUTEX_CREATE, blocking as usize, 0, 0)
+}
+pub fn sys_mutex_lock(id: usize) -> isize {
+    syscall(SYSCALL_MUTEX_LOCK, id, 0, 0)
+}
+pub fn sys_mutex_unlock(id: usize) -> isize {
+    syscall(SYSCALL_MUTEX_UNLOCK, id, 0, 0)
+}
+
+pub fn sys_semaphore_create(res_count: usize) -> isize {
+    syscall(SYSCALL_SEMAPHORE_CREATE, res_count, 0, 0)
+}
+
+pub fn sys_semaphore_up(sem_id: usize) -> isize {
+    syscall(SYSCALL_SEMAPHORE_UP, sem_id, 0, 0)
+}
+
+pub fn sys_semaphore_down(sem_id: usize) -> isize {
+    syscall(SYSCALL_SEMAPHORE_DOWN, sem_id, 0, 0)
+}
+
+pub fn sys_condvar_create(_arg: usize) -> isize {
+    syscall(SYSCALL_CONDVAR_CREATE, _arg, 0, 0)
+}
+
+pub fn sys_condvar_signal(condvar_id: usize) -> isize {
+    syscall(SYSCALL_CONDVAR_SIGNAL, condvar_id, 0, 0)
+}
+
+pub fn sys_condvar_wait(condvar_id: usize, mutex_id: usize) -> isize {
+    syscall(SYSCALL_CONDVAR_WAIT, condvar_id, mutex_id, 0)
+}
+
+pub fn sys_ls()->isize{
+    syscall(SYSCALL_LS,0,0,0)
 }
