@@ -6,6 +6,5 @@ extern "C" {
     pub fn __switch(
         current_task_cx_ptr: *mut TaskContext,
         next_task_cx_ptr: *const TaskContext,
-        task_id: usize,
     );
 }

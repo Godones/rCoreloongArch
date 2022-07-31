@@ -11,7 +11,7 @@ __alltraps:
     st.d $r1, $sp, 8
     st.d $r2, $sp, 16
     # 这里不需要保存 sp的值
-    #st.d $r3, $sp, 24 #sp
+    # st.d $r3, $sp, 24 #sp
     st.d $r4, $sp, 32
     st.d $r5, $sp, 40
     st.d $r6, $sp, 48
@@ -28,7 +28,7 @@ __alltraps:
     st.d $r17, $sp, 136
     st.d $r18, $sp, 144
     st.d $r19, $sp, 152
-    st.d $r20, $sp,160
+    st.d $r20, $sp, 160
     st.d $r21, $sp, 168
     st.d $r22, $sp, 176
     st.d $r23, $sp, 184
@@ -42,14 +42,14 @@ __alltraps:
     st.d $r31, $sp, 248
 
     #读取crmd
-    csrrd $t0, 0x0
+    csrrd $t0, 0x0 #CRMD
     csrrd $t1, 0x6 #返回地址
-    st.d $t0, $sp,256
-    st.d $t1, $sp,264
+    st.d $t0, $sp,256 #保存CRMD
+    st.d $t1, $sp,264 #保存era
 
-    csrrd $t2,0x502 #读出用户栈指针
+    csrrd $t2,0x502  #读出用户栈指针
 
-    st.d $t2, $sp,24
+    st.d $t2, $sp,24 #保存用户栈指针
     # set input argument of trap_handler(cx: &mut TrapContext)
 
     move $a0, $sp
@@ -58,6 +58,7 @@ __alltraps:
 __restore:
     ld.d $t1, $sp,264 #加载返回地址
     ld.d $t2, $sp,24  #用户栈指针
+
 
     csrwr $t1, 0x6    #将返回地址写入$era寄存器中
     csrwr $t2, 0x502  #将用户栈指针放到DSAVE中,这里暂时使用此寄存器

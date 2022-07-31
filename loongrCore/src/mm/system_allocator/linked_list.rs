@@ -4,7 +4,7 @@
 use crate::mm::system_allocator::common::{align_up, Locked};
 use core::alloc::GlobalAlloc;
 use core::{alloc::Layout, result};
-use log::debug;
+use log::{debug, info};
 
 struct ListNode {
     size: usize,
@@ -35,7 +35,7 @@ impl LinkedListAllocator {
     }
     pub fn init(&mut self, heap_start: usize, heap_size: usize) {
         //初始化堆
-        debug!("heap_start: {:x}, heap_size: {:x}", heap_start, heap_size);
+        info!("heap_start: {:#x}, heap_size: {:#x}", heap_start, heap_size);
         unsafe {
             self.push(heap_start, heap_size);
         }

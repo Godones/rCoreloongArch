@@ -99,7 +99,7 @@ impl KernelStack {
         ptr_mut
     }
     ///Get the value on the top of kernelstack
-    fn get_top(&self) -> usize {
+    pub fn get_top(&self) -> usize {
         let top :PhysAddr= self.frame.ppn.into();
         let top = top.0 + PAGE_SIZE;
         top

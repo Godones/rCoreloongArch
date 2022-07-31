@@ -1,5 +1,5 @@
 use super::{frame_alloc, FrameTracker, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
-use crate::config::{PAGE_SIZE_BITS, PALEN};
+use crate::config::{PAGE_SIZE, PAGE_SIZE_BITS, PALEN};
 use crate::mm::PhysAddr;
 use alloc::string::String;
 use alloc::vec;
@@ -7,6 +7,7 @@ use alloc::vec::Vec;
 use bit_field::BitField;
 use bitflags::*;
 use core::fmt::{self};
+use log::{info};
 bitflags! {
     pub struct PTEFlags: usize {
         const V = 1 << 0;
@@ -145,6 +146,7 @@ impl PageTable {
             if pte.is_zero() {
                 let frame = frame_alloc().unwrap();
                 // 页目录项只保存地址
+                info!("[PageTable] [PTE2-3]: {:#x}-{:#x}", frame.ppn.0<<PAGE_SIZE_BITS,(frame.ppn.0<<PAGE_SIZE_BITS) + PAGE_SIZE);
                 *pte = PageTableEntry {
                     bits: frame.ppn.0 << PAGE_SIZE_BITS,
                 };
@@ -160,6 +162,10 @@ impl PageTable {
         let mut result: Option<&mut PageTableEntry> = None;
         for i in 0..3 {
             let pte = &mut ppn.get_pte_array()[idxs[i]];
+            // if i!=2{
+            //     warn!("[FINDPTE] PPN:{:#x}",pte.bits);
+            // }
+
             if pte.is_zero() {
                 return None;
             }

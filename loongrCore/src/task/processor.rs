@@ -59,6 +59,9 @@ pub fn run_tasks() {
             let pgd = task_inner.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
+            use crate::error;
+            error!("[TRAP] [ASID] {} {:?}",pid,task_inner.kernel_stack.get_trap_cx());
+
             // info!("task {} is running, ASID:{} pgd:{:#x}", pid,Asid::read().get_asid(),pgd>>PAGE_SIZE_BITS);
             drop(task_inner);
             // release coming task TCB manually
@@ -66,7 +69,7 @@ pub fn run_tasks() {
             // release processor manually
             drop(processor);
             unsafe {
-                __switch(idle_task_cx_ptr, next_task_cx_ptr, pid);
+                __switch(idle_task_cx_ptr, next_task_cx_ptr);
             }
         }
     }
@@ -107,6 +110,6 @@ pub fn schedule(switched_task_cx_ptr: *mut TaskContext) {
     let idle_task_cx_ptr = processor.get_idle_task_cx_ptr();
     drop(processor);
     unsafe {
-        __switch(switched_task_cx_ptr, idle_task_cx_ptr, 0);
+        __switch(switched_task_cx_ptr, idle_task_cx_ptr);
     }
 }

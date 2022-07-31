@@ -46,11 +46,10 @@ pub fn init() {
     Eentry::read().set_eentry(kernel_trap_entry  as usize).write(); //设置普通异常和中断入口
                                                             //设置TLB重填异常地址
     TLBREntry::read()
-        .set_val((__alltraps as usize).get_bits(0..32))
+        .set_val((__tlb_rfill as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
     SltbPs::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
     TlbREhi::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
-
     Pwcl::read()
         .set_ptbase(0xe)
         .set_ptwidth(0xb)
@@ -125,10 +124,10 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         | Trap::Exception(Exception::StorePageFault)
         | Trap::Exception(Exception::FetchPageFault) => {
             //页面异常
-            // tlb_page_fault();
+            tlb_page_fault();
             let t = estat.cause();
             let badv = Badv::read().get_value();
-            println!("[kernel] {:?} {:#x} PageFault in application, core dumped.",t,badv);
+            info!("[kernel] {:?} {:#x} PageFault in application, core dumped.",t,badv);
             exit_current_and_run_next(-2);
         }
         Trap::Exception(Exception::InstructionNotExist) => {
@@ -195,7 +194,8 @@ pub fn trap_handler_kernel(){
             Ticlr::read().clear_timer().write(); //清除时钟专断
         }
         _ => {
-            panic!("{:?}", estat.cause());
+            let badv = Badv::read().get_value();
+            panic!("{:?}, badv:{:#x}", estat.cause(),badv);
         }
     }
 
@@ -234,6 +234,7 @@ fn tlb_refill_handler() {
     //     )
     // }
     // info!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+    info!("TLBRFill handler");
     extern "C"{
         fn __tlb_rfill();
     }
@@ -246,16 +247,17 @@ fn tlb_refill_handler() {
 /// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且 V=1，且特权等级合规的项，但是该页
 //  表项的 D 位为 0，将触发该例外
 fn tlb_page_modify_handler() {
-    // INFO!("PageModifyFault handler");
     //找到对应的页表项，修改D位为1
-    let badv = TlbRBadv::read().get_val(); //出错虚拟地址
+    let badv = Badv::read().get_value(); //出错虚拟地址
+    let rbadv = TlbRBadv::read().get_val();
+    info!("PageModifyFault {:#x} {:#x}",badv,rbadv);
     let vpn: VirtAddr = badv.into(); //虚拟地址
     let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
     let token = current_user_token();
     let page_table = PageTable::from_token(token);
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
     pte.set_dirty(); //修改D位为1
-                     // INFO!("{:?}", pte);
+    // info!("{:?}", pte);
     unsafe {
         asm!("tlbsrch", "tlbrd",); //根据TLBEHI的虚双页号查询TLB对应项
     }
@@ -277,14 +279,21 @@ fn man(){}
 #[no_mangle]
 fn tlb_page_fault(){
     //检查pagefault相关内容
-    unsafe {
-        asm!(
-            "tlbsrch",
-            "tlbrd",
-        )
+    // unsafe {
+    //     asm!(
+    //         "tlbsrch",
+    //         "tlbrd",
+    //     )
+    // }
+    let badv = Badv::read().get_value();
+    let token = current_user_token();
+    let vpn: VirtAddr = badv.into(); //虚拟地址
+    let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
+    let page_table = PageTable::from_token(token);
+    if let Some(pte) = page_table.find_pte(vpn){
+        info!("badv:{:#x} has pte:{:?}",badv,pte);
+    }else{
+        info!("badv:{:#x} hasn't pte",badv);
     }
-    let tlbelo0 = TLBELO::read(0);
-    let tlbelo1 = TLBELO::read(1);
-    info!("tlbelo0 :{:?}",tlbelo0);
-    info!("tlbelo1 :{:?}",tlbelo1);
+
 }
