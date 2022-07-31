@@ -52,7 +52,7 @@ pub fn init() {
         .write(); //设置普通异常和中断入口
                   //设置TLB重填异常地址
     TLBREntry::read()
-        .set_val((__alltraps as usize).get_bits(0..32))
+        .set_val((__tlb_rfill as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
     SltbPs::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
     TlbREhi::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
@@ -143,13 +143,13 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
                 "[kernel] {:?} {:#x} PageFault in application, core dumped.",
                 t, badv
             );
-            panic!("PageFault in application, core dumped.");
+            exit_current_and_run_next(-2);
         }
         Trap::Exception(Exception::InstructionNotExist) => {
             //指令不存在
             tlb_page_fault();
             println!("[kernel] InstructionNotExist in application, core dumped.");
-            exit_current_and_run_next(-3);
+            exit_current_and_run_next(-2);
         }
         Trap::Exception(Exception::InstructionPrivilegeIllegal) => {
             //指令权限不足
