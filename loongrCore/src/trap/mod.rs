@@ -60,18 +60,18 @@ pub fn init() {
     unsafe {
         asm!("invtlb 0,$r0,$r0"); //清除TLB
     }
-    info!("init trap ok");
 }
 
 pub fn enable_timer_interrupt() {
     let timer_freq = get_timer_freq();
+    Ecfg::read().set_lie_with_index(11, true).write();
     Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read()
         .set_enable(true)
         .set_loop(true)
         .set_tval(timer_freq / TICKS_PER_SEC)
         .write(); //设置计时器的配置
-    Ecfg::read().set_lie_with_index(11, true).write();
+
     Crmd::read().set_ie(true).write(); //开启全局中断
 }
 
@@ -90,7 +90,7 @@ pub fn trap_return(){
         fn __restore();
     }
     unsafe{
-        asm!("bl __restore")
+        __restore();
     }
 }
 
@@ -138,9 +138,11 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
             // 页表项和页目录项的区别将会与riscv大不相同
             tlb_refill_handler()
         }
-        Trap::Exception(Exception::PageModifyFault) => tlb_page_modify_handler(),
+        Trap::Exception(Exception::PageModifyFault) => {
+            tlb_page_modify_handler();
+        }
         _ => {
-            panic!("{:?}", estat.cause());
+            panic!("{:#b}", estat.get_val());
         }
     }
     cx
@@ -153,6 +155,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
 /// 在正常运行后系统在从用户态trap进入内核态后是不会触发中断的
 #[no_mangle]
 pub fn trap_handler_kernel(){
+    info!("kernel trap");
     let estat = Estat::read();
     let crmd = Crmd::read();
     if crmd.get_plv() !=0{
