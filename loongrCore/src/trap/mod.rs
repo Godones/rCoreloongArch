@@ -249,8 +249,7 @@ fn tlb_refill_handler() {
 fn tlb_page_modify_handler() {
     //找到对应的页表项，修改D位为1
     let badv = Badv::read().get_value(); //出错虚拟地址
-    let rbadv = TlbRBadv::read().get_val();
-    info!("PageModifyFault {:#x} {:#x}",badv,rbadv);
+    // info!("PageModifyFault {:#x} {:#x}",badv,rbadv);
     let vpn: VirtAddr = badv.into(); //虚拟地址
     let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
     let token = current_user_token();

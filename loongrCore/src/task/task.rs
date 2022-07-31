@@ -1,4 +1,4 @@
-use crate::config::{PAGE_SIZE, PAGE_SIZE_BITS, USER_STACK_SIZE};
+use crate::config::{PAGE_SIZE_BITS};
 use crate::loong_arch::tlb::Pgdl;
 use crate::mm::MemorySet;
 use crate::sync::UPSafeCell;
@@ -12,7 +12,6 @@ use alloc::sync::Weak;
 use alloc::vec::Vec;
 use core::arch::asm;
 use core::cell::RefMut;
-use log::info;
 
 pub struct TaskControlBlock {
     // immutable
@@ -68,13 +67,7 @@ impl TaskControlBlock {
                                                     //在内核栈放入trap上下文
         let kernel_trap_cx =
             kernel_stack.push_on_top(TrapContext::app_init_context(entry_point, user_sp));
-        info!("entry_point: {:#x}, user_sp:{:#x}-{:#x}, kernel_sp:{:#x}-{:#x}",
-            entry_point,
-            user_sp-USER_STACK_SIZE,
-            user_sp,
-            kernel_stack.get_top()-PAGE_SIZE,
-            kernel_stack.get_top()
-        );
+
         let task_control_block = Self {
             pid,
             inner: unsafe {
@@ -108,8 +101,6 @@ impl TaskControlBlock {
         let kernel_stack = KernelStack::new();
         // kernel_stack = *kernel_stack.copy_from_other(&parent_inner.kernel_stack);
         let kstack_ptr = kernel_stack.get_trap_addr();
-
-        info!("[fork]: kernel_sp:{:#x}-{:#x}", kernel_stack.get_top()-PAGE_SIZE, kernel_stack.get_top());
         // todo!(未知bug)
         // bug描述，在构建task_control_block前完成trap_context的初始化
         // 会在构造完成后使得trap初始化区域的值变化

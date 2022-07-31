@@ -5,9 +5,8 @@ use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
-use log::info;
 
-use crate::config::{PAGE_SIZE, PAGE_SIZE_BITS, USER_STACK_SIZE};
+use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
 
 pub struct MemorySet {
     // 页表，这里主要管理的是各级目录所在位置
@@ -184,7 +183,6 @@ impl MapArea {
         let ppn: PhysPageNum;
         let frame = frame_alloc().unwrap();
         ppn = frame.ppn;
-        info!("[MapArea] [PTE] {:#x}-{:#x}",frame.ppn.0<<PAGE_SIZE_BITS,(frame.ppn.0<<PAGE_SIZE_BITS)+ PAGE_SIZE);
         self.data_frames.insert(vpn, frame);
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
         page_table.map(vpn, ppn, pte_flags);

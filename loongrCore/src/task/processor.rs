@@ -59,9 +59,6 @@ pub fn run_tasks() {
             let pgd = task_inner.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
-            use crate::error;
-            error!("[TRAP] [ASID] {} {:?}",pid,task_inner.kernel_stack.get_trap_cx());
-
             // info!("task {} is running, ASID:{} pgd:{:#x}", pid,Asid::read().get_asid(),pgd>>PAGE_SIZE_BITS);
             drop(task_inner);
             // release coming task TCB manually
