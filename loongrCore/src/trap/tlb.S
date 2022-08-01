@@ -11,6 +11,6 @@ __tlb_rfill:
     ldpte $t0, 1
     #取回奇数号页表项
     tlbfill
-    csrrd $t0, CSR_TLBRSAVE
-    jr $ra
-    #ertn
+    csrrd $t0, 0x8B
+    #jr $ra
+    ertn

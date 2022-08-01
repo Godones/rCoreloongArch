@@ -85,10 +85,9 @@ pub extern "C" fn main(
     info!("Block device init");
     ahci_init();
     //运行程序
-    add_initproc(); //添加初始化程序
     list_apps(); //列出所有程序
-    enable_timer_interrupt();
-    info!("task init");
+    add_initproc(); //添加初始化程序
+    // enable_timer_interrupt();
     task::run_tasks(); //运行程序
     panic!("main end");
 }

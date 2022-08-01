@@ -53,7 +53,7 @@ pub fn init() {
         .write(); //设置普通异常和中断入口
                   //设置TLB重填异常地址
     TLBREntry::read()
-        .set_val((__alltraps as usize).get_bits(0..32))
+        .set_val((__tlb_rfill as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
     SltbPs::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
     TlbREhi::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
@@ -161,7 +161,9 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             // 页表项和页目录项的区别将会与riscv大不相同
             tlb_refill_handler();
         }
-        Trap::Exception(Exception::PageModifyFault) => tlb_page_modify_handler(),
+        Trap::Exception(Exception::PageModifyFault) => {
+            tlb_page_modify_handler();
+        }
         Trap::Exception(Exception::PagePrivilegeIllegal) => {
             //页权限不足
             tlb_page_fault();
