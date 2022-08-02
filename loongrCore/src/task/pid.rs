@@ -5,6 +5,7 @@ use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use alloc::vec::Vec;
 use lazy_static::*;
+use crate::{print, println};
 
 ///Pid Allocator struct
 pub struct PidAllocator {
@@ -92,7 +93,7 @@ impl KernelStack {
         let kernel_stack_top = self.get_top();
         let ptr_mut = (kernel_stack_top - core::mem::size_of::<T>()) as *mut T;
         unsafe {
-            *ptr_mut = value;
+            ptr_mut.write_volatile(value);
         }
         ptr_mut
     }
@@ -115,11 +116,12 @@ impl KernelStack {
         let addr = self.get_top() - core::mem::size_of::<TrapContext>();
         addr
     }
-}
-
-fn kernel_stack_position(app_id: usize) -> (usize, usize) {
-    let top = MEMORY_END - app_id * KERNEL_STACK_SIZE;
-    // 对齐到8k
-    let bottom = top - KERNEL_STACK_SIZE;
-    (bottom, top)
+    pub fn print_trap_context(&self) {
+        let cx = self.get_top() - core::mem::size_of::<TrapContext>();
+        unsafe {
+            let cx = &*(cx as *const TrapContext);
+            cx.x.iter().for_each(|x| {print!("{:} ", x);});
+            println!("crmd {:#b} sepc: {:#x}",cx.crmd,cx.sepc);
+        }
+    }
 }

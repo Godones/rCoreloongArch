@@ -16,6 +16,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::arch::asm;
 use core::cell::RefMut;
+use log::info;
 
 pub struct TaskControlBlock {
     // immutable
@@ -83,16 +84,14 @@ impl TaskControlBlock {
         let task_status = TaskStatus::Ready; //准备指向状态
         let pid = pid_alloc(); //分配pid
         let kernel_stack = KernelStack::new(); //分配内核栈
-                                               //在内核栈放入trap上下文
-        let kernel_trap_cx =
-            kernel_stack.push_on_top(TrapContext::app_init_context(entry_point, user_sp));
+        let kernel_trap_cx = kernel_stack.get_trap_addr();
         let task_control_block = Self {
             pid,
             inner: unsafe {
                 UPSafeCell::new(TaskControlBlockInner {
                     kernel_stack,
                     base_size: 0,
-                    task_cx: TaskContext::goto_restore(kernel_trap_cx as usize),
+                    task_cx: TaskContext::goto_restore(kernel_trap_cx),
                     //初始化任务上下文,参数为内核栈地址，内核栈存放的是trap上下文
                     task_status,
                     memory_set,
@@ -119,8 +118,10 @@ impl TaskControlBlock {
                 })
             },
         };
+        task_control_block.inner.exclusive_access()
+            .kernel_stack
+            .push_on_top(TrapContext::app_init_context(entry_point, user_sp));
         // prepare TrapContext in user space
-        // info!("kstack addr: {:#x}",kernel_stack.get_trap_addr());
         task_control_block
     }
 
@@ -152,7 +153,6 @@ impl TaskControlBlock {
         let task_control_block = Arc::new(TaskControlBlock {
             pid: pid_handle,
             inner: unsafe {
-                // error!("fork trap_cx :{:?}",kernel_stack.get_trap_cx());
                 let inner = UPSafeCell::new(TaskControlBlockInner {
                     kernel_stack,
                     base_size: parent_inner.base_size,
@@ -174,7 +174,6 @@ impl TaskControlBlock {
                     frozen: false,
                     trap_ctx_backup: None,
                 });
-
                 inner
             },
         });

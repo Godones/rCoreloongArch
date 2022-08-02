@@ -42,7 +42,7 @@ SECTIONS
     *(.data .data.*)
   }
   . = ALIGN(4K);
-PROVIDE(sdata = .);
+ PROVIDE(sdata = .);
 
   .bss : {
   *(.bss.stack)

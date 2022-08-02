@@ -135,18 +135,22 @@ fn final_sig_test() {
 
     let pid = fork();
     if pid == 0 {
+        println!("child");
         if sigaction(SIGUSR1, &new, &old) < 0 {
             panic!("Sigaction failed!");
         }
         if sigaction(14, &new2, &old2) < 0 {
             panic!("Sigaction failed!");
         }
+        println!("child set over");
         if kill(getpid() as usize, SIGUSR1) < 0 {
             println!("Kill failed!");
             exit(-1);
         }
     } else {
+        println!("Waiting for child to die");
         sleep(1000);
+        println!("father sending signal 14");
         if kill(pid as usize, 1 << 14) < 0 {
             println!("Kill failed!");
             exit(-1);

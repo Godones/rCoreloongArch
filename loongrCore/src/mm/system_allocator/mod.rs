@@ -26,7 +26,9 @@ static ALLOCATOR: LockedHeap = LockedHeap::empty();
 // static ALLOCATOR: Locked<Buddy> = Locked::new(Buddy::new());
 
 pub fn init_heap() {
+
     unsafe {
+        info!("[HEAP RANGE]: {:#x}-{:#x}",HEAP_SPACE.as_ptr() as usize,HEAP_SPACE.as_ptr() as usize+KERNEL_HEAP_SIZE);
         ALLOCATOR
             .lock()
             .init(HEAP_SPACE.as_ptr() as usize, KERNEL_HEAP_SIZE);

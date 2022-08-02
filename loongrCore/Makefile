@@ -2,6 +2,7 @@ TARGET := loongarch64-unknown-linux-gnu
 MODE := release
 
 KERNEL_ELF := target/$(TARGET)/$(MODE)/loongrCore
+KERNEL_DEBUG :=target/$(TARGET)/debug/loongrCore
 KERNEL_BIN := $(KERNEL_ELF).bin
 DISASM_TMP := target/$(TARGET)/$(MODE)/asm
 
@@ -36,6 +37,7 @@ kernel:
 	@rm -f $(FS_IMG)
 	@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/$(TARGET)/release/
 	@echo Platform: $(BOARD)
+	@cargo build
 	@cargo build --$(MODE) --features "board_$(BOARD)"
 
 clean:
@@ -61,7 +63,7 @@ ifeq ($(BOARD),qemu)
 		-m 1G \
 		-smp 1 \
 		-bios $(BOOTLOADER) \
-		-kernel $(KERNEL_ELF) \
+		-kernel $(KERNEL_DEBUG) \
 		-vga none -nographic \
 		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
 		-device ahci,id=ahci0 \
@@ -74,7 +76,7 @@ ifeq ($(BOARD),qemu)
 		-m 1G \
 		-smp 1 \
 		-bios $(BOOTLOADER) \
-		-kernel $(KERNEL_ELF) \
+		-kernel $(KERNEL_DEBUG) \
 		-vga none -nographic \
 		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
 		-device ahci,id=ahci0 \

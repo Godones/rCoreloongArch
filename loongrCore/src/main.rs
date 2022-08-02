@@ -53,6 +53,7 @@ use crate::loong_arch::{
     ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read,
 };
 pub use log::{debug, error, info, trace, warn};
+use crate::loong_arch::register::crmd::Crmd;
 
 global_asm!(include_str!("head.S"));
 
@@ -82,12 +83,12 @@ pub extern "C" fn main(
     mm::init();
     trap::init();
     print_machine_info();
-    info!("Block device init");
     ahci_init();
     //运行程序
     list_apps(); //列出所有程序
     add_initproc(); //添加初始化程序
-    // enable_timer_interrupt();
+    enable_timer_interrupt();
+    info!("kernel start");
     task::run_tasks(); //运行程序
     panic!("main end");
 }

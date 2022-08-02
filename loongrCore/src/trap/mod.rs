@@ -25,15 +25,12 @@ use crate::loong_arch::{
 };
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{
-    check_signals_error_of_current, current_add_signal, current_trap_cx, current_user_token,
-    exit_current_and_run_next, handle_signals, suspend_current_and_run_next, SignalFlags,
-};
+use crate::task::{check_signals_error_of_current, current_add_signal, current_trap_cx, current_user_token, exit_current_and_run_next, handle_signals, suspend_current_and_run_next, SignalFlags, current_trap_addr};
 use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
-use log::{error, trace};
+use log::{error, trace, warn};
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -76,7 +73,7 @@ pub fn enable_timer_interrupt() {
     Tcfg::read()
         .set_enable(true)
         .set_loop(false)
-        .set_tval(timer_freq / TICKS_PER_SEC)
+        .set_tval(timer_freq / 50)
         .write(); //设置计时器的配置
     Ecfg::read()
         .set_lie_with_index(11, true)
@@ -91,8 +88,11 @@ pub fn set_user_trap_entry() {
     extern "C" {
         fn __alltraps();
     }
-    Eentry::read().set_eentry(__alltraps as usize).write(); //设置普通异常和中断入口
+    Eentry::read()
+        .set_eentry(__alltraps as usize)
+        .write(); //设置普通异常和中断入口
 }
+
 pub fn set_kernel_trap_entry() {
     extern "C" {
         fn kernel_trap_entry();
@@ -101,18 +101,25 @@ pub fn set_kernel_trap_entry() {
         .set_eentry(kernel_trap_entry as usize)
         .write(); //设置普通异常和中断入口
 }
+
 #[no_mangle]
-pub fn trap_return() {
+pub fn trap_return(){
     set_user_trap_entry();
+    let trap_cx = current_trap_addr();
     unsafe {
         asm!("ibar 0");
     }
     extern "C" {
         fn __restore();
     }
-    unsafe {
-        __restore();
+    unsafe{
+        asm!(
+            "move $a0,{}",
+            in(reg) trap_cx,
+        );
+        __restore()
     }
+
 }
 
 #[no_mangle]
@@ -128,7 +135,6 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         Trap::Exception(Exception::Syscall) => {
             //系统调用
             cx.sepc += 4;
-            // INFO!("call id:{}, {} {} {}",cx.x[11], cx.x[4], cx.x[5], cx.x[6]);
             let result = syscall(cx.x[11], [cx.x[4], cx.x[5], cx.x[6]]) as usize;
             cx = current_trap_cx();
             cx.x[4] = result;
@@ -142,17 +148,23 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             let t = estat.cause();
             let badv = Badv::read().get_value();
             println!("[kernel] {:?} {:#x} in application, core dumped.", t, badv);
+            panic!("page fault");
             // 设置SIGSEGV信号
             current_add_signal(SignalFlags::SIGSEGV);
         }
         Trap::Exception(Exception::InstructionPrivilegeIllegal) => {
             //指令权限不足
-            println!("[kernel] InstructionPrivilegeIllegal in application, core dumped.");
+            let t = estat.cause();
+            let badv = Badv::read().get_value();
+            println!("[kernel] {:?} {:#x} in application, core dumped.", t, badv);
+            panic!("page fault");
             current_add_signal(SignalFlags::SIGILL);
         }
         Trap::Interrupt(Interrupt::Timer) => {
             //时钟中断
-            timer_handler();
+            Ticlr::read().clear_timer().write(); //清除时钟中断
+            Tcfg::read().set_enable(true).write(); //使能时钟中断
+            suspend_current_and_run_next();
         }
         Trap::Exception(Exception::TLBRFill) => {
             // 具体实现中TLB重填例外不会进入这里
@@ -166,8 +178,10 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         }
         Trap::Exception(Exception::PagePrivilegeIllegal) => {
             //页权限不足
-            tlb_page_fault();
-            panic!("[kernel] PagePrivilegeIllegal in application, core dumped.");
+            let t = estat.cause();
+            let badv = Badv::read().get_value();
+            println!("[kernel] {:?} {:#x} in application, core dumped.", t, badv);
+            panic!("page fault");
         }
         Trap::Interrupt(Interrupt::HWI0) => {
             //中断0 --- 外部中断处理
@@ -180,22 +194,18 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
     // handle signals (handle the sent signal)
     //println!("[K] trap_handler:: handle_signals");
     handle_signals();
-
     // check error signals (if error then exit)
     if let Some((errno, msg)) = check_signals_error_of_current() {
         println!("[kernel] {}", msg);
         exit_current_and_run_next(errno);
     }
-
     set_user_trap_entry();
     cx
 }
 
 fn timer_handler() {
-    trace!("timer interrupt from user");
-    Ticlr::read().clear_timer().write(); //清除时钟中断
-    Tcfg::read().set_enable(true).write(); //使能时钟中断
-    suspend_current_and_run_next();
+    // info!("timer interrupt from user");
+
 }
 
 /// 当在内核态发生异常或中断时处理
@@ -215,8 +225,9 @@ pub fn trap_handler_kernel() {
     match estat.cause() {
         Trap::Interrupt(Interrupt::Timer) => {
             //时钟中断
-            trace!("timer interrupt from kernel");
+            info!("timer interrupt from kernel");
             Ticlr::read().clear_timer().write(); //清除时钟专断
+            Tcfg::read().set_enable(true).write(); //使能时钟中断
         }
         _ => {
             panic!("{:?}", estat.cause());
@@ -238,9 +249,9 @@ fn tlb_refill_handler() {
 /// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且 V=1，且特权等级合规的项，但是该页
 //  表项的 D 位为 0，将触发该例外
 fn tlb_page_modify_handler() {
-    // INFO!("PageModifyFault handler");
     //找到对应的页表项，修改D位为1
     let badv = TlbRBadv::read().get_val(); //出错虚拟地址
+    // info!("[PageModifyFault] badv: {:#x}", badv);
     let vpn: VirtAddr = badv.into(); //虚拟地址
     let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
     let token = current_user_token();

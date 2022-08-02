@@ -1,5 +1,5 @@
 use super::{PhysAddr, PhysPageNum};
-use crate::config::MEMORY_END;
+use crate::config::{MEMORY_END, PAGE_SIZE, PAGE_SIZE_BITS};
 use crate::println;
 use crate::sync::UPSafeCell;
 use alloc::vec::Vec;
@@ -74,7 +74,7 @@ impl FrameAllocator for StackFrameAllocator {
                 ans = Some((self.current - 1).into())
             }
         }
-        // info!("alloc: {:#x}", ans.unwrap().0);
+        // info!("[FRAME]: {:#x}-{:#x}", ans.unwrap().0<<PAGE_SIZE_BITS,(ans.unwrap().0<<PAGE_SIZE_BITS)+PAGE_SIZE);
         ans
     }
     fn dealloc(&mut self, ppn: PhysPageNum) {

@@ -5,6 +5,7 @@ use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
+use log::info;
 
 use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
 

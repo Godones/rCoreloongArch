@@ -67,14 +67,12 @@ pub fn print_machine_info() {
         pwch.get_dir3_width()
     ); //PTE的索引宽度
     let crmd = Crmd::read();
-    info!("DA: {}", crmd.get_da()); //是否支持DA模式
-    info!("PG :{}", crmd.get_pg()); //是否支持PG模式
-    info!("DTMA :{}", crmd.get_datm()); //是否支持DTMA模式
+    info!("CRMD: {:#b}", crmd.get_val()); //CRMD的值
     let misc = Misc::read().get_enable_32_in_plv3();
     info!("MISC: enable_32_in_plv3 :{}", misc); //是否支持32位在PLV3模式下运行
     info!("dmwo: {:#x}", Dmw0::read().get_value());
     info!("dmw1: {:#x}", Dmw1::read().get_value());
-    info!("PLV: {}", crmd.get_plv()); //
+    info!("PLV: {}", crmd.get_plv());
 }
 
 // 检查初始化后的硬件是否正确

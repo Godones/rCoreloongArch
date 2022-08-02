@@ -1,3 +1,4 @@
+use log::info;
 use crate::loong_arch::cpu::CpuMode;
 use crate::loong_arch::register::crmd::Crmd;
 use crate::loong_arch::register::csr::Register;

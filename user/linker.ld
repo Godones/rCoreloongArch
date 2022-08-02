@@ -4,7 +4,7 @@ ENTRY( _start)
 
 SECTIONS
 {
-    . = 0x1000;
+    . = 0x10000000;
   .text : {
     *(.text.entry)
     *(.text .text.*)
@@ -32,8 +32,9 @@ SECTIONS
     . = ALIGN(16);
     *(.bss .bss.*)
   }
-    . = ALIGN(4K);
   sbss = .;
+    . = ALIGN(4K);
+
     ekernel = .;
 
   PROVIDE(end = .);

@@ -11,8 +11,8 @@ use crate::trap::trap_return;
 pub struct TaskContext {
     //ra: 此寄存器存储的是函数返回时跳转的地址
     //在调用函数返回指令时,Pc指针会取出ra里面的地址
-    ra: usize,
-    sp: usize,
+    pub ra: usize,
+    pub sp: usize,
     s: [usize; 10], //loongArch下需要保存10个s寄存器
 }
 
@@ -28,6 +28,9 @@ impl TaskContext {
         }
     }
     pub fn goto_restore(kstack_ptr: usize) -> Self {
+        extern "C" {
+            fn __restore();
+        }
         Self {
             ra: trap_return as usize,
             sp: kstack_ptr, //存放了trap上下文后的栈地址,内核栈地址

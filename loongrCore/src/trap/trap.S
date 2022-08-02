@@ -41,8 +41,8 @@ __alltraps:
     st.d $r30, $sp, 240
     st.d $r31, $sp, 248
 
-    #读取crmd
-    csrrd $t0, 0x0
+
+    csrrd $t0, 0x0 #读取crmd
     csrrd $t1, 0x6 #返回地址
     st.d $t0, $sp,256
     st.d $t1, $sp,264
@@ -56,6 +56,7 @@ __alltraps:
     bl trap_handler
 
 __restore:
+    move $sp, $a0
     ld.d $t1, $sp,264 #加载返回地址
     ld.d $t2, $sp,24  #用户栈指针
 
