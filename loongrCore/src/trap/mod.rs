@@ -25,9 +25,7 @@ use crate::loong_arch::{
 };
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{
-    current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next,
-};
+use crate::task::{current_trap_addr, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next};
 use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
@@ -103,6 +101,7 @@ pub fn set_kernel_trap_entry() {
 #[no_mangle]
 pub fn trap_return() {
     set_user_trap_entry();
+    let trap_addr = current_trap_addr();
     unsafe {
         asm!("ibar 0");
     }
@@ -110,6 +109,7 @@ pub fn trap_return() {
         fn __restore();
     }
     unsafe {
+        asm!("move $a0,{}",in(reg)trap_addr);
         __restore();
     }
 }
