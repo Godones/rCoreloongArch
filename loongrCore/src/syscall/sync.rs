@@ -3,8 +3,6 @@ use crate::task::{block_current_and_run_next, current_process, current_task};
 use crate::timer::{add_timer, get_time_ms};
 use alloc::sync::Arc;
 
-
-
 pub fn sys_sleep(ms: usize) -> isize {
     let expire_ms = get_time_ms() + ms;
     let task = current_task().unwrap();
@@ -12,7 +10,6 @@ pub fn sys_sleep(ms: usize) -> isize {
     block_current_and_run_next();
     0
 }
-
 
 pub fn sys_mutex_create(blocking: bool) -> isize {
     let process = current_process();

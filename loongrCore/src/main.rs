@@ -39,6 +39,7 @@ extern crate pci;
 extern crate rlibc;
 extern crate xmas_elf;
 
+
 // use log::info;
 use crate::boot_param::boot_params_interface::BootParamsInterface;
 use crate::info::print_machine_info;
@@ -51,9 +52,7 @@ use config::FLAG;
 use core::arch::{asm, global_asm};
 
 use crate::fs::list_apps;
-use crate::loong_arch::{
-    ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read,
-};
+use crate::loong_arch::{ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read, vbe_test};
 pub use log::{debug, error, info, trace, warn};
 
 global_asm!(include_str!("head.S"));
@@ -82,6 +81,8 @@ pub extern "C" fn main(
         _boot_params_interface as usize
     );
     mm::init();
+    // vbe_test();
+
     trap::init();
     print_machine_info();
     ahci_init();
@@ -92,3 +93,4 @@ pub extern "C" fn main(
     task::run_tasks(); //运行程序
     panic!("main end");
 }
+

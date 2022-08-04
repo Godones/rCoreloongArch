@@ -1,11 +1,11 @@
+use crate::config::MSEC_PER_SEC;
+use crate::loong_arch::register::time::*;
+use crate::sync::UPSafeCell;
+use crate::task::{add_task, TaskControlBlock};
 use alloc::collections::BinaryHeap;
 use alloc::sync::Arc;
 use core::cmp::Ordering;
 use lazy_static::lazy_static;
-use crate::config::MSEC_PER_SEC;
-use crate::loong_arch::register::time::*;
-use crate::task::{add_task, TaskControlBlock};
-use crate::sync::UPSafeCell;
 pub fn get_time() -> usize {
     Time::read()
 }
@@ -48,7 +48,6 @@ pub fn add_timer(expire_ms: usize, task: Arc<TaskControlBlock>) {
     let mut timers = TIMERS.exclusive_access();
     timers.push(TimerCondVar { expire_ms, task });
 }
-
 
 /// 将对应与线程的时钟删除,其它的仍然存在最小堆中
 pub fn remove_timer(task: Arc<TaskControlBlock>) {

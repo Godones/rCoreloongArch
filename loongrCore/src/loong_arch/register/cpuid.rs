@@ -1,8 +1,8 @@
 // 该寄存器中存有处理器核编号信息。
 
-use core::arch::asm;
 use super::csr::CSR_CPUID;
 use crate::Register;
+use core::arch::asm;
 pub struct Cpuid {
     bits: u32,
 }

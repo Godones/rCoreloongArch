@@ -1,4 +1,4 @@
-use crate::task::{SignalFlags, pid2process};
+use crate::task::{pid2process, SignalFlags};
 
 pub fn sys_kill(pid: usize, signal: u32) -> isize {
     if let Some(process) = pid2process(pid) {
@@ -13,7 +13,6 @@ pub fn sys_kill(pid: usize, signal: u32) -> isize {
     }
 }
 
-
 fn check_sigaction_error(signal: SignalFlags, action: usize, old_action: usize) -> bool {
     if action == 0
         || old_action == 0
@@ -25,5 +24,3 @@ fn check_sigaction_error(signal: SignalFlags, action: usize, old_action: usize) 
         false
     }
 }
-
-

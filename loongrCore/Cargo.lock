@@ -96,6 +96,8 @@ dependencies = [
  "pci",
  "rlibc",
  "spin 0.9.3",
+ "stack_trace",
+ "vbe",
  "xmas-elf",
 ]
 
@@ -112,6 +114,12 @@ name = "rlibc"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc874b127765f014d792f16763a81245ab80500e2ad921ed4ee9e82481ee08fe"
+
+[[package]]
+name = "rustc-demangle"
+version = "0.1.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ef03e0a2b150c7a90d01faf6254c9c48a41e95fb2a8c2ac1c6f0d2b9aefc342"
 
 [[package]]
 name = "scopeguard"
@@ -138,6 +146,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c530c2b0d0bf8b69304b39fe2001993e267461948b890cd037d8ad4293fa1a0d"
 dependencies = [
  "lock_api",
+]
+
+[[package]]
+name = "stack_trace"
+version = "0.1.0"
+dependencies = [
+ "bit_field",
+ "log",
+ "rustc-demangle",
+ "xmas-elf",
+]
+
+[[package]]
+name = "vbe"
+version = "0.1.0"
+dependencies = [
+ "bit_field",
+ "lazy_static",
+ "rlibc",
+ "spin 0.9.3",
 ]
 
 [[package]]

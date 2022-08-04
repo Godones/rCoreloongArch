@@ -1,13 +1,13 @@
 use super::ProcessControlBlock;
-use crate::config:: {PAGE_SIZE, USER_STACK_SIZE};
+use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
 use crate::mm::{frame_alloc, FrameTracker, MapPermission, PhysAddr, VirtAddr};
 use crate::sync::UPSafeCell;
+use crate::trap::TrapContext;
 use alloc::{
     sync::{Arc, Weak},
     vec::Vec,
 };
 use lazy_static::*;
-use crate::trap::TrapContext;
 
 pub struct RecycleAllocator {
     current: usize,
@@ -59,13 +59,12 @@ impl Drop for PidHandle {
     }
 }
 
-
-pub struct KernelStack{
-    pub frame:FrameTracker,
+pub struct KernelStack {
+    pub frame: FrameTracker,
 }
 
 pub fn kstack_alloc() -> KernelStack {
-    frame_alloc().map(|frame| KernelStack{frame}).unwrap()
+    frame_alloc().map(|frame| KernelStack { frame }).unwrap()
 }
 
 // impl Drop for KernelStack {
@@ -82,8 +81,8 @@ pub fn kstack_alloc() -> KernelStack {
 impl KernelStack {
     #[allow(unused)]
     pub fn push_on_top<T>(&self, value: T) -> *mut T
-        where
-            T: Sized,
+    where
+        T: Sized,
     {
         let kernel_stack_top = self.get_top();
         let ptr_mut = (kernel_stack_top - core::mem::size_of::<T>()) as *mut T;
@@ -116,7 +115,6 @@ impl KernelStack {
         let addr = self.get_top() - core::mem::size_of::<TrapContext>();
         addr
     }
-
 }
 
 pub struct TaskUserRes {
@@ -124,7 +122,6 @@ pub struct TaskUserRes {
     pub ustack_base: usize,
     pub process: Weak<ProcessControlBlock>,
 }
-
 
 fn ustack_bottom_from_tid(ustack_base: usize, tid: usize) -> usize {
     ustack_base + tid * (PAGE_SIZE + USER_STACK_SIZE)
@@ -158,7 +155,7 @@ impl TaskUserRes {
         process_inner.memory_set.insert_area(
             ustack_bottom.into(),
             ustack_top.into(),
-            MapPermission::default() | MapPermission::W
+            MapPermission::default() | MapPermission::W,
         );
         // alloc trap_cx
     }
@@ -190,7 +187,6 @@ impl TaskUserRes {
         let mut process_inner = process.inner_exclusive_access();
         process_inner.dealloc_tid(self.tid);
     }
-
 
     pub fn ustack_base(&self) -> usize {
         self.ustack_base

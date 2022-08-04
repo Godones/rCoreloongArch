@@ -1,6 +1,9 @@
 use crate::get_time_ms;
 use crate::mm::{translated_ref, translated_refmut, translated_str};
-use crate::task::{ current_process, current_task, current_user_token, exit_current_and_run_next, suspend_current_and_run_next};
+use crate::task::{
+    current_process, current_task, current_user_token, exit_current_and_run_next,
+    suspend_current_and_run_next,
+};
 use alloc::string::String;
 // use crate::timer::get_time_ms;
 use crate::fs::{open_file, OpenFlags};
@@ -64,8 +67,6 @@ pub fn sys_exec(path: *const u8, mut args: *const usize) -> isize {
         -1
     }
 }
-
-
 
 pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut i32) -> isize {
     let process = current_process();

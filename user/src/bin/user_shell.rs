@@ -10,7 +10,7 @@ extern crate user_lib;
 const LF: u8 = 0x0au8;
 const CR: u8 = 0x0du8;
 const DL: u8 = 0x7fu8;
-const BS: u8 = 0x08u8;
+const BS: u8 = 0x08u8; //退格键
 const LINE_START: &str = ">> ";
 
 use alloc::string::String;

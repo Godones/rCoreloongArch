@@ -5,11 +5,11 @@ use super::{TaskContext, TaskControlBlock};
 use crate::config::PAGE_SIZE_BITS;
 use crate::loong_arch::tlb::{Asid, Pgdl};
 use crate::sync::UPSafeCell;
+use crate::task::process::ProcessControlBlock;
 use crate::trap::TrapContext;
 use crate::Register;
 use alloc::sync::Arc;
 use lazy_static::*;
-use crate::task::process::ProcessControlBlock;
 
 /// Processor management structure
 pub struct Processor {
@@ -57,18 +57,17 @@ pub fn run_tasks() {
             let pgd = task.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
-            // let trap = task_inner.kernel_stack.get_trap_cx();
-            // error!(
-            //     "task_pid:{}, ASID:{}, pgd:{:#x}",
-            //     pid,
-            //     Asid::read().get_asid(),
-            //     pgd >> PAGE_SIZE_BITS
-            // );
+                                                       // let trap = task_inner.kernel_stack.get_trap_cx();
+                                                       // error!(
+                                                       //     "task_pid:{}, ASID:{}, pgd:{:#x}",
+                                                       //     pid,
+                                                       //     Asid::read().get_asid(),
+                                                       //     pgd >> PAGE_SIZE_BITS
+                                                       // );
 
             let mut task_inner = task.inner_exclusive_access();
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
-
 
             drop(task_inner);
             // release coming task TCB manually
@@ -108,7 +107,11 @@ pub fn current_trap_cx() -> &'static mut TrapContext {
         .get_trap_cx()
 }
 pub fn current_kstack_top() -> usize {
-    current_task().unwrap().inner_exclusive_access().kstack.get_trap_addr()
+    current_task()
+        .unwrap()
+        .inner_exclusive_access()
+        .kstack
+        .get_trap_addr()
 }
 
 pub fn current_trap_addr() -> usize {

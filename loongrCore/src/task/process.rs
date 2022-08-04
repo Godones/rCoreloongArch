@@ -3,19 +3,19 @@ use super::manager::insert_into_pid2process;
 use super::TaskControlBlock;
 use super::{add_task, SignalFlags};
 use super::{pid_alloc, PidHandle};
+use crate::config::PAGE_SIZE_BITS;
 use crate::fs::{File, Stdin, Stdout};
+use crate::loong_arch::tlb::Pgdl;
 use crate::mm::{translated_refmut, MemorySet};
-use crate::trap::{TrapContext};
+use crate::sync::{Condvar, Mutex, Semaphore, UPSafeCell};
+use crate::trap::TrapContext;
+use crate::Register;
 use alloc::string::String;
 use alloc::sync::{Arc, Weak};
 use alloc::vec;
 use alloc::vec::Vec;
 use core::arch::asm;
 use core::cell::RefMut;
-use crate::config::PAGE_SIZE_BITS;
-use crate::loong_arch::tlb::Pgdl;
-use crate::Register;
-use crate::sync::{Condvar, Mutex, Semaphore, UPSafeCell};
 
 // 进程控制块
 pub struct ProcessControlBlock {
@@ -27,17 +27,17 @@ pub struct ProcessControlBlock {
 
 pub struct ProcessControlBlockInner {
     pub is_zombie: bool,
-    pub memory_set: MemorySet, //地址空间
-    pub parent: Option<Weak<ProcessControlBlock>>,// 父进程
-    pub children: Vec<Arc<ProcessControlBlock>>, //子进程
+    pub memory_set: MemorySet,                     //地址空间
+    pub parent: Option<Weak<ProcessControlBlock>>, // 父进程
+    pub children: Vec<Arc<ProcessControlBlock>>,   //子进程
     pub exit_code: i32,
     pub fd_table: Vec<Option<Arc<dyn File + Send + Sync>>>, //文件描述符表
-    pub signals: SignalFlags, //信号
-    pub tasks: Vec<Option<Arc<TaskControlBlock>>>, //线程控制块
-    pub task_res_allocator: RecycleAllocator, //资源分配器
-    pub mutex_list: Vec<Option<Arc<dyn Mutex>>>, //互斥锁列表
-    pub semaphore_list: Vec<Option<Arc<Semaphore>>>, //信号量列表
-    pub condvar_list: Vec<Option<Arc<Condvar>>>, //条件变量列表
+    pub signals: SignalFlags,                               //信号
+    pub tasks: Vec<Option<Arc<TaskControlBlock>>>,          //线程控制块
+    pub task_res_allocator: RecycleAllocator,               //资源分配器
+    pub mutex_list: Vec<Option<Arc<dyn Mutex>>>,            //互斥锁列表
+    pub semaphore_list: Vec<Option<Arc<Semaphore>>>,        //信号量列表
+    pub condvar_list: Vec<Option<Arc<Condvar>>>,            //条件变量列表
 }
 
 impl ProcessControlBlockInner {
@@ -120,10 +120,7 @@ impl ProcessControlBlock {
         let ustack_top = task_inner.res.as_ref().unwrap().ustack_top();
         drop(task_inner);
         // waring:在内核栈上压入trap上下文，与rcore实现不同
-        *trap_cx = TrapContext::app_init_context(
-            entry_point,
-            ustack_top,
-        );
+        *trap_cx = TrapContext::app_init_context(entry_point, ustack_top);
         // add main thread to the process
         let mut process_inner = process.inner_exclusive_access();
         process_inner.tasks.push(Some(Arc::clone(&task)));
@@ -175,12 +172,8 @@ impl ProcessControlBlock {
         // make the user_sp aligned to 8B for k210 platform
         user_sp -= user_sp % core::mem::size_of::<usize>();
 
-
         // initialize trap_cx
-        let mut trap_cx = TrapContext::app_init_context(
-            entry_point,
-            user_sp,
-        );
+        let mut trap_cx = TrapContext::app_init_context(entry_point, user_sp);
         trap_cx.x[4] = args.len();
         trap_cx.x[5] = argv_base;
         *task_inner.get_trap_cx() = trap_cx;
@@ -257,9 +250,10 @@ impl ProcessControlBlock {
 
         // 修改trap_cx的内容，使其保持与父进程相同
         // 这需要拷贝父进程的主线程的内核栈到子进程的内核栈中
-        task_inner.kstack.copy_from_other(&parent.get_task(0).inner_exclusive_access().kstack);
+        task_inner
+            .kstack
+            .copy_from_other(&parent.get_task(0).inner_exclusive_access().kstack);
         drop(task_inner);
-
 
         insert_into_pid2process(child.getpid(), Arc::clone(&child));
         // add this thread to scheduler

@@ -45,7 +45,7 @@ impl provider::Provider for Provider {
             assert_eq!(frame_pa, base + i * PAGE_SIZE);
         }
         let base_page = base / PAGE_SIZE;
-        info!("virtio_dma_alloc: {:#x} {}",base_page , pages);
+        info!("virtio_dma_alloc: {:#x} {}", base_page, pages);
         (base, base)
     }
 

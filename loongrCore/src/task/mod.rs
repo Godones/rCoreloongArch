@@ -138,19 +138,17 @@ use manager::fetch_task;
 use process::ProcessControlBlock;
 use switch::__switch;
 
-
+use crate::println;
+use crate::timer::remove_timer;
 pub use context::TaskContext;
 pub use id::{kstack_alloc, pid_alloc, KernelStack, PidHandle, IDLE_PID};
-pub use manager::{add_task, remove_task, pid2process, remove_from_pid2process};
+pub use manager::{add_task, pid2process, remove_from_pid2process, remove_task};
 pub use processor::{
-    current_process, current_task, current_trap_cx,
-    current_user_token, run_tasks, schedule, take_current_task,current_kstack_top
+    current_kstack_top, current_process, current_task, current_trap_addr, current_trap_cx,
+    current_user_token, run_tasks, schedule, take_current_task,
 };
 pub use signal::SignalFlags;
 pub use task::{TaskControlBlock, TaskStatus};
-use crate::println;
-use crate::timer::remove_timer;
-
 
 pub fn block_current_and_run_next() {
     let task = take_current_task().unwrap();
@@ -178,7 +176,6 @@ pub fn suspend_current_and_run_next() {
     // jump to scheduling cycle
     schedule(task_cx_ptr);
 }
-
 
 pub fn exit_current_and_run_next(exit_code: i32) {
     let task = take_current_task().unwrap();
@@ -253,7 +250,6 @@ pub fn exit_current_and_run_next(exit_code: i32) {
         // remove all tasks
         // 这里会释放掉所有的线程
         process_inner.tasks.clear();
-
 
         // 使得原来的TLB表项无效掉，否则下一个进程与当前退出的进程号相同会导致
         // 无法正确进行地址转换

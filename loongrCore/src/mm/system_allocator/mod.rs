@@ -6,6 +6,7 @@ pub mod bump_allocator;
 mod common;
 mod linked_list;
 
+use alloc::vec;
 use crate::config::KERNEL_HEAP_SIZE;
 use crate::info;
 use crate::mm::system_allocator::bump_allocator::BumpAllocator;
@@ -35,12 +36,15 @@ pub fn init_heap() {
 
 #[allow(unused)]
 pub fn heap_test() {
+
     use alloc::boxed::Box; //使用Box包装器
     use alloc::vec::Vec; //使用vec数组
     extern "C" {
         fn sbss();
         fn ebss();
     }
+    let vec = vec![1, 2, 3, 4, 5];
+    panic!("{:?}", vec);
 
     let bss_range = ebss as usize..sbss as usize;
 

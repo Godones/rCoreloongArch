@@ -25,13 +25,16 @@ use crate::loong_arch::{
 };
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{current_add_signal, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags, check_signals_of_current};
+use crate::task::{
+    check_signals_of_current, current_add_signal, current_trap_addr, current_trap_cx,
+    current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags,
+};
+use crate::timer::check_timer;
 use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
 use log::{error, trace};
-use crate::timer::check_timer;
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -51,7 +54,7 @@ pub fn init() {
         .write(); //设置普通异常和中断入口
                   //设置TLB重填异常地址
     TLBREntry::read()
-        .set_val((__alltraps as usize).get_bits(0..32))
+        .set_val((__tlb_rfill as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
     SltbPs::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
     TlbREhi::read().set_page_size(0xe).write(); //设置TLB的页面大小为16KiB
@@ -102,6 +105,7 @@ pub fn set_kernel_trap_entry() {
 #[no_mangle]
 pub fn trap_return() {
     set_user_trap_entry();
+    let trap_addr = current_trap_addr();
     unsafe {
         asm!("ibar 0");
     }
@@ -109,6 +113,7 @@ pub fn trap_return() {
         fn __restore();
     }
     unsafe {
+        asm!("move $a0,{}",in(reg)trap_addr);
         __restore();
     }
 }
@@ -186,7 +191,7 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
 
 fn timer_handler() {
     trace!("timer interrupt from user");
-    check_timer();//释放那些处于等待的任务
+    check_timer(); //释放那些处于等待的任务
     Ticlr::read().clear_timer().write(); //清除时钟中断
     Tcfg::read().set_enable(true).write(); //使能时钟中断,继续下一轮运转
     suspend_current_and_run_next();

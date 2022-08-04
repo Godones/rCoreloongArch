@@ -62,7 +62,8 @@ ifeq ($(BOARD),qemu)
 		-smp 1 \
 		-bios $(BOOTLOADER) \
 		-kernel $(KERNEL_ELF) \
-		-vga none -nographic \
+		-vga none \
+		-nographic \
 		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
 		-device ahci,id=ahci0 \
 		-device ide-hd,drive=x0,bus=ahci0.0

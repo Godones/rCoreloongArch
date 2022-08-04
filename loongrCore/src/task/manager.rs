@@ -1,10 +1,10 @@
 //!Implementation of [`TaskManager`]
 use super::TaskControlBlock;
 use crate::sync::UPSafeCell;
+use crate::task::ProcessControlBlock;
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
 use lazy_static::*;
-use crate::task::ProcessControlBlock;
 
 ///A array of `TaskControlBlock` that is thread-safe
 pub struct TaskManager {
@@ -29,11 +29,13 @@ impl TaskManager {
     }
     // 删除线程
     pub fn remove(&mut self, task: Arc<TaskControlBlock>) {
-        if let Some((id, _)) = self.ready_queue
+        if let Some((id, _)) = self
+            .ready_queue
             .iter()
             .enumerate()
-            .find(|(_, t)| Arc::as_ptr(t) == Arc::as_ptr(&task)) {
-            self.ready_queue.remove(id);//通过检查两个线程是否是相同的
+            .find(|(_, t)| Arc::as_ptr(t) == Arc::as_ptr(&task))
+        {
+            self.ready_queue.remove(id); //通过检查两个线程是否是相同的
         }
     }
 }
@@ -53,13 +55,9 @@ pub fn fetch_task() -> Option<Arc<TaskControlBlock>> {
     TASK_MANAGER.exclusive_access().fetch()
 }
 
-
 pub fn remove_task(task: Arc<TaskControlBlock>) {
     TASK_MANAGER.exclusive_access().remove(task);
 }
-
-
-
 
 pub fn pid2process(pid: usize) -> Option<Arc<ProcessControlBlock>> {
     let map = PID2PCB.exclusive_access();
