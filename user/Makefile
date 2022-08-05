@@ -1,5 +1,5 @@
 TARGET := loongarch64-unknown-linux-gnu
-MODE := debug
+MODE := release
 APP_DIR := src/bin
 TARGET_DIR := target/$(TARGET)/$(MODE)
 
@@ -17,8 +17,5 @@ elf:
 	@#echo $(ELFS)
 	@#echo $(BINS)
 
-
-binary: elf
-	$(foreach elf, $(ELFS), $(OBJCOPY) $(elf) --strip-all -O binary $(patsubst $(TARGET_DIR)/%, $(TARGET_DIR)/%.bin, $(elf));)
 
 build: elf

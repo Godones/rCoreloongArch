@@ -57,19 +57,14 @@ pub fn run_tasks() {
             let pgd = task.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
-            // let trap = task_inner.kernel_stack.get_trap_cx();
-            // error!(
-            //     "task_pid:{}, ASID:{}, pgd:{:#x}",
-            //     pid,
-            //     Asid::read().get_asid(),
-            //     pgd >> PAGE_SIZE_BITS
-            // );
 
             let mut task_inner = task.inner_exclusive_access();
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
 
-
+            unsafe {
+                asm!("invtlb 0x4,{},$r0",in(reg) pid);
+            }
             drop(task_inner);
             // release coming task TCB manually
             processor.current = Some(task);

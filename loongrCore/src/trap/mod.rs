@@ -25,7 +25,7 @@ use crate::loong_arch::{
 };
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{current_add_signal, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags, check_signals_of_current};
+use crate::task::{current_add_signal, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags, check_signals_of_current, current_trap_addr};
 use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
@@ -47,7 +47,7 @@ pub fn init() {
     Ecfg::read().set_lie_with_index(11, false).write();
     Crmd::read().set_ie(false).write(); //关闭全局中断
     Eentry::read()
-        .set_eentry(kernel_trap_entry as usize)
+        .set_eentry(__tlb_rfill as usize)
         .write(); //设置普通异常和中断入口
                   //设置TLB重填异常地址
     TLBREntry::read()
@@ -102,6 +102,7 @@ pub fn set_kernel_trap_entry() {
 #[no_mangle]
 pub fn trap_return() {
     set_user_trap_entry();
+    let trap_cx = current_trap_addr();
     unsafe {
         asm!("ibar 0");
     }
@@ -109,6 +110,7 @@ pub fn trap_return() {
         fn __restore();
     }
     unsafe {
+        asm!("move $a0,{}",in(reg)trap_cx);
         __restore();
     }
 }
@@ -179,7 +181,6 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         println!("[kernel] {}", msg);
         exit_current_and_run_next(errno);
     }
-
     set_user_trap_entry();
     cx
 }

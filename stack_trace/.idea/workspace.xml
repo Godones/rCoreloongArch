@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="CargoProjects">
+    <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="bd52a2e4-a4a3-48bc-91bc-1ecebc77a780" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/link_app.S" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/loader.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../loongrCore/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/mm/system_allocator/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../loongrCore/src/mm/system_allocator/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/task/processor.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../loongrCore/src/task/processor.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/task/switch.asm" beforeDir="false" afterPath="$PROJECT_DIR$/../loongrCore/src/task/switch.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/task/switch.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../loongrCore/src/task/switch.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../loongrCore/src/trap/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../loongrCore/src/trap/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../user/linker.ld" beforeDir="false" afterPath="$PROJECT_DIR$/../user/linker.ld" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../user/src/bin/matrix.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../user/src/bin/matrix.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../user/src/bin/race_adder.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../user/src/bin/race_adder.rs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="wyroeh6n" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2CsAjqSQtY49sqSp1z3OGpeXnMz" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+    <option name="sortByType" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "last_opened_file_path": "//wsl$/Ubuntu-20.04/home/code/test_asm",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "settings.editor.selected.configurable": "language.rust"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="\\wsl$\Ubuntu-20.04\home\proj93\stack_trace\src\bin" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Run elf" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="run --package stack_trace --bin elf" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.Run elf" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bd52a2e4-a4a3-48bc-91bc-1ecebc77a780" name="Changes" comment="" />
+      <created>1659581057647</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1659581057647</updated>
+      <workItem from="1659581058928" duration="23596000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
