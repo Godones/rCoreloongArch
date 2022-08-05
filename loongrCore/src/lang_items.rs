@@ -20,14 +20,14 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     } else {
         println!("no location information available");
     }
-    let mut trace = stack_trace::Trace::new();
-    let data = include_bytes!("../target/loongarch64-unknown-linux-gnu/release/loongrCore");
-    trace.init(data);
-    unsafe {
-        trace.trace().iter().for_each(|frame| {
-            println!("{}", frame);
-        });
-    }
+    // let mut trace = stack_trace::Trace::new();
+    // let data = include_bytes!("../target/loongarch64-unknown-linux-gnu/release/loongrCore");
+    // trace.init(data);
+    // unsafe {
+    //     trace.trace().iter().for_each(|frame| {
+    //         println!("{}", frame);
+    //     });
+    // }
 
     abort();
 }

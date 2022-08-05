@@ -14,7 +14,6 @@ pub fn wait(exit_code: &mut i32) -> isize {
     loop {
         match sys_waitpid(-1, exit_code as *mut _) {
             -2 => {
-                // println!("waitpid no over");
                 yield_();
             }
             // -1 or a real pid

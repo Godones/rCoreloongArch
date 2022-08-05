@@ -3,9 +3,8 @@
 #![allow(unused)]
 extern crate alloc;
 
-mod vbe;
-mod show;
 mod ascii;
+mod show;
+mod vbe;
 
-pub use vbe::{VbeDriver,VbeInfo};
-
+pub use vbe::{VbeDriver, VbeInfo};

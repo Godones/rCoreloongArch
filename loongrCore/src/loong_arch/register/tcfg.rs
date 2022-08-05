@@ -1,3 +1,4 @@
+use core::arch::asm;
 use crate::loong_arch::register::csr::Register;
 use bit_field::BitField;
 

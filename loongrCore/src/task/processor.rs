@@ -10,6 +10,8 @@ use crate::trap::TrapContext;
 use crate::Register;
 use alloc::sync::Arc;
 use lazy_static::*;
+use log::{error, warn};
+use crate::loong_arch::register::tcfg::Tcfg;
 
 /// Processor management structure
 pub struct Processor {
@@ -57,15 +59,10 @@ pub fn run_tasks() {
             let pgd = task.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
-                                                       // let trap = task_inner.kernel_stack.get_trap_cx();
-                                                       // error!(
-                                                       //     "task_pid:{}, ASID:{}, pgd:{:#x}",
-                                                       //     pid,
-                                                       //     Asid::read().get_asid(),
-                                                       //     pgd >> PAGE_SIZE_BITS
-                                                       // );
-
             let mut task_inner = task.inner_exclusive_access();
+
+            let trap = task_inner.kstack.get_trap_cx(); //获取中断上下文
+            error!("[TOPID]{}",pid);
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
 
@@ -75,7 +72,7 @@ pub fn run_tasks() {
             // release processor manually
             drop(processor);
             unsafe {
-                __switch(idle_task_cx_ptr, next_task_cx_ptr, pid);
+                __switch(idle_task_cx_ptr, next_task_cx_ptr);
             }
         }
     }
@@ -127,6 +124,6 @@ pub fn schedule(switched_task_cx_ptr: *mut TaskContext) {
     let idle_task_cx_ptr = processor.get_idle_task_cx_ptr();
     drop(processor);
     unsafe {
-        __switch(switched_task_cx_ptr, idle_task_cx_ptr, 0);
+        __switch(switched_task_cx_ptr, idle_task_cx_ptr);
     }
 }

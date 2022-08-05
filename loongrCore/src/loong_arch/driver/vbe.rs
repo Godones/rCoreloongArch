@@ -10,7 +10,7 @@ pub fn vbe_test() {
     }
     vbe.print_string_with_color("hello\n",0x0,0x00ff00ff);
     vbe.print_string("\thello\n");
-    vbe.put_rect(1280/2,800/2,100,100,0x00ff00ff);
+    vbe.fill_rect(1280/2,800/2,100,100,0x00ff00ff);
 }
 
 

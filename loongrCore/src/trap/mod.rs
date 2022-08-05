@@ -76,7 +76,7 @@ pub fn enable_timer_interrupt() {
     Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read()
         .set_enable(true)
-        .set_loop(false)
+        .set_loop(true)
         .set_tval(timer_freq / TICKS_PER_SEC)
         .write(); //设置计时器的配置
     Ecfg::read()
@@ -178,13 +178,11 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             panic!("{:?}", estat.cause());
         }
     }
-
     // check error signals (if error then exit)
     if let Some((errno, msg)) = check_signals_of_current() {
         println!("[kernel] {}", msg);
         exit_current_and_run_next(errno);
     }
-
     set_user_trap_entry();
     cx
 }
@@ -193,7 +191,6 @@ fn timer_handler() {
     trace!("timer interrupt from user");
     check_timer(); //释放那些处于等待的任务
     Ticlr::read().clear_timer().write(); //清除时钟中断
-    Tcfg::read().set_enable(true).write(); //使能时钟中断,继续下一轮运转
     suspend_current_and_run_next();
 }
 
@@ -246,20 +243,16 @@ fn tlb_page_modify_handler() {
     let page_table = PageTable::from_token(token);
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
     pte.set_dirty(); //修改D位为1
-                     // INFO!("{:?}", pte);
     unsafe {
         asm!("tlbsrch", "tlbrd",); //根据TLBEHI的虚双页号查询TLB对应项
     }
     let tlbidx = TlbIdx::read(); //获取TLB项索引
     assert_eq!(tlbidx.get_ne(), false);
-    // INFO!("page-size: {}",tlbidx.get_ps());
     let mut tlbelo0 = TLBELO::read(0); //获取TLB项0
     let mut tlbelo1 = TLBELO::read(1); //获取TLB项1
     tlbelo0.set_dirty(true).write();
     tlbelo1.set_dirty(true).write();
 
-    // INFO!("{:?}",tlbelo0);
-    // INFO!("{:?}",tlbelo1);
     unsafe {
         asm!("tlbwr"); //重新将tlbelo写入tlb
     }

@@ -24,7 +24,7 @@ pub fn main() -> i32 {
     }
 
     let mut exit_code: i32 = 0;
-    for _ in 0..NUM {
+    for i in 0..NUM {
         assert!(wait(&mut exit_code) > 0);
         assert_eq!(exit_code, 0);
     }

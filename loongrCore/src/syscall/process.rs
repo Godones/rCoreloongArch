@@ -71,7 +71,6 @@ pub fn sys_exec(path: *const u8, mut args: *const usize) -> isize {
 pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut i32) -> isize {
     let process = current_process();
     // find a child process
-
     let mut inner = process.inner_exclusive_access();
     if !inner
         .children

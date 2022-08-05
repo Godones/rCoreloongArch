@@ -57,5 +57,7 @@ PROVIDE(sdata = .);
 
     sbss = .;
     ekernel = .;
-  PROVIDE(end = .);
+  /DISCARD/ : {
+          *(.eh_frame)
+      }
 }

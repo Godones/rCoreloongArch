@@ -1,12 +1,14 @@
 use super::ProcessControlBlock;
-use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
-use crate::mm::{frame_alloc, FrameTracker, MapPermission, PhysAddr, VirtAddr};
+use crate::config::{KERNEL_STACK_SIZE, PAGE_SIZE, USER_STACK_SIZE};
+use crate::mm::{frame_alloc, frame_dealloc, FrameTracker, MapPermission, PhysAddr, VirtAddr};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use alloc::{
     sync::{Arc, Weak},
     vec::Vec,
 };
+use alloc::alloc::alloc;
+use core::alloc::Layout;
 use lazy_static::*;
 
 pub struct RecycleAllocator {
@@ -67,12 +69,12 @@ pub fn kstack_alloc() -> KernelStack {
     frame_alloc().map(|frame| KernelStack { frame }).unwrap()
 }
 
-// impl Drop for KernelStack {
-//     fn drop(&mut self) {
-//         warn!("drop kernel stack");
-//         frame_dealloc(self.frame.ppn);
-//     }
-// }
+impl Drop for KernelStack {
+    fn drop(&mut self) {
+        // warn!("drop kernel stack");
+        // frame_dealloc(self.frame.ppn);
+    }
+}
 /// Create a kernelstack
 /// 在loongArch平台上，并不需要根据pid在内核空间分配内核栈
 /// 内核态并不处于页表翻译模式，而是以类似于直接管理物理内存的方式管理

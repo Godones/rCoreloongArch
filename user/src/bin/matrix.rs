@@ -7,7 +7,7 @@ extern crate user_lib;
 
 use user_lib::{exit, fork, get_time, getpid, wait, yield_};
 
-static NUM: usize = 30;
+static NUM: usize = 10;
 const N: usize = 10;
 static P: i32 = 10007;
 type Arr = [[i32; N]; N];
@@ -24,6 +24,7 @@ fn work(times: isize) {
     }
     yield_();
     println!("pid {} is running ({} times)!.", getpid(), times);
+    let z = 3;
     for _ in 0..times {
         for i in 0..N {
             for j in 0..N {

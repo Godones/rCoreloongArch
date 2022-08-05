@@ -247,7 +247,6 @@ impl ProcessControlBlock {
         drop(child_inner);
         // modify kstack_top in trap_cx of this thread
         let mut task_inner = task.inner_exclusive_access();
-
         // 修改trap_cx的内容，使其保持与父进程相同
         // 这需要拷贝父进程的主线程的内核栈到子进程的内核栈中
         task_inner

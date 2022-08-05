@@ -27,6 +27,7 @@ unsafe fn f() -> ! {
 
 #[no_mangle]
 pub fn main() -> i32 {
+    // println!("Hello, world!");
     let start = get_time();
     let mut v = Vec::new();
     for _ in 0..THREAD_COUNT {

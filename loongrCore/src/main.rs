@@ -82,7 +82,6 @@ pub extern "C" fn main(
     );
     mm::init();
     // vbe_test();
-
     trap::init();
     print_machine_info();
     ahci_init();
