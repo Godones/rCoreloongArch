@@ -34,7 +34,7 @@ use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
-use log::{error, trace};
+use log::{error, trace, warn};
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -164,7 +164,9 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             // 页表项和页目录项的区别将会与riscv大不相同
             tlb_refill_handler();
         }
-        Trap::Exception(Exception::PageModifyFault) => tlb_page_modify_handler(),
+        Trap::Exception(Exception::PageModifyFault) => {
+            tlb_page_modify_handler();
+        }
         Trap::Exception(Exception::PagePrivilegeIllegal) => {
             //页权限不足
             tlb_page_fault();

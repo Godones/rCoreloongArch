@@ -1,14 +1,12 @@
 use super::ProcessControlBlock;
-use crate::config::{KERNEL_STACK_SIZE, PAGE_SIZE, USER_STACK_SIZE};
-use crate::mm::{frame_alloc, frame_dealloc, FrameTracker, MapPermission, PhysAddr, VirtAddr};
+use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
+use crate::mm::{frame_alloc, FrameTracker, MapPermission, PhysAddr, VirtAddr};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use alloc::{
     sync::{Arc, Weak},
     vec::Vec,
 };
-use alloc::alloc::alloc;
-use core::alloc::Layout;
 use lazy_static::*;
 
 pub struct RecycleAllocator {

@@ -68,11 +68,8 @@ pub extern "C" fn main(
     }
     println!("{}", FLAG);
     logging::init();
-    // extioi_init();
     rtc_init();
     info!("CURRENT TIME {:?}", rtc_time_read());
-    // ls7a_intc_init();
-    // i8042_init(); //键盘驱动初始化
     print_range();
     info!("kernel args: {}", argc);
     info!("kernel argv address: {:#x}", _argv as usize);

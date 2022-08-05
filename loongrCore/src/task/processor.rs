@@ -10,8 +10,6 @@ use crate::trap::TrapContext;
 use crate::Register;
 use alloc::sync::Arc;
 use lazy_static::*;
-use log::{error, warn};
-use crate::loong_arch::register::tcfg::Tcfg;
 
 /// Processor management structure
 pub struct Processor {
@@ -54,29 +52,38 @@ pub fn run_tasks() {
         if let Some(task) = fetch_task() {
             let idle_task_cx_ptr = processor.get_idle_task_cx_ptr();
             // access coming task TCB exclusively
-            // info!("Switch to task {}", task.inner_exclusive_access().res.as_ref().unwrap().tid);
             let pid = task.process.upgrade().unwrap().getpid(); //应用进程号
             let pgd = task.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
             let mut task_inner = task.inner_exclusive_access();
-
-            let trap = task_inner.kstack.get_trap_cx(); //获取中断上下文
-            error!("[TOPID]{}",pid);
+            let tid = task_inner.res.as_ref().unwrap().tid; //线程号
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
-
+            // 在进行线程切换的时候
+            // 地址空间是相同的，并且pgd也是相同的
+            // 每个线程都有自己的内核栈和用户栈，用户栈互相隔离
+            // 在进入用户态后应该每个线程的地址转换是相同的
+            unsafe {
+                asm!("invtlb 0x4,{},$r0",in(reg) pid);
+            }
             drop(task_inner);
             // release coming task TCB manually
             processor.current = Some(task);
             // release processor manually
             drop(processor);
+            mangle();
             unsafe {
                 __switch(idle_task_cx_ptr, next_task_cx_ptr);
             }
         }
     }
 }
+#[no_mangle]
+fn mangle(){
+}
+
+
 ///Take the current task,leaving a None in its place
 pub fn take_current_task() -> Option<Arc<TaskControlBlock>> {
     PROCESSOR.exclusive_access().take_current()

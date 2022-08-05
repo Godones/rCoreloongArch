@@ -6,7 +6,7 @@ extern crate user_lib;
 extern crate alloc;
 
 use alloc::vec::Vec;
-use user_lib::{exit, get_time, thread_create, waittid, yield_};
+use user_lib::{exit, get_time, gettid, thread_create, waittid, yield_};
 
 static mut A: usize = 0;
 static mut OCCUPIED: bool = false;
@@ -30,7 +30,6 @@ unsafe fn f() -> ! {
         // exit critical section
         OCCUPIED = false;
     }
-
     exit(t as i32)
 }
 

@@ -6,7 +6,7 @@ use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
 
-use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
+use crate::config::{PAGE_SIZE};
 
 pub struct MemorySet {
     // 页表，这里主要管理的是各级目录所在位置
