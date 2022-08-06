@@ -69,7 +69,7 @@ pub extern "C" fn main(
     trap::init();
     print_machine_info();
     //运行程序
-    enable_timer_interrupt(); //开启时钟中断
+
     task::run_first_task();
     panic!("main end");
 }

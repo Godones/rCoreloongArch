@@ -39,7 +39,7 @@ pub fn init() {
     Tcfg::read().set_enable(false).write();
     Ecfg::read().set_lie_with_index(11, false).write();
     Crmd::read().set_ie(false).write(); //关闭全局中断
-    Eentry::read().set_eentry(kernel_trap_entry as usize).write(); //设置普通异常和中断入口
+    Eentry::read().set_eentry(__alltraps as usize).write(); //设置普通异常和中断入口
                                                                //设置TLB重填异常地址
     TLBREntry::read()
         .set_val((__tlb_rfill as usize).get_bits(0..32))
@@ -86,6 +86,7 @@ pub fn set_user_trap_entry(){
 #[no_mangle]
 pub fn trap_return(){
     set_user_trap_entry();
+    // let trap_cx =
     extern  "C"{
         fn __restore();
     }

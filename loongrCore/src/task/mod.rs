@@ -2,7 +2,7 @@ use crate::config::{BIG_STRIDE, PAGE_SIZE_BITS};
 use crate::loader::{get_app_data, get_num_app};
 use crate::loong_arch::tlb::pgdl::Pgdl;
 use crate::sync::UPSafeCell;
-use crate::{Register, info};
+use crate::{Register, info, enable_timer_interrupt};
 use alloc::vec::Vec;
 use context::TaskContext;
 use lazy_static::lazy_static;
@@ -107,10 +107,10 @@ impl TaskManager {
     }
 
     fn run_first_task(&self) -> ! {
+        enable_timer_interrupt(); //开启时钟中断
         let mut inner = self.inner.borrow();
         let mut task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;
-        // task0.stride += inner.tasks[0].pass;
         let next_task_cx_ptr = &task0.task_cx_ptr as *const TaskContext;
         let mut _unused = TaskContext::zero_init();
         let pgd = task0.get_user_token() << PAGE_SIZE_BITS; //获得根页表基地址
