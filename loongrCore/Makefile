@@ -69,6 +69,25 @@ ifeq ($(BOARD),qemu)
 		-device ide-hd,drive=x0,bus=ahci0.0
 endif
 
+build_gui:
+	@cd ../user && make build
+	@rm -f $(FS_IMG)
+	@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/$(TARGET)/release/
+	@echo Platform: $(BOARD)
+	@cargo build --$(MODE) --features "board_$(BOARD)" --features "gui"
+
+gui: build_gui
+	@qemu-system-loongarch64 \
+		-m 1G \
+		-smp 1 \
+		-bios $(BOOTLOADER) \
+		-kernel $(KERNEL_ELF) \
+		-vga std \
+		-serial stdio \
+		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
+		-device ahci,id=ahci0 \
+		-device ide-hd,drive=x0,bus=ahci0.0 \
+
 debug: build
 ifeq ($(BOARD),qemu)
 	@qemu-system-loongarch64 \

@@ -1,12 +1,9 @@
-# interrupts and exceptions handler
-# push all registers, call trap_handler_kernel(), restore, return.
 .section k1_eentry
 .globl kernel_trap_entry
 .align 4
 kernel_trap_entry:
         // make room to save registers.
-        addi.d $sp, $sp, -256
-        // save the registers.
+        addi.d $sp, $sp, -264
         st.d $ra, $sp, 0
         st.d $tp, $sp, 8
         st.d $sp, $sp, 16
@@ -38,6 +35,7 @@ kernel_trap_entry:
         st.d $s6, $sp, 224
         st.d $s7, $sp, 232
         st.d $s8, $sp, 240
+
 
 	    // call the C trap handler in trap.c
         bl trap_handler_kernel
@@ -75,7 +73,7 @@ kernel_trap_entry:
         ld.d $s7, $sp, 232
         ld.d $s8, $sp, 240
 
-        addi.d $sp, $sp, 256
+        addi.d $sp, $sp, 264
 
         // exception return
         ertn

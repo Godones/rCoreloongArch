@@ -69,7 +69,7 @@ impl Estat {
             let ecfg_vs = Ecfg::read().get_vs();
             if ecfg_vs == 0 {
                 // 读取中断位
-                for index in 0..13 {
+                for index in (0..13).rev() {
                     if self.get_is_with_index(index) {
                         return Trap::Interrupt(Interrupt::from_usize(index));
                     }

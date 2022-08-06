@@ -9,6 +9,7 @@ use crate::task::process::ProcessControlBlock;
 use crate::trap::TrapContext;
 use crate::Register;
 use alloc::sync::Arc;
+use core::arch::asm;
 use lazy_static::*;
 
 /// Processor management structure
@@ -57,7 +58,6 @@ pub fn run_tasks() {
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
             let mut task_inner = task.inner_exclusive_access();
-            let tid = task_inner.res.as_ref().unwrap().tid; //线程号
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
             // 在进行线程切换的时候
@@ -72,15 +72,11 @@ pub fn run_tasks() {
             processor.current = Some(task);
             // release processor manually
             drop(processor);
-            mangle();
             unsafe {
                 __switch(idle_task_cx_ptr, next_task_cx_ptr);
             }
         }
     }
-}
-#[no_mangle]
-fn mangle(){
 }
 
 

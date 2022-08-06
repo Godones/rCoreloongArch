@@ -65,6 +65,20 @@ impl VbeDriver {
             foreground_color: 0xffffffff,
         }
     }
+    pub fn empty() -> VbeDriver {
+        Self {
+            vbe_info: VbeInfo::new(0, 0, 0, 0, 0, 0),
+            ram_buffer: 0,
+            x_position: 0,
+            y_position: 0,
+            background_color: 0x0,
+            foreground_color: 0xffffffff,
+        }
+    }
+    pub fn set_vbe_info(&mut self, vbe_info: VbeInfo) {
+        self.vbe_info = vbe_info;
+    }
+
     fn update_screen_all(&self) {
         let frame_buffer_addr = self.vbe_info.frame_buffer_addr as *mut u8;
         let ram_buffer_addr = self.ram_buffer as *mut u8;

@@ -53,7 +53,7 @@ pub fn ls7a_write_d(addr: usize, value: u64) {
 /// 初始化ls7a中断控制器
 pub fn ls7a_intc_init() {
     // enable uart0/keyboard/mouse
-    // 分配中断号
+    // 使能设备的中断
     ls7a_write_w(
         LS7A_INT_MASK_REG,
         !((0x1 << UART0_IRQ) | (0x1 << KEYBOARD_IRQ) | (0x1 << MOUSE_IRQ)),
@@ -61,6 +61,7 @@ pub fn ls7a_intc_init() {
     // 触发方式设置寄存器
     // 0：电平触发中断
     // 1：边沿触发中断
+    // 这里设置为电平触发
     ls7a_write_w(
         LS7A_INT_EDGE_REG,
         0x1 << (UART0_IRQ | KEYBOARD_IRQ | MOUSE_IRQ),
@@ -73,6 +74,7 @@ pub fn ls7a_intc_init() {
     // 对于电平触发类型：
     // 0：高电平触发；
     // 1：低电平触发
+    // 这里是高电平触发
     ls7a_write_w(LS7A_INT_POL_REG, 0x0);
 }
 

@@ -54,7 +54,7 @@ use core::arch::{asm, global_asm};
 use crate::fs::list_apps;
 use crate::loong_arch::{ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read, vbe_test};
 pub use log::{debug, error, info, trace, warn};
-
+pub use vbe::VBEDRIVER;
 global_asm!(include_str!("head.S"));
 
 #[no_mangle]
@@ -78,15 +78,27 @@ pub extern "C" fn main(
         _boot_params_interface as usize
     );
     mm::init();
-    // vbe_test();
+    if cfg!(feature = "gui") {
+        // 外部中断控制器初始化
+        extioi_init();
+        // 桥片中断初始化
+        ls7a_intc_init();
+        // 键盘
+        i8042_init();
+        // gui
+        vbe_test();
+    }
+
     trap::init();
     print_machine_info();
+    // sata硬盘
     ahci_init();
     //运行程序
     list_apps(); //列出所有程序
     add_initproc(); //添加初始化程序
     enable_timer_interrupt();
     task::run_tasks(); //运行程序
+
     panic!("main end");
 }
 

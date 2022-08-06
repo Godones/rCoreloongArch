@@ -64,6 +64,7 @@ pub fn i8042_init() {
     data = ls7a_read_b(LS7A_I8042_DATA);
     info!("test reset result {:#x}", data);
     assert_eq!(data, 0xFA, "reset keyboard fail");
+    info!("i8042_init success");
 }
 
 pub fn kbd_read_scancode() -> u8 {

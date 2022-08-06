@@ -69,7 +69,9 @@ pub fn print_machine_info() {
     let crmd = Crmd::read();
     info!("DA: {}", crmd.get_da()); //是否支持DA模式
     info!("PG :{}", crmd.get_pg()); //是否支持PG模式
-    info!("DTMA :{}", crmd.get_datm()); //是否支持DTMA模式
+    info!("DATF: {}", crmd.get_datf()); //
+    info!("DATM :{}", crmd.get_datm()); //
+    info!("CRMD :{:#x}", crmd.get_val()); //
     let misc = Misc::read().get_enable_32_in_plv3();
     info!("MISC: enable_32_in_plv3 :{}", misc); //是否支持32位在PLV3模式下运行
     info!("dmwo: {:#x}", Dmw0::read().get_value());

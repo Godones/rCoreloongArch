@@ -30,11 +30,13 @@ use crate::task::{
     current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags,
 };
 use crate::timer::check_timer;
-use crate::{info, println};
+use crate::{info, println, sprintln};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
 use log::{error, trace, warn};
+use crate::loong_arch::register::era::Era;
+use crate::loong_arch::register::prmd::Prmd;
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -81,10 +83,11 @@ pub fn enable_timer_interrupt() {
         .write(); //设置计时器的配置
     Ecfg::read()
         .set_lie_with_index(11, true)
-        // .set_lie_with_index(2,true)
+        .set_lie_with_index(2,true)
         .write();
-    info!("interrupt enable: {:#b}", Ecfg::read().get_val());
+
     Crmd::read().set_ie(true).write(); //开启全局中断
+    info!("interrupt enable: {:#b}", Ecfg::read().get_val());
 }
 
 pub fn set_user_trap_entry() {
@@ -123,10 +126,13 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
     set_kernel_trap_entry();
     let estat = Estat::read();
     let crmd = Crmd::read();
+    let mut era = Era::read();
+    let mut prmd = Prmd::read();
     if crmd.get_ie() {
         // 全局中断会在中断处理程序被关掉
         info!("kerneltrap: global interrupt enable");
     }
+    // crmd.set_ie(true).write(); //开启全局中断
     match estat.cause() {
         Trap::Exception(Exception::Syscall) => {
             //系统调用
@@ -186,6 +192,8 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
         exit_current_and_run_next(errno);
     }
     set_user_trap_entry();
+    era.set_pc(era.get_pc()).write();
+    prmd.set_val(prmd.get_val()).write();
     cx
 }
 
@@ -206,6 +214,8 @@ pub fn trap_handler_kernel() {
     info!("kernel trap");
     let estat = Estat::read();
     let crmd = Crmd::read();
+    let mut prmd = Prmd::read();
+    let mut era = Era::read();
     if crmd.get_plv() != 0 {
         // 只有在内核态才会触发中断
         panic!("{:?}", estat.cause());
@@ -213,13 +223,20 @@ pub fn trap_handler_kernel() {
     match estat.cause() {
         Trap::Interrupt(Interrupt::Timer) => {
             //时钟中断
-            trace!("timer interrupt from kernel");
+            info!("timer interrupt from kernel");
             Ticlr::read().clear_timer().write(); //清除时钟专断
+        }
+        Trap::Interrupt(Interrupt::HWI0) => {
+            //中断0 --- 外部中断处理
+            hwi0_handler();
         }
         _ => {
             panic!("{:?}", estat.cause());
         }
     }
+    prmd.set_val(prmd.get_val()).write();
+    era.set_pc(era.get_pc()).write();
+    info!("kernel trap end");
 }
 
 // 重填异常处理
@@ -275,7 +292,7 @@ fn tlb_page_fault() {
 fn hwi0_handler() {
     // 查找是哪一个中断
     let irq = extioi_claim();
-    info!("extioi irq: {:#b}", irq);
+    sprintln!("extioi irq: {:#b}", irq);
     if irq.get_bit(KEYBOARD_IRQ) {
         keyboard_handler();
     }
@@ -290,15 +307,15 @@ fn hwi0_handler() {
 }
 
 fn uart_handler() {
-    info!("uart interrupt!");
+    sprintln!("uart interrupt!");
 }
 fn mouse_handler() {
-    info!("mouse interrupt");
+    sprintln!("mouse interrupt");
 }
 
 fn keyboard_handler() {
     while kbd_has_data() {
-        println!("{:#x}", kbd_read_scancode());
+        sprintln!("{:#x}", kbd_read_scancode());
     }
-    println!("key done");
+    sprintln!("key done");
 }
