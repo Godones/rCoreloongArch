@@ -9,7 +9,7 @@ use crate::trap::TrapContext;
 use crate::Register;
 use alloc::sync::Arc;
 use lazy_static::*;
-use log::warn;
+
 
 /// Processor management structure
 pub struct Processor {
@@ -62,13 +62,6 @@ pub fn run_tasks() {
             let pgd = task_inner.get_user_token() << PAGE_SIZE_BITS;
             Pgdl::read().set_val(pgd).write(); //设置根页表基地址
             Asid::read().set_asid(pid as u32).write(); //设置ASID
-            let trap = task_inner.kernel_stack.get_trap_addr();
-
-            unsafe {
-                warn!("[PID]{:#x} [TRAP]{:#x} [RA]{:#x} [SP]{:#x}", pid, trap,(*next_task_cx_ptr).ra, (*next_task_cx_ptr).sp);
-                // task_inner.kernel_stack.print_trap_context();
-            }
-
             drop(task_inner);
             // release coming task TCB manually
             processor.current = Some(task);

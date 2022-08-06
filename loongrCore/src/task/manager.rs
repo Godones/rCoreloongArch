@@ -4,7 +4,6 @@ use crate::sync::UPSafeCell;
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
 use lazy_static::*;
-use crate::{print, println};
 
 ///A array of `TaskControlBlock` that is thread-safe
 pub struct TaskManager {

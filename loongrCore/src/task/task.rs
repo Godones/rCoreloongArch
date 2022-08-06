@@ -16,7 +16,6 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::arch::asm;
 use core::cell::RefMut;
-use log::info;
 
 pub struct TaskControlBlock {
     // immutable

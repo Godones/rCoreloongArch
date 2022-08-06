@@ -72,7 +72,7 @@ pub fn enable_timer_interrupt() {
     Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read()
         .set_enable(true)
-        .set_loop(false)
+        .set_loop(true)
         .set_tval(timer_freq / 50)
         .write(); //设置计时器的配置
     Ecfg::read()
@@ -148,7 +148,6 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             let t = estat.cause();
             let badv = Badv::read().get_value();
             println!("[kernel] {:?} {:#x} in application, core dumped.", t, badv);
-            panic!("page fault");
             // 设置SIGSEGV信号
             current_add_signal(SignalFlags::SIGSEGV);
         }
@@ -157,14 +156,11 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             let t = estat.cause();
             let badv = Badv::read().get_value();
             println!("[kernel] {:?} {:#x} in application, core dumped.", t, badv);
-            panic!("page fault");
             current_add_signal(SignalFlags::SIGILL);
         }
         Trap::Interrupt(Interrupt::Timer) => {
             //时钟中断
-            Ticlr::read().clear_timer().write(); //清除时钟中断
-            Tcfg::read().set_enable(true).write(); //使能时钟中断
-            suspend_current_and_run_next();
+            timer_handler();
         }
         Trap::Exception(Exception::TLBRFill) => {
             // 具体实现中TLB重填例外不会进入这里
@@ -204,8 +200,9 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
 }
 
 fn timer_handler() {
-    // info!("timer interrupt from user");
-
+    trace!("timer interrupt from user");
+    Ticlr::read().clear_timer().write(); //清除时钟中断
+    suspend_current_and_run_next();
 }
 
 /// 当在内核态发生异常或中断时处理

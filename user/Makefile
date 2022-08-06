@@ -12,13 +12,5 @@ OBJCOPY := loongarch64-unknown-linux-gnu-objcopy
 
 elf:
 	@cargo build --release
-	@#python3 build.py
-	@#echo $(APPS)
-	@#echo $(ELFS)
-	@#echo $(BINS)
-
-
-binary: elf
-	$(foreach elf, $(ELFS), $(OBJCOPY) $(elf) --strip-all -O binary $(patsubst $(TARGET_DIR)/%, $(TARGET_DIR)/%.bin, $(elf));)
 
 build: elf

@@ -1,5 +1,4 @@
 use super::{PhysAddr, PhysPageNum};
-use crate::config::{MEMORY_END, PAGE_SIZE, PAGE_SIZE_BITS};
 use crate::println;
 use crate::sync::UPSafeCell;
 use alloc::vec::Vec;
@@ -7,6 +6,7 @@ use alloc::vec::Vec;
 use core::fmt::{self, Debug, Formatter};
 use lazy_static::*;
 use log::info;
+use crate::config::MEMORY_END;
 
 #[derive(Clone)]
 pub struct FrameTracker {
