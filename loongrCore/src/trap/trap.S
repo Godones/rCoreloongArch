@@ -84,7 +84,7 @@ __restore:
     ld.d $r14, $sp, 112
     ld.d $r15, $sp, 120
     ld.d $r16, $sp, 128
-    ld.d $r16, $sp, 136
+    ld.d $r17, $sp, 136
     ld.d $r18, $sp, 144
     ld.d $r19, $sp, 152
     ld.d $r20, $sp, 160
