@@ -18,7 +18,6 @@ mod logging;
 mod loong_arch;
 mod mm;
 mod print;
-mod scanf;
 mod sync;
 mod syscall;
 mod task;
@@ -54,7 +53,6 @@ use crate::loong_arch::{
 };
 pub use log::{debug, error, info, trace, warn};
 
-global_asm!(include_str!("link_app.S"));
 global_asm!(include_str!("head.S"));
 
 #[no_mangle]
