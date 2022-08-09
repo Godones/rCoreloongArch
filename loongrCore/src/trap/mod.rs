@@ -25,10 +25,7 @@ use crate::loong_arch::{
 };
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{
-    check_signals_of_current, current_add_signal, current_trap_addr, current_trap_cx,
-    current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags,
-};
+use crate::task::{check_signals_of_current, current_add_signal, current_trap_addr, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags, current_process};
 use crate::timer::check_timer;
 use crate::{info, println, sprintln};
 use bit_field::BitField;
@@ -253,7 +250,8 @@ fn tlb_refill_handler() {
 /// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且 V=1，且特权等级合规的项，但是该页
 //  表项的 D 位为 0，将触发该例外
 fn tlb_page_modify_handler() {
-    // INFO!("PageModifyFault handler");
+    let pid= current_process().getpid();
+    trace!("PageModifyFault handler [PID]{}",pid);
     //找到对应的页表项，修改D位为1
     let badv = TlbRBadv::read().get_val(); //出错虚拟地址
     let vpn: VirtAddr = badv.into(); //虚拟地址
@@ -261,6 +259,7 @@ fn tlb_page_modify_handler() {
     let token = current_user_token();
     let page_table = PageTable::from_token(token);
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
+
     pte.set_dirty(); //修改D位为1
     unsafe {
         asm!("tlbsrch", "tlbrd",); //根据TLBEHI的虚双页号查询TLB对应项

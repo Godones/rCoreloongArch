@@ -8,6 +8,7 @@ use bitflags::bitflags;
 
 use crate::config::{PAGE_SIZE};
 
+#[derive(Clone)]
 pub struct MemorySet {
     // 页表，这里主要管理的是各级目录所在位置
     page_table: PageTable,
@@ -55,6 +56,9 @@ impl MemorySet {
         }
         memory_set
     }
+
+
+
     /// Include sections in elf and trampoline and TrapContext and user stack,
     /// also returns user_sp and entry point.
     pub fn from_elf(elf_data: &[u8]) -> (Self, usize, usize) {
@@ -144,6 +148,7 @@ impl Default for MapPermission {
     }
 }
 
+#[derive(Clone)]
 pub struct MapArea {
     vpn_range: VPNRange,
     data_frames: BTreeMap<VirtPageNum, FrameTracker>,
@@ -152,7 +157,7 @@ pub struct MapArea {
 
 impl MapArea {
     pub fn new(start_va: VirtAddr, end_va: VirtAddr, map_perm: MapPermission) -> Self {
-        // TRACE!("MapArea::new: {:#x}-{:#x}", start_va.0, end_va.0);
+        // TRACE!("MapArea::new: {:#x}-{:# x}", start_va.0, end_va.0);
         let start_vpn: VirtPageNum = start_va.floor();
         let end_vpn: VirtPageNum = end_va.ceil();
         Self {
@@ -173,8 +178,7 @@ impl MapArea {
         let ppn: PhysPageNum;
         let frame = frame_alloc().unwrap();
         ppn = frame.ppn;
-        // info!("MapArea::map_one: {:#x}-{:#x}", vpn.0, ppn.0);
-        self.data_frames.insert(vpn, frame);
+        self.data_frames.insert(vpn, frame); //虚拟页号与物理页帧的对应关系
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
         page_table.map(vpn, ppn, pte_flags);
     }
