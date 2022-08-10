@@ -98,7 +98,6 @@ pub extern "C" fn main(
     add_initproc(); //添加初始化程序
     enable_timer_interrupt();
     task::run_tasks(); //运行程序
-
     panic!("main end");
 }
 

@@ -98,7 +98,7 @@ make debug #gdb
 
 运行截图：
 
-<video src="sourcepicture/run.mp4" />
+![](sourcepicture/run.gif)
 
 #### 一些说明文件和实验过程:
 
