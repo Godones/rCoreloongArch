@@ -8,4 +8,6 @@
 
 # 章节指导
 - [第一章](./chapter_1.md)
+    - [启动过程](boot.md)
+    - [UART串口](uart.md)
 - [第二章](./chaprer_2.md)
