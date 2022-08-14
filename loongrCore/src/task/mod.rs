@@ -1,5 +1,5 @@
 use crate::config::{BIG_STRIDE, PAGE_SIZE_BITS};
-use crate::loader::{get_app_data, get_num_app};
+use crate::loader::{get_app_data, get_app_trap_cx, get_num_app};
 use crate::loong_arch::tlb::pgdl::Pgdl;
 use crate::sync::UPSafeCell;
 use crate::{Register, info, enable_timer_interrupt};
@@ -56,6 +56,11 @@ lazy_static! {
     };
 }
 impl TaskManager {
+    pub fn get_current_trap_cx(&self) -> usize {
+        let inner = self.inner.exclusive_access();
+        let id = inner.tasks[inner.current_task].task_id;
+        get_app_trap_cx(id)
+    }
     fn mark_current_suspended(&self) {
         //将当前任务变成暂停状态
         let current_task = self.inner.borrow().current_task;
@@ -189,4 +194,7 @@ fn run_next_task() {
 }
 pub fn current_user_token() -> usize {
     TASK_MANAGER.get_current_token()
+}
+pub fn current_trap_cx()->usize{
+    TASK_MANAGER.get_current_trap_cx()
 }

@@ -24,6 +24,9 @@ impl KernelStack {
         }
         trap_cx_ptr as usize
     }
+    pub fn get_trap_cx(&self)->usize{
+        self.get_sp() - core::mem::size_of::<TrapContext>()
+    }
 }
 
 pub fn get_num_app() -> usize {
@@ -59,6 +62,12 @@ pub fn get_app_data(app_id: usize) -> &'static [u8] {
         )
     }
 }
+
+
+pub fn get_app_trap_cx(app_id: usize) -> usize {
+    KERNEL_STACK[app_id].get_trap_cx()
+}
+
 /// 编译器会报出找不到bcmp的错误，这里将其实现为memcmp
 #[no_mangle]
 pub unsafe extern "C" fn bcmp(s1: *const u8, s2: *const u8, n: usize) -> i32 {

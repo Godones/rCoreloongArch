@@ -22,7 +22,7 @@ use crate::loong_arch::tlb::tlbrehi::TlbREhi;
 use crate::loong_arch::tlb::tlbrelo::TlbRelo;
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{current_user_token, exit_current_run_next, suspend_current_run_next};
+use crate::task::{current_trap_cx, current_user_token, exit_current_run_next, suspend_current_run_next};
 use crate::{println, info};
 use bit_field::BitField;
 pub use context::TrapContext;
@@ -86,11 +86,12 @@ pub fn set_user_trap_entry(){
 #[no_mangle]
 pub fn trap_return(){
     set_user_trap_entry();
-    // let trap_cx =
+    let trap_cx = current_trap_cx();
     extern  "C"{
         fn __restore();
     }
     unsafe{
+        asm!("move $a0,{}",in(reg)trap_cx);
         __restore();
     }
 }
@@ -146,6 +147,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
             panic!("{:#b}", estat.get_val());
         }
     }
+    trap_return();
     cx
 }
 
