@@ -102,13 +102,23 @@ make debug #gdb
 
 #### 一些说明文件和实验过程:
 
-文档全部位于docs目录下
+要查看提供的教程，请进入rCoreloongArch目录，使用mdbook命令
 
-[linker.md](linker.md)
+```
+mdbook serve --open
+```
 
-[cross_tool.md](cross_tools.md)
+在线查看指导教程。
 
-[manual.md](manual.md)
+或者查看根目录下导出的**rCoreloongArch-tutorial.pdf**文件。
+
+
+
+#### 未来
+
+- [ ] 添加键盘、鼠标中断的完整支持
+- [ ] 图形化显示
+- [ ] 教程的细致化
 
 #### 其它仓库地址
 
