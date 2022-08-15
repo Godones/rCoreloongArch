@@ -51,7 +51,6 @@ pub trait PortOps {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum CSpaceAccessMethod {
-    // PCIe memory-mapped configuration space access
     MemoryMapped,
 }
 

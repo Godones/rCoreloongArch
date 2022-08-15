@@ -157,7 +157,6 @@ impl TaskUserRes {
             ustack_top.into(),
             MapPermission::default() | MapPermission::W,
         );
-        // alloc trap_cx
     }
 
     fn dealloc_user_res(&self) {

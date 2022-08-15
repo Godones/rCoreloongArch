@@ -10,6 +10,13 @@ pub struct TaskControlBlock {
     // mutable
     inner: UPSafeCell<TaskControlBlockInner>,
 }
+pub struct TaskControlBlockInner {
+    pub kstack: KernelStack,      //每个线程都存在内核栈，其trap上下文位于内核栈上
+    pub res: Option<TaskUserRes>, //线程资源
+    pub task_cx: TaskContext,     //线程上下文
+    pub task_status: TaskStatus,  //线程状态
+    pub exit_code: Option<i32>,   //线程退出码
+}
 
 impl TaskControlBlock {
     pub fn inner_exclusive_access(&self) -> RefMut<'_, TaskControlBlockInner> {
@@ -23,13 +30,6 @@ impl TaskControlBlock {
     }
 }
 
-pub struct TaskControlBlockInner {
-    pub kstack: KernelStack,      //每个线程都存在内核栈，其trap上下文位于内核栈上
-    pub res: Option<TaskUserRes>, //线程资源
-    pub task_cx: TaskContext,     //线程上下文
-    pub task_status: TaskStatus,  //线程状态
-    pub exit_code: Option<i32>,   //线程退出码
-}
 
 impl TaskControlBlockInner {
     pub fn get_trap_cx(&self) -> &'static mut TrapContext {

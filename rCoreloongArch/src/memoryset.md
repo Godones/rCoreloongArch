@@ -290,4 +290,106 @@ __tlb_rfill:
 
 ```
 
-重填异常的处理中需要获取地址空间的根页表地址，类似rcore中token，但这里是完整的物理地址，而不是物理页号，所以在memoryset的实现中也可以看到返回token的实现存在差异。
+重填异常的处理中需要获取地址空间的根页表地址，类似rcore中token，但这里是完整的物理地址，而不是物理页号，所以在memoryset的实现中也可以看到返回token的实现存在差异。完成TLB重填的任务，还需要解决的是页修改例外，在risc-v上页表的访问由硬件完成，因此某些位将由硬件来设置，但loongarch上全部由软件完成，包括其中的D位，这是表示该页表项对应的数据是否有被写过，在构建页表项时，这个位被设置为0，当程序发生写操作时，如果这位为0会发生页修改例外，而我们需要做的就是修改应用地址空间页表项的对应位以及修改TLB中的页表项对应位。其实现如下:
+
+```rust
+/// Exception(PageModifyFault)的处理
+/// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且 V=1，且特权等级合规的项，但是该页
+//  表项的 D 位为 0，将触发该例外
+fn tlb_page_modify_handler() {
+    // INFO!("PageModifyFault handler");
+    //找到对应的页表项，修改D位为1
+    let badv = TlbRBadv::read().get_val(); //出错虚拟地址
+    let vpn: VirtAddr = badv.into(); //虚拟地址
+    let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
+    let token = current_user_token(); //根页表的地址
+    let page_table = PageTable::from_token(token);
+    let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
+    pte.set_dirty(); //修改D位为1
+    unsafe {
+        asm!("tlbsrch", "tlbrd",); //根据TLBEHI的虚双页号查询TLB对应项
+    }
+    let tlbidx = TlbIdx::read(); //获取TLB项索引
+    assert_eq!(tlbidx.get_ne(), false);
+    let mut tlbelo0 = TLBELO::read(0); //获取TLB项0
+    let mut tlbelo1 = TLBELO::read(1); //获取TLB项1
+    tlbelo0.set_dirty(true).write();
+    tlbelo1.set_dirty(true).write();
+    unsafe {
+        asm!("tlbwr"); //重新将tlbelo写入tlb
+    }
+}
+```
+
+在完成上述工作后页表机制就可以正常运行了。在开启时钟的实现部分，我们修改了相关实现:
+
+```rust
+pub fn enable_timer_interrupt() {
+    let timer_freq = get_timer_freq();
+    Ecfg::read().set_lie_with_index(11, true).write();
+    Ticlr::read().clear_timer().write(); //清除时钟专断
+    Tcfg::read()
+        .set_enable(true)
+        .set_loop(true)
+        .set_tval(timer_freq / TICKS_PER_SEC)
+        .write(); //设置计时器的配置
+
+    Crmd::read().set_ie(true).write(); //开启全局中断
+}
+```
+
+在实验前期时钟的中断间隔被我们设置了一个大概值，这里通过读取cpu配置字查询到了时钟的频率，可以正确配置周期间隔了。
+
+其中trap的处理也做了对应于rcore的修改
+
+```rust
+pub fn trap_return(){
+    set_user_trap_entry();
+    let trap_cx = current_trap_cx();
+    extern  "C"{
+        fn __restore();
+    }
+    unsafe{
+        asm!("move $a0,{}",in(reg)trap_cx);
+        __restore();
+    }
+}
+```
+
+这里要简单的多，只需要设置用户态发生异常时的入口然后将用户程序的trap上下文所在内核栈的地址传入a0即可。
+
+在切换任务时，处理切换任务上下文，我们还需要切换地址空间和设置ASID
+
+```rust
+
+    fn run_next_task(&self) {
+        if let Some(next) = self.find_next_task() {
+            //查询是否有处于准备的任务，如果有就运行
+            let mut inner = self.inner.borrow();
+            let current_task = inner.current_task;
+            inner.current_task = next;
+            inner.tasks[next].task_status = TaskStatus::Running;
+            //获取两个任务的task上下文指针
+            let current_task_cx_ptr =
+                &mut inner.tasks[current_task].task_cx_ptr as *mut TaskContext;
+            let next_task_cx_ptr2 = &inner.tasks[next].task_cx_ptr as *const TaskContext;
+            let pgd = inner.tasks[next].get_user_token() << PAGE_SIZE_BITS; //获得根页表基地址
+            Pgdl::read().set_val(pgd).write(); //设置根页表基地址
+            let current_task_id = inner.tasks[next].task_id;
+            //释放可变借用，否则进入下一个任务后将不能获取到inner的使用权
+            drop(inner);
+            unsafe {
+                __switch(current_task_cx_ptr, next_task_cx_ptr2, current_task_id);
+            }
+        } else {
+            panic!("There are no tasks!");
+        }
+    }
+```
+
+在代码中我们获取了当前任务的根页表物理页号并将其转为物理地址写入PGDL寄存器中，在__switch中，传入了要切换到的任务id,在汇编代码实现中，会将id写入ASID寄存器，这样一来，当任务回复trap上下文回到用户态后，就会根据这两个寄存器来进行地址转换了。
+
+
+
+
+
