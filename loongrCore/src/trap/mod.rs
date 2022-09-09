@@ -32,15 +32,15 @@ pub fn init() {
     let mut ticlr = Ticlr::read();
     ticlr.clear();
     Tcfg::read().set_val(0x10000000usize | CSR_TCFG_EN | CSR_TCFG_PER); //设置计时器的配置
-    // ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
-    // Ecfg::read().set_local_interrupt((0usize << CSR_ECFG_VS_SHIFT) | HWI_VEC | TI_VEC); // 设置所有异常处理函数的入口为同一个
+                                                                        // ticlr.set_val(ticlr.get_val() | CSR_TICLR_CLR); //清除时钟中断
+                                                                        // Ecfg::read().set_local_interrupt((0usize << CSR_ECFG_VS_SHIFT) | HWI_VEC | TI_VEC); // 设置所有异常处理函数的入口为同一个
     Ecfg::read().set_vs(0);
-    Ecfg::read().set_local_interrupt(11,false);
+    Ecfg::read().set_local_interrupt(11, false);
     Crmd::read().set_interrupt_enable(false); //开启全局中断
-                                             // INFO!(
-                                             //     "global interrupt enable: {}",
-                                             //     Crmd::read().get_interrupt_enable()
-                                             // );
+                                              // INFO!(
+                                              //     "global interrupt enable: {}",
+                                              //     Crmd::read().get_interrupt_enable()
+                                              // );
     Eentry::read().set_eentry(__alltraps as usize); // 设置中断入口
 }
 // loongArch的参数寄存器为a0-a7
@@ -81,14 +81,15 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
         }
         _ => {
             let mut record = 0;
-            for i in 0..13{
-                if estat.get_val().get_bit(i){
+            for i in 0..13 {
+                if estat.get_val().get_bit(i) {
                     record = i;
                 }
             }
             panic!(
                 "Unsupported trap {:?}, interrupt = {}!",
-                estat.get_val().get_bits(16..=21),record
+                estat.get_val().get_bits(16..=21),
+                record
             );
         }
     }

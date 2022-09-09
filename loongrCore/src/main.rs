@@ -8,6 +8,7 @@
 mod batch;
 mod config;
 mod lang_items;
+mod loader;
 mod loong_arch;
 mod print;
 mod scanf;
@@ -16,7 +17,6 @@ mod syscall;
 mod test;
 mod trap;
 mod uart;
-mod loader;
 
 extern crate bit_field;
 extern crate rlibc;
