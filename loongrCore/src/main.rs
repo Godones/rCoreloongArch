@@ -54,7 +54,6 @@ use core::arch::{asm, global_asm};
 use crate::fs::list_apps;
 use crate::loong_arch::{ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read, vbe_test};
 pub use log::{debug, error, info, trace, warn};
-pub use vbe::VBEDRIVER;
 global_asm!(include_str!("head.S"));
 
 #[no_mangle]
@@ -63,9 +62,6 @@ pub extern "C" fn main(
     _argv: *const *const u8,
     _boot_params_interface: *const BootParamsInterface,
 ) {
-    unsafe {
-        asm!("invtlb 0,$r0,$r0");
-    }
     println!("{}", FLAG);
     logging::init();
     rtc_init();
@@ -86,7 +82,6 @@ pub extern "C" fn main(
         // 键盘
         i8042_init();
         // gui
-        vbe_test();
     }
 
     trap::init();
@@ -94,6 +89,11 @@ pub extern "C" fn main(
     // sata硬盘
     ahci_init();
     //运行程序
+
+    if cfg!(feature = "gui"){
+        vbe_test();
+    }
+
     list_apps(); //列出所有程序
     add_initproc(); //添加初始化程序
     enable_timer_interrupt();

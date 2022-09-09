@@ -23,8 +23,8 @@ static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 #[global_allocator]
 // pub static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
 // static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
-static ALLOCATOR: LockedHeap = LockedHeap::empty();
-// static ALLOCATOR: Locked<Buddy> = Locked::new(Buddy::new());
+// static ALLOCATOR: LockedHeap = LockedHeap::empty();
+static ALLOCATOR: Locked<Buddy> = Locked::new(Buddy::new());
 
 pub fn init_heap() {
     unsafe {

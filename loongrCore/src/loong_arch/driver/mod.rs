@@ -14,7 +14,10 @@ use easy_fs::BlockDevice;
 use log::info;
 pub use pckbd::{i8042_init, kbd_has_data, kbd_read_scancode};
 
-pub use self::vbe::vbe_test;
+pub use self::vbe::*;
+
+
+
 
 /// Used only for initialization hacks.
 pub const DUMMY_BLOCK_DEVICE: *const dyn BlockDevice =

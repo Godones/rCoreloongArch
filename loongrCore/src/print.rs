@@ -4,7 +4,6 @@ use crate::uart::Uart;
 use core::fmt::{Arguments, Write};
 use lazy_static::lazy_static;
 use spin::mutex::Mutex;
-use vbe::VBEDRIVER;
 
 pub struct Console {
     inner: Uart,
@@ -78,35 +77,36 @@ impl Screen {
         Self {}
     }
 }
-impl Write for Screen{
-    fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        VBEDRIVER.lock().print_string(s);
-        Ok(())
-    }
-}
-
-lazy_static! {
-    pub static ref SCREEN: Mutex<Screen> = Mutex::new(Screen::new());
-}
-
-
-pub fn s_print(arg: Arguments) {
-    SCREEN.lock().write_fmt(arg).unwrap()
-}
-///借用标准库的print!实现
-/// $crate 变量使得我们不必在使用println!时导入宏
-#[macro_export]
-/// print string macro
-macro_rules! sprint {
-    ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::print::s_print(format_args!($fmt $(, $($arg)+)?));
-    }
-}
-
-#[macro_export]
-/// println string macro
-macro_rules! sprintln {
-    ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::print::s_print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
-    }
-}
+//
+// impl Write for Screen{
+//     fn write_str(&mut self, s: &str) -> core::fmt::Result {
+//         VBEDRIVER.lock().print_string(s);
+//         Ok(())
+//     }
+// }
+//
+// lazy_static! {
+//     pub static ref SCREEN: Mutex<Screen> = Mutex::new(Screen::new());
+// }
+//
+//
+// pub fn s_print(arg: Arguments) {
+//     SCREEN.lock().write_fmt(arg).unwrap()
+// }
+// ///借用标准库的print!实现
+// /// $crate 变量使得我们不必在使用println!时导入宏
+// #[macro_export]
+// /// print string macro
+// macro_rules! sprint {
+//     ($fmt: literal $(, $($arg: tt)+)?) => {
+//         $crate::print::s_print(format_args!($fmt $(, $($arg)+)?));
+//     }
+// }
+//
+// #[macro_export]
+// /// println string macro
+// macro_rules! sprintln {
+//     ($fmt: literal $(, $($arg: tt)+)?) => {
+//         $crate::print::s_print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
+//     }
+// }

@@ -6,6 +6,7 @@ use bit_field::BitField;
 pub const RTC_YEAR: usize = 0x30;
 pub const RTC_TOYREAD0: usize = 0x2c; //月日时分
 pub const RTC_CTRL: usize = 0x40;
+
 pub fn rtc_time_read() -> RtcTime {
     let value = ls7a_read_w(LS7A_RTC_REG_BASE + RTC_TOYREAD0);
     let sec = (value >> 4) & 0x3f;

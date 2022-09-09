@@ -1,3 +1,5 @@
+use alloc::format;
+use alloc::string::{String, ToString};
 use core::fmt::{Debug, Formatter};
 use rlibc::memcmp;
 
@@ -16,6 +18,15 @@ impl Debug for RtcTime {
             f,
             "{}-{}-{} {}:{}:{}",
             self.year, self.month, self.day, self.hour, self.minute, self.second
+        )
+    }
+}
+
+impl ToString for RtcTime {
+    fn to_string(&self) -> String {
+        format!(
+            "{}:{}:{}\n{}-{}-{}",
+            self.hour, self.minute, self.second, self.year, self.month, self.day
         )
     }
 }

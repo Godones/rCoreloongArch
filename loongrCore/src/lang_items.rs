@@ -33,8 +33,6 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 }
 
 
-
-
 #[no_mangle]
 pub(crate) extern "C" fn abort() -> ! {
     loop {

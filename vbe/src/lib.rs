@@ -1,23 +1,18 @@
 #![no_main]
 #![no_std]
 #![allow(unused)]
-extern crate alloc;
 
-mod ascii;
-mod show;
-mod vbe;
+mod old_impl;
+mod driver;
+mod gui;
+pub mod id_allocator;
+
+extern crate alloc;
 
 use spin::Mutex;
 use lazy_static::lazy_static;
-pub use vbe::{VbeInfo};
-use vbe::VbeDriver;
 
+pub use log::{info};
+pub use gui::*;
 
-lazy_static! {
-    pub static ref VBEDRIVER: Mutex<VbeDriver> = Mutex::new(VbeDriver::empty());
-}
-
-
-pub fn init_vbe(vbe_info: VbeInfo, _ram_buffer: usize){
-    VBEDRIVER.lock().set_vbe_info(vbe_info);
-}
+pub use embedded_graphics::*;

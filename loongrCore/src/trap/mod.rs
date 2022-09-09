@@ -27,7 +27,7 @@ use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
 use crate::task::{check_signals_of_current, current_add_signal, current_trap_addr, current_trap_cx, current_user_token, exit_current_and_run_next, suspend_current_and_run_next, SignalFlags, current_process};
 use crate::timer::check_timer;
-use crate::{info, println, sprintln};
+use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
 use core::arch::{asm, global_asm};
@@ -38,6 +38,8 @@ use crate::loong_arch::register::prmd::Prmd;
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
 global_asm!(include_str!("trap_kernel.S"));
+
+
 pub fn init() {
     extern "C" {
         fn __alltraps();
@@ -291,7 +293,7 @@ fn tlb_page_fault() {
 fn hwi0_handler() {
     // 查找是哪一个中断
     let irq = extioi_claim();
-    sprintln!("extioi irq: {:#b}", irq);
+    println!("extioi irq: {:#b}", irq);
     if irq.get_bit(KEYBOARD_IRQ) {
         keyboard_handler();
     }
@@ -306,15 +308,15 @@ fn hwi0_handler() {
 }
 
 fn uart_handler() {
-    sprintln!("uart interrupt!");
+    println!("uart interrupt!");
 }
 fn mouse_handler() {
-    sprintln!("mouse interrupt");
+    println!("mouse interrupt");
 }
 
 fn keyboard_handler() {
     while kbd_has_data() {
-        sprintln!("{:#x}", kbd_read_scancode());
+        println!("{:#x}", kbd_read_scancode());
     }
-    sprintln!("key done");
+    println!("key done");
 }

@@ -1,4 +1,4 @@
-use crate::ascii::FONT_ASCII;
+use crate::old_impl::ascii::FONT_ASCII;
 use alloc::alloc::alloc;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
