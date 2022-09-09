@@ -1,0 +1,410 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>多级页表实现 - rCoreloongArch-tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">前置知识</li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">1.</strong> 工具链安装</a></li><li class="chapter-item expanded "><a href="linker.html"><strong aria-hidden="true">2.</strong> linker文件</a></li><li class="chapter-item expanded "><a href="rust_bare.html"><strong aria-hidden="true">3.</strong> Rust裸机环境配置</a></li><li class="chapter-item expanded "><a href="assemble.html"><strong aria-hidden="true">4.</strong> rust汇编</a></li><li class="chapter-item expanded affix "><li class="part-title">章节指导</li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">5.</strong> 第一章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="boot.html"><strong aria-hidden="true">5.1.</strong> 启动过程</a></li><li class="chapter-item expanded "><a href="uart.html"><strong aria-hidden="true">5.2.</strong> UART串口</a></li><li class="chapter-item expanded "><a href="macro.html"><strong aria-hidden="true">5.3.</strong> Rust宏</a></li></ol></li><li class="chapter-item expanded "><a href="ch2.html"><strong aria-hidden="true">6.</strong> 第二章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sup.html"><strong aria-hidden="true">6.1.</strong> 特权级架构</a></li><li class="chapter-item expanded "><a href="app.html"><strong aria-hidden="true">6.2.</strong> 应用程序</a></li></ol></li><li class="chapter-item expanded "><a href="ch3.html"><strong aria-hidden="true">7.</strong> 第三章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="task_ex.html"><strong aria-hidden="true">7.1.</strong> 任务切换</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">7.2.</strong> 时钟</a></li></ol></li><li class="chapter-item expanded "><a href="ch4.html"><strong aria-hidden="true">8.</strong> 第四章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="reg.html"><strong aria-hidden="true">8.1.</strong> 寄存器设计</a></li><li class="chapter-item expanded "><a href="buddy.html"><strong aria-hidden="true">8.2.</strong> 内存分配</a></li><li class="chapter-item expanded "><a href="manage-mem.html"><strong aria-hidden="true">8.3.</strong> 存储管理</a></li><li class="chapter-item expanded "><a href="mmu.html"><strong aria-hidden="true">8.4.</strong> 多级页表硬件机制</a></li><li class="chapter-item expanded "><a href="mmu-impl.html" class="active"><strong aria-hidden="true">8.5.</strong> 多级页表实现</a></li><li class="chapter-item expanded "><a href="memoryset.html"><strong aria-hidden="true">8.6.</strong> 地址空间</a></li></ol></li><li class="chapter-item expanded "><a href="ch5.html"><strong aria-hidden="true">9.</strong> 第五章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="kstack.html"><strong aria-hidden="true">9.1.</strong> 内核栈</a></li><li class="chapter-item expanded "><a href="f-e.html"><strong aria-hidden="true">9.2.</strong> fork和exec</a></li></ol></li><li class="chapter-item expanded "><a href="ch6.html"><strong aria-hidden="true">10.</strong> 第六章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="line.html"><strong aria-hidden="true">10.1.</strong> 总线</a></li><li class="chapter-item expanded "><a href="pci.html"><strong aria-hidden="true">10.2.</strong> pci设备探测</a></li><li class="chapter-item expanded "><a href="stat.html"><strong aria-hidden="true">10.3.</strong> 块设备驱动</a></li></ol></li><li class="chapter-item expanded "><a href="ch7.html"><strong aria-hidden="true">11.</strong> 第七章</a></li><li class="chapter-item expanded "><a href="ch8.html"><strong aria-hidden="true">12.</strong> 第八章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="thread.html"><strong aria-hidden="true">12.1.</strong> 线程</a></li></ol></li><li class="chapter-item expanded "><a href="other.html"><strong aria-hidden="true">13.</strong> 其它</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interrupt.html"><strong aria-hidden="true">13.1.</strong> 中断系统</a></li><li class="chapter-item expanded "><a href="stacktrace.html"><strong aria-hidden="true">13.2.</strong> 内核栈回溯工具</a></li><li class="chapter-item expanded "><a href="vbe.html"><strong aria-hidden="true">13.3.</strong> VBE图形显示</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rCoreloongArch-tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="多级页表实现"><a class="header" href="#多级页表实现">多级页表实现</a></h1>
+<p>通过CPUCFG指令获取系统配置后，我们得到了loongarch机器支持的虚拟地址区间位宽和物理地址区间均为48位，在将页大小规定位16kb后，将会构成三级页表机制。</p>
+<p>在地址相关的数据结构抽象与类型定义中，只需要简单修改config文件中的页大小和位宽即可。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub const PAGE_SIZE: usize = 0x4000; //16kB
+pub const PAGE_SIZE_BITS: usize = 14; //16kB
+<span class="boring">}
+</span></code></pre></pre>
+<p>在页表项的实现中，由于两个平台差异较大，因此许多结构需要重新定义，对于页表项中的标志位，重新定义如下:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>bitflags! {
+    pub struct PTEFlags: usize {
+        const V = 1 &lt;&lt; 0;
+        const D = 1 &lt;&lt; 1;
+        const PLVL = 1 &lt;&lt; 2;
+        const PLVH = 1 &lt;&lt; 3;
+        const MATL = 1 &lt;&lt; 4;
+        const MATH = 1 &lt;&lt; 5;
+        const G = 1 &lt;&lt; 6;
+        const P = 1 &lt;&lt; 7;
+        const W = 1 &lt;&lt; 8;
+        const NR = 1 &lt;&lt; 61;
+        const NX = 1 &lt;&lt; 62;
+        const RPLV = 1 &lt;&lt; 63;
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>上述所有位都不会被硬件自动修改，在发生TLB相关的异常时，我们可能需要手动查找到页表项并进行修改，主要涉及的是D位。同时PTEFlags提供了默认的实现:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl PTEFlags {
+    fn default() -&gt; Self {
+        PTEFlags::V | PTEFlags::MATL | PTEFlags::P | PTEFlags::W
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在后续构建页表项时，需要获取默认实现再根据读写权限修改其它位，这也就是说，我们规定了这些页表项都是有效的，并且存储类型为一致可缓存，同时这些虚拟页号对应物理页均存在(P)，该页可写(W)。上文提到的其中P和W位只存在于页表项中，不会放入TLB中，这两个位主要用于cow机制中，但本实验不会涉及cow，因此这里将其规定为特定值。</p>
+<p>对页表项相关的函数也做了修改:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl PageTableEntry {
+    pub fn new(ppn: PhysPageNum, flags: PTEFlags) -&gt; Self {
+        let mut bits = 0usize;
+        bits.set_bits(14..PALEN, ppn.0); //采用16kb大小的页
+        bits = bits | flags.bits;
+        PageTableEntry { bits }
+    }
+    // 空页表项
+    pub fn empty() -&gt; Self {
+        PageTableEntry { bits: 0 }
+    }
+    // 返回物理页号---页表项
+    pub fn ppn(&amp;self) -&gt; PhysPageNum {
+        self.bits.get_bits(14..PALEN).into()
+    }
+    // 返回物理页号---页目录项
+    // 在一级和二级页目录表中目录项存放的是只有下一级的基地址
+    pub fn directory_ppn(&amp;self) -&gt; PhysPageNum {
+        (self.bits &gt;&gt; PAGE_SIZE_BITS).into()
+    }
+    // 返回标志位
+    pub fn flags(&amp;self) -&gt; PTEFlags {
+        //这里只需要标志位，需要把非标志位的位置清零
+        let mut bits = self.bits;
+        bits.set_bits(14..PALEN, 0);
+        PTEFlags::from_bits(bits).unwrap()
+    }
+    // 有效位
+    pub fn is_valid(&amp;self) -&gt; bool {
+        (self.flags() &amp; PTEFlags::V) != PTEFlags::empty()
+    }
+    // 是否可写
+    pub fn writable(&amp;self) -&gt; bool {
+        (self.flags() &amp; PTEFlags::W) != PTEFlags::empty()
+    }
+    // 是否可读
+    pub fn readable(&amp;self) -&gt; bool {
+        !((self.flags() &amp; PTEFlags::NR) != PTEFlags::empty())
+    }
+    // 是否可执行
+    pub fn executable(&amp;self) -&gt; bool {
+        !((self.flags() &amp; PTEFlags::NX) != PTEFlags::empty())
+    }
+    //设置脏位
+    pub fn set_dirty(&amp;mut self) {
+        self.bits.set_bit(1, true);
+    }
+    // 用于判断存放的页目录项是否为0
+    // 由于页目录项只保存下一级目录的基地址
+    // 因此判断是否是有效的就只需判断是否为0即可
+    pub fn is_zero(&amp;self) -&gt; bool {
+        self.bits == 0
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>除了根据标志位定义差异而进行修改的函数，可以看到上述还多出来几个函数，这几个函数主要用于后续构建页表时的遍历过程，与risc-v不同，loongarch下三级页表的构建中第1，2级页表的页表项并不是前文提到的页表项，而是一个物理地址，其直接保存下一级页表的基地址，只有最后一级页表的页表项存储上述所说明的页表项。</p>
+<p>物理页帧的分配方法与rcore相同，没有额外的修改。</p>
+<p>在内核中访问一个物理页帧的方法也需要做修改，因为页大小的差异导致了每一页上的页表项数量和字节数组大小都发生了改变</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl PhysPageNum {
+    pub fn get_pte_array(&amp;self) -&gt; &amp;'static mut [PageTableEntry] {
+        let pa: PhysAddr = self.clone().into();
+        unsafe { core::slice::from_raw_parts_mut(pa.0 as *mut PageTableEntry, 2048) }
+        //每一个页有2048个页表项
+    }
+    pub fn get_bytes_array(&amp;self) -&gt; &amp;'static mut [u8] {
+        let pa: PhysAddr = self.clone().into();
+        unsafe { core::slice::from_raw_parts_mut(pa.0 as *mut u8, 16 * 1024) }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>为了取出虚拟地址的三级页表索引，并按照从高到低的顺序返回，也根据页表大小定义做了修改:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl VirtPageNum {
+    pub fn indexes(&amp;self) -&gt; [usize; 3] {
+        let mut vpn = self.0;
+        let mut idx = [0usize; 3];
+        for i in (0..3).rev() {
+            idx[i] = vpn &amp; 2047; //2^11-1 每一页包含2048个页表项
+            vpn &gt;&gt;= 11;
+        }
+        idx
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn find_pte_create(&amp;mut self, vpn: VirtPageNum) -&gt; Option&lt;&amp;mut PageTableEntry&gt; {
+        let idxs = vpn.indexes();
+        let mut ppn = self.root_ppn;
+        let mut result: Option&lt;&amp;mut PageTableEntry&gt; = None;
+        for i in 0..3 {
+            let pte = &amp;mut ppn.get_pte_array()[idxs[i]];
+            if i == 2 {
+                //找到叶子节点，叶子节点的页表项是否合法由调用者来处理
+                result = Some(pte);
+                break;
+            }
+            if pte.is_zero() {
+                let frame = frame_alloc().unwrap();
+                // 页目录项只保存地址
+                *pte = PageTableEntry {
+                    bits: frame.ppn.0 &lt;&lt; PAGE_SIZE_BITS, //存储下一级页表的基地址
+                };
+                self.frames.push(frame);
+            }
+            ppn = pte.directory_ppn();
+        }
+        result
+    }
+    pub fn find_pte(&amp;self, vpn: VirtPageNum) -&gt; Option&lt;&amp;mut PageTableEntry&gt; {
+        let idxs = vpn.indexes();
+        let mut ppn = self.root_ppn;
+        let mut result: Option&lt;&amp;mut PageTableEntry&gt; = None;
+        for i in 0..3 {
+            let pte = &amp;mut ppn.get_pte_array()[idxs[i]];
+            if pte.is_zero() {
+                return None;
+            }
+            if i == 2 {
+                result = Some(pte);
+                break;
+            }
+            ppn = pte.directory_ppn();
+        }
+        result
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>PageTable::find_pte</code> 与 <code>find_pte_create</code> 实现中使用了上面额外定义的函数，在申请一个物理页帧的时候，我们会将其清空，因此判断页目录项中是否保存一个有效地址的方法就是直接判断其是否为0 .</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span> pub fn map(&amp;mut self, vpn: VirtPageNum, ppn: PhysPageNum, flags: PTEFlags) {
+        let pte = self.find_pte_create(vpn).unwrap();
+        assert!(!pte.is_valid(), &quot;vpn {:?} is mapped before mapping&quot;, vpn);
+        *pte = PageTableEntry::new(ppn, flags | PTEFlags::default());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在插入页表项时，需要将标志位与默认的设置进行或操作，因为外部传入的标志位可能并不会正确设置这些默认位。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="mmu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="memoryset.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="mmu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="memoryset.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script type="text/javascript">
+            window.playground_line_numbers = true;
+        </script>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="editor.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mode-rust.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-dawn.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-tomorrow_night.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>

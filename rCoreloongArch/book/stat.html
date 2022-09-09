@@ -1,0 +1,359 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>块设备驱动 - rCoreloongArch-tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">前置知识</li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">1.</strong> 工具链安装</a></li><li class="chapter-item expanded "><a href="linker.html"><strong aria-hidden="true">2.</strong> linker文件</a></li><li class="chapter-item expanded "><a href="rust_bare.html"><strong aria-hidden="true">3.</strong> Rust裸机环境配置</a></li><li class="chapter-item expanded "><a href="assemble.html"><strong aria-hidden="true">4.</strong> rust汇编</a></li><li class="chapter-item expanded affix "><li class="part-title">章节指导</li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">5.</strong> 第一章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="boot.html"><strong aria-hidden="true">5.1.</strong> 启动过程</a></li><li class="chapter-item expanded "><a href="uart.html"><strong aria-hidden="true">5.2.</strong> UART串口</a></li><li class="chapter-item expanded "><a href="macro.html"><strong aria-hidden="true">5.3.</strong> Rust宏</a></li></ol></li><li class="chapter-item expanded "><a href="ch2.html"><strong aria-hidden="true">6.</strong> 第二章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sup.html"><strong aria-hidden="true">6.1.</strong> 特权级架构</a></li><li class="chapter-item expanded "><a href="app.html"><strong aria-hidden="true">6.2.</strong> 应用程序</a></li></ol></li><li class="chapter-item expanded "><a href="ch3.html"><strong aria-hidden="true">7.</strong> 第三章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="task_ex.html"><strong aria-hidden="true">7.1.</strong> 任务切换</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">7.2.</strong> 时钟</a></li></ol></li><li class="chapter-item expanded "><a href="ch4.html"><strong aria-hidden="true">8.</strong> 第四章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="reg.html"><strong aria-hidden="true">8.1.</strong> 寄存器设计</a></li><li class="chapter-item expanded "><a href="buddy.html"><strong aria-hidden="true">8.2.</strong> 内存分配</a></li><li class="chapter-item expanded "><a href="manage-mem.html"><strong aria-hidden="true">8.3.</strong> 存储管理</a></li><li class="chapter-item expanded "><a href="mmu.html"><strong aria-hidden="true">8.4.</strong> 多级页表硬件机制</a></li><li class="chapter-item expanded "><a href="mmu-impl.html"><strong aria-hidden="true">8.5.</strong> 多级页表实现</a></li><li class="chapter-item expanded "><a href="memoryset.html"><strong aria-hidden="true">8.6.</strong> 地址空间</a></li></ol></li><li class="chapter-item expanded "><a href="ch5.html"><strong aria-hidden="true">9.</strong> 第五章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="kstack.html"><strong aria-hidden="true">9.1.</strong> 内核栈</a></li><li class="chapter-item expanded "><a href="f-e.html"><strong aria-hidden="true">9.2.</strong> fork和exec</a></li></ol></li><li class="chapter-item expanded "><a href="ch6.html"><strong aria-hidden="true">10.</strong> 第六章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="line.html"><strong aria-hidden="true">10.1.</strong> 总线</a></li><li class="chapter-item expanded "><a href="pci.html"><strong aria-hidden="true">10.2.</strong> pci设备探测</a></li><li class="chapter-item expanded "><a href="stat.html" class="active"><strong aria-hidden="true">10.3.</strong> 块设备驱动</a></li></ol></li><li class="chapter-item expanded "><a href="ch7.html"><strong aria-hidden="true">11.</strong> 第七章</a></li><li class="chapter-item expanded "><a href="ch8.html"><strong aria-hidden="true">12.</strong> 第八章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="thread.html"><strong aria-hidden="true">12.1.</strong> 线程</a></li></ol></li><li class="chapter-item expanded "><a href="other.html"><strong aria-hidden="true">13.</strong> 其它</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interrupt.html"><strong aria-hidden="true">13.1.</strong> 中断系统</a></li><li class="chapter-item expanded "><a href="stacktrace.html"><strong aria-hidden="true">13.2.</strong> 内核栈回溯工具</a></li><li class="chapter-item expanded "><a href="vbe.html"><strong aria-hidden="true">13.3.</strong> VBE图形显示</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rCoreloongArch-tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="块设备驱动"><a class="header" href="#块设备驱动">块设备驱动</a></h1>
+<p>在上小节中完成了PCI设备的探测，文末介绍了设备配置的一点相关内容，在这一节，我们需要争对SATA设备进行配置，在PCI设备扫描中，当我们探测到了SATA设备时，会进行中断配置</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>if dev.id.class == 0x01 &amp;&amp; dev.id.subclass == 0x06 {
+            // Mass storage class, SATA subclass
+            if let Some(BAR::Memory(pa, len, _, _)) = dev.bars[5] {
+                info!(&quot;Found AHCI device&quot;);
+                // 检查status的第五位是否为1，如果是，则说明该设备存在能力链表
+                if dev.status | Status::CAPABILITIES_LIST == Status::empty() {
+                    info!(&quot;\tNo capabilities list&quot;);
+                    return None;
+                }
+                unsafe { enable(dev.loc) };
+                assert!((len as usize) &lt; PAGE_SIZE);
+                if let Some(x) = AHCIDriver::new(pa as usize, len as usize) {
+                    return Some(x);
+                }
+            }
+        }
+<span class="boring">}
+</span></code></pre></pre>
+<p>通过class 和subclass字段的对应值，判断是否找到SATA设备，并检查设备是否存在能力链表，如果存在那么我们将会配置MSI中断</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>unsafe fn enable(loc: Location) {
+    let ops = &amp;UnusedPort;
+    let am = CSpaceAccessMethod::MemoryMapped;
+    // 23 and lower are used
+    static mut MSI_IRQ: u32 = 23;
+
+    let orig = am.read16(ops, loc, PCI_COMMAND);
+    // bit0     |bit1       |bit2          |bit3           |bit10
+    // IO Space |MEM Space  |Bus Mastering |Special Cycles |PCI Interrupt Disable
+    am.write32(ops, loc, PCI_COMMAND, (orig | 0x40f) as u32);
+	//0100 0000 1111
+    // find MSI cap
+    let mut msi_found = false;
+    let mut cap_ptr = am.read8(ops, loc, PCI_CAP_PTR) as u16; // 能力链表的起始地址
+    while cap_ptr &gt; 0 {
+        // info!(&quot;cap_ptr: {:#x}&quot;, cap_ptr);
+        let cap_id = am.read8(ops, loc, cap_ptr);
+        if cap_id == PCI_CAP_ID_MSI {
+            let orig_ctrl = am.read32(ops, loc, cap_ptr + PCI_MSI_CTRL_CAP);
+
+            // 在 3A+7A 的系统中，PCI MSI 中断的目标地址为 0xfdf8000000 或者 0x2ff00000。桥片会将设
+            // 备发给这两个地址段的 MSI 消息包，转换成 HT 中断消息包，发送给处理器。
+            am.write32(ops, loc, cap_ptr + PCI_MSI_ADDR, 0x2ff0_0000); // 设置MSI的地址
+            MSI_IRQ += 1;
+            let irq = MSI_IRQ;
+            //检查是64位/32位模式
+            // we offset all our irq numbers by 32
+            if (orig_ctrl &gt;&gt; 16) &amp; (1 &lt;&lt; 7) != 0 {
+                // 64bit
+                am.write32(ops, loc, cap_ptr + PCI_MSI_DATA_64, irq + 32);
+            } else {
+                // 32bit
+                am.write32(ops, loc, cap_ptr + PCI_MSI_DATA_32, irq + 32);
+            }
+
+            // enable MSI interrupt, assuming 64bit for now
+            am.write32(ops, loc, cap_ptr + PCI_MSI_CTRL_CAP, orig_ctrl | 0x10000);
+            msi_found = true;
+        }
+        cap_ptr = am.read8(ops, loc, cap_ptr + 1) as u16;
+    }
+
+    if !msi_found {
+        info!(&quot;MSI not found&quot;);
+        // Use PCI legacy interrupt instead
+        // IO Space | MEM Space | Bus Mastering | Special Cycles
+        am.write32(ops, loc, PCI_COMMAND, (orig | 0xf) as u32);
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<ul>
+<li>第10行中根据命令寄存器的含义写入特定值，这里主要是关闭传统中断</li>
+<li>第14行读取能力链表的起始位置</li>
+<li>第18行检查是否支持MSI中断</li>
+<li>第23行根据loongarch的7a1000桥片设置中断消息目标地址</li>
+<li>第30/33设置irq</li>
+<li>第37行启用MSI中断</li>
+<li>第47行如果发现不支持MSI中断则使用默认中断</li>
+</ul>
+<h2 id="sata协议与ahci协议"><a class="header" href="#sata协议与ahci协议">SATA协议与AHCI协议</a></h2>
+<p><img src="sourcepicture/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTU1MzAw,size_16,color_FFFFFF,t_70.png" alt="img" /></p>
+<p>SATA接口协议借鉴TCP/IP模型，将SATA接口划分为四个层次来实现，包括物理层、链路层、传输层、应用层，其体系结构如图所示:</p>
+<p><img src="sourcepicture/v2-34ffaf641fb97927dbd3bafd15eeac27_720w.jpg" alt="img" /></p>
+<p>物理层采用全双工串行传输方式，主要功能是进行信号的串并及并串转化。物理层接收来自链路层的数据信息，将接收到的并行的数字逻辑信号转换为串行的差分物理信号，发送到主机端。相应的物理层能将来自主机端的串行差分物理信号转化为并行的逻辑信号传送到链路层</p>
+<p>链路层的主要功能是通过控制原语的传递来控制信息帧的整个传输过程，保证帧信息能够正确的发送与接收并能进行流量的控制，防止数据发送过快或接受过多。</p>
+<p>传输层主要负责FIS帧信息结构的封装与解封。
+1）传输层接收到来自应用层的数据传输操作请求后，将相关寄存器中信息按SATA协议规定的标准格式封装为FIS传递给链路层。当链路层正确接收完成后，能给传输层反馈成功完成本次传输的信号。
+2）传输层接收到来自链路层的SOF信号后，能接收FIS信息帧，并能判断该FIS的类型，根据FIS类型，判断该FIS是否是有效的FIS。如果是则将该FIS中的命令和数据等按照SATA协议规定进行解析，映射到各个寄存器中，然后能通知应用层接收相应寄存器的值。如果该FIS无效，则丢弃。</p>
+<p>应用层能够进行接受来自主机端的命令，根据命令的要求将自身的信息发送给主机端，或是接收来自主机端的以PIO或DMA方式传输的数据,同时写入闪存中，也能从闪存中以PIO或DMA的方式读出数据，传送给主机端。在应用层采用两个FIFO对数据进行缓冲，一个为读FIFO，一个为写FIFO。应用层能接收来自传输层的数据帧送入写FIFO中或将来自总线的数据保存在读FIFO中，然后通知传输层构造数据帧。</p>
+<p>AHCI（高级主机控制器接口）由 Intel 开发，以方便处理 SATA 设备。AHCI 规范强调 AHCI 控制器（称为主机总线适配器，或 HBA）被设计为系统内存和 SATA 设备之间的数据移动引擎。它封装了 SATA 设备，并为主机提供了标准的 PCI 接口。系统设计人员可以使用系统内存和内存映射寄存器轻松访问 SATA 驱动器，而无需像 IDE 那样处理烦人的任务文件。AHCI 控制器最多可支持 32 个端口，这些端口可以连接不同的 SATA 设备，例如磁盘驱动器、端口倍增器或机箱管理桥。AHCI 支持所有原生 SATA 功能，例如命令队列、热插拔、电源管理等。对于软件开发人员而言，AHCI 控制器只是具有总线主控功能的 PCI 设备。</p>
+<p>简单来说，AHCI的抽象层次更高，作为开发者来说可以直接操作AHCI完成硬盘的读写。</p>
+<p>主机通过系统内存和内存映射寄存器与 AHCI 控制器通信。最后一个PCI基地址寄存器(BAR[5], header offset 0x24)指向AHCI基内存，称为ABAR(AHCI Base Memory Register)。所有 AHCI 寄存器和存储器都可以通过 ABAR 定位。在上面代码中我们也获取了BAR[5]的基地址和大小并根据此构建AHCI,这里我们不深入讲解AHCI协议的内容，文末会给出链接给想了解的同学。</p>
+<p>SATA设备使用DMA的方式进行硬盘的读取，因此需要我们在内存中分配相应的区域，这需要我们为其实现相应的接口:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl provider::Provider for Provider {
+    const PAGE_SIZE: usize = PAGE_SIZE;
+    fn alloc_dma(size: usize) -&gt; (usize, usize) {
+        let pages = size / PAGE_SIZE;
+        let mut base = 0;
+        for i in 0..pages {
+            let frame = frame_alloc().unwrap();
+            let frame_pa: PhysAddr = frame.ppn.into();
+            let frame_pa = frame_pa.into();
+            core::mem::forget(frame);
+            if i == 0 {
+                base = frame_pa;
+            }
+            assert_eq!(frame_pa, base + i * PAGE_SIZE);
+        }
+        let base_page = base / PAGE_SIZE;
+        info!(&quot;virtio_dma_alloc: {:#x} {}&quot;, base_page, pages);
+        (base, base)
+    }
+
+    fn dealloc_dma(va: usize, size: usize) {
+        info!(&quot;dealloc_dma: {:x} {:x}&quot;, va, size);
+        let pages = size / PAGE_SIZE;
+        let mut pa = va;
+        for _ in 0..pages {
+            frame_dealloc(PhysAddr::from(pa).into());
+            pa += PAGE_SIZE;
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>主要就是需要保证在进行分配时需要保证页帧的连续性，并且由于生命周期的原因，alloc_dma函数结束后，由于没有明确的保存申请的物理页帧，因此可能会被回收掉，这里使用第十行使用<code>core::mem::forget(frame)</code>使得编译期忽略掉页帧，即不会对其调用drop进行回收。</p>
+<h2 id="参考链接"><a class="header" href="#参考链接">参考链接</a></h2>
+<p><a href="https://wiki.osdev.org/SATA">SATA</a></p>
+<p><a href="https://wiki.osdev.org/AHCI">AHCI</a></p>
+<p><a href="https://serial-ata-ahci-cn.readthedocs.io/zh_CN/latest/ch1/">AHCI</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="pci.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="ch7.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="pci.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="ch7.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script type="text/javascript">
+            window.playground_line_numbers = true;
+        </script>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="editor.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mode-rust.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-dawn.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-tomorrow_night.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>启动过程 - rCoreloongArch-tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">前置知识</li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">1.</strong> 工具链安装</a></li><li class="chapter-item expanded "><a href="linker.html"><strong aria-hidden="true">2.</strong> linker文件</a></li><li class="chapter-item expanded "><a href="rust_bare.html"><strong aria-hidden="true">3.</strong> Rust裸机环境配置</a></li><li class="chapter-item expanded "><a href="assemble.html"><strong aria-hidden="true">4.</strong> rust汇编</a></li><li class="chapter-item expanded affix "><li class="part-title">章节指导</li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">5.</strong> 第一章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="boot.html" class="active"><strong aria-hidden="true">5.1.</strong> 启动过程</a></li><li class="chapter-item expanded "><a href="uart.html"><strong aria-hidden="true">5.2.</strong> UART串口</a></li><li class="chapter-item expanded "><a href="macro.html"><strong aria-hidden="true">5.3.</strong> Rust宏</a></li></ol></li><li class="chapter-item expanded "><a href="ch2.html"><strong aria-hidden="true">6.</strong> 第二章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sup.html"><strong aria-hidden="true">6.1.</strong> 特权级架构</a></li><li class="chapter-item expanded "><a href="app.html"><strong aria-hidden="true">6.2.</strong> 应用程序</a></li></ol></li><li class="chapter-item expanded "><a href="ch3.html"><strong aria-hidden="true">7.</strong> 第三章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="task_ex.html"><strong aria-hidden="true">7.1.</strong> 任务切换</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">7.2.</strong> 时钟</a></li></ol></li><li class="chapter-item expanded "><a href="ch4.html"><strong aria-hidden="true">8.</strong> 第四章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="reg.html"><strong aria-hidden="true">8.1.</strong> 寄存器设计</a></li><li class="chapter-item expanded "><a href="buddy.html"><strong aria-hidden="true">8.2.</strong> 内存分配</a></li><li class="chapter-item expanded "><a href="manage-mem.html"><strong aria-hidden="true">8.3.</strong> 存储管理</a></li><li class="chapter-item expanded "><a href="mmu.html"><strong aria-hidden="true">8.4.</strong> 多级页表硬件机制</a></li><li class="chapter-item expanded "><a href="mmu-impl.html"><strong aria-hidden="true">8.5.</strong> 多级页表实现</a></li><li class="chapter-item expanded "><a href="memoryset.html"><strong aria-hidden="true">8.6.</strong> 地址空间</a></li></ol></li><li class="chapter-item expanded "><a href="ch5.html"><strong aria-hidden="true">9.</strong> 第五章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="kstack.html"><strong aria-hidden="true">9.1.</strong> 内核栈</a></li><li class="chapter-item expanded "><a href="f-e.html"><strong aria-hidden="true">9.2.</strong> fork和exec</a></li></ol></li><li class="chapter-item expanded "><a href="ch6.html"><strong aria-hidden="true">10.</strong> 第六章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="line.html"><strong aria-hidden="true">10.1.</strong> 总线</a></li><li class="chapter-item expanded "><a href="pci.html"><strong aria-hidden="true">10.2.</strong> pci设备探测</a></li><li class="chapter-item expanded "><a href="stat.html"><strong aria-hidden="true">10.3.</strong> 块设备驱动</a></li></ol></li><li class="chapter-item expanded "><a href="ch7.html"><strong aria-hidden="true">11.</strong> 第七章</a></li><li class="chapter-item expanded "><a href="ch8.html"><strong aria-hidden="true">12.</strong> 第八章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="thread.html"><strong aria-hidden="true">12.1.</strong> 线程</a></li></ol></li><li class="chapter-item expanded "><a href="other.html"><strong aria-hidden="true">13.</strong> 其它</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interrupt.html"><strong aria-hidden="true">13.1.</strong> 中断系统</a></li><li class="chapter-item expanded "><a href="stacktrace.html"><strong aria-hidden="true">13.2.</strong> 内核栈回溯工具</a></li><li class="chapter-item expanded "><a href="vbe.html"><strong aria-hidden="true">13.3.</strong> VBE图形显示</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rCoreloongArch-tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="启动过程"><a class="header" href="#启动过程">启动过程</a></h1>
+<h2 id="计算机启动过程"><a class="header" href="#计算机启动过程">计算机启动过程</a></h2>
+<p>无论采用何种指令系统的处理器，复位后的第一条指令都会从一个预先定义的特定地址取回。处理器的执行就从这条指令开始。处理器的启动过程，实际上就是一个特定程序的执行过程。这个程序我们称之为固件，又称为 BIOS（Basic Input Output System，基本输入输出系统）。对于 <code>loongArch</code>，处理器复位后的第一条指令将固定从地址 0x1C000000 的位置获取。这个地址需要对应一个能够给处理器核提供指令的设备，这个设备以前是各种 ROM，现在通常是闪存（Flash）。从获取第一条指令开始，计算机系统的启动过程也就开始了。在<code>risc-v</code>体系结构上，通常这个地址是0x80200000.在启动过程中，计算机需要对包括处理器核、内存、外设等在内的各个部分分别进行初始化，再对必要的外设进行驱动管理。</p>
+<p>RISC-V架构中，存在着定义于操作系统之下的运行环境。这个运行环境不仅将引导启动RISC-V下的操作系统， 还将常驻后台，为操作系统提供一系列二进制接口，以便其获取和操作硬件信息。 RISC-V给出了此类环境和二进制接口的规范，称为“操作系统二进制接口”，即“SBI”。<code>RustSbi</code>作为其中一种实现，在当前<code>rCore</code>中使用。其位于<code>risc-v</code>定义的M态下，比操作系统的级别更高，对机器有更大的权限。机器上电时，SBI将配置环境，准备设备树，最终将引导启动操作系统。操作系统需要访问硬件或者特殊的功能，这时候就需要通过ecall指令陷入M层的SBI运行时，由SBI完成这些功能再提供。</p>
+<p>在<code>loongArch</code>或者<code>x86</code>这些架构下，通常上述工作由BIOS完成,现在一般是UEFI.BIOS和UEFI提供了整个主板，包括主板上外插的设备的软件抽象，通过探测，枚举，找到系统所有的硬件信息，再通过几组详细定义好的接口，把这些信息抽象封装后传递给操作系统，这些信息包括SMBIOS，ACPI表等，通过这层映射，操作系统就能做到在不修改的前提下直接运行在新的硬件上。通常来说，UEFI不会像SBI一样一直位于后台运行，在内核代码中，一般只会去读取UEFI提供的信息而不主动调用其实现的一些功能。</p>
+<h2 id="uefibios"><a class="header" href="#uefibios">UEFI/BIOS</a></h2>
+<p>为了在Qemu上启动<code>loongArch</code>的机器，需要一个UEFI启动器，因此在<code>qemu-loongarch-runenv</code>目录下提供了此文件。</p>
+<p>UEFI bios装载内核时，会把从内核elf文件获取的入口点地址（可以用readelf -h或者-l vmlinux看到）抹去高32位使用。比如vmlinux链接的地址是0x9000000001034804，实际bios跳转的地址将是0x1034804，代码装载的位置也是物理内存0x1034804。BIOS这么做是因为它逻辑上相当于用物理地址去访问内存，高的虚拟地址空间没有映射不能直接用。</p>
+<ul>
+<li>内核启动入口代码需要做两件事：（参见arch/loongarch/kernel/head.S）
+<ol>
+<li>设置一个直接地址映射窗口（参见loongarch体系结构手册，5.2.1节），把内核用到的64地址抹去高位映射到物理内存。目前linux内核是设置0x8000xxxx-xxxxxxxx和0x9000xxxx-xxxxxxxx地址抹去最高的8和9为其物理地址，前者用于uncache访问(即不通过高速缓存去load/store)，后者用于cache访问。</li>
+<li>做个代码自跳转，使得后续代码执行的PC和链接用的虚拟地址匹配。BIOS刚跳转到内核时，用的地址是抹去了高32位的地址（相当于物理地址），步骤1使得链接时的高地址可以访问到同样的物理内存，这里则换回到原始的虚拟地址。</li>
+</ol>
+</li>
+</ul>
+<p>在linux源代码中可以得到入口代码如下所示:</p>
+<pre><code class="language-assembly">SYM_CODE_START(kernel_entry)			# kernel entry point
+	la.abs		t0, 0f
+	jirl		zero, t0, 0 
+0:
+	la		t0, __bss_start		# clear .bss
+	st.d		zero, t0, 0
+	la		t1, __bss_stop - LONGSIZE
+1:
+	addi.d		t0, t0, LONGSIZE
+	st.d		zero, t0, 0
+	bne		t0, t1, 1b
+
+	#设置直接地址映射窗口
+	li.d		t0, CSR_DMW0_INIT	# UC, PLV0, 0x8000 xxxx xxxx xxxx
+	csrwr		t0, LOONGARCH_CSR_DMWIN0
+	li.d		t0, CSR_DMW1_INIT	# CA, PLV0, 0x9000 xxxx xxxx xxxx
+	csrwr		t0, LOONGARCH_CSR_DMWIN1
+	#开启页表
+	li.w		t0, 0xb0		# PLV=0, IE=0, PG=1
+	csrwr		t0, LOONGARCH_CSR_CRMD
+	li.w		t0, 0x04		# PLV=0, PIE=1, PWE=0
+	csrwr		t0, LOONGARCH_CSR_PRMD
+	li.w		t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
+	csrwr		t0, LOONGARCH_CSR_EUEN
+
+	#设置栈空间
+	PTR_LI		sp, (_THREAD_SIZE - 32 - PT_SIZE)
+	PTR_ADDU	sp, sp, tp
+	set_saved_sp	sp, t0, t1
+	PTR_ADDIU	sp, sp, -4 * SZREG	# init stack pointer
+
+	#跳转到内核入口
+	bl		start_kernel
+
+SYM_CODE_END(kernel_entry)
+</code></pre>
+<p>乍一看怎么才第一章就已经开始这么难了，但实际上上述的代码我们可以在后续章节中再使用，这里我们将会使用另外一种更简单的方式。</p>
+<p>在内存使用上，BIOS实现了虚拟地址和物理地址相等的一个映射。为了简单起见，第一章的内核利用了这个映射，跳过了常规的汇编初始化代码。在实际的内核代码中，内核将会接管物理内存和虚拟内存，不能一直依赖BIOS建立的映射，当然也要注意使用的内存不会破坏BIOS用于传递参数的区域。因此这里可以直接开始编写rust代码。</p>
+<pre><pre class="playground"><code class="language-rust">#[no_mangle]
+pub extern &quot;C&quot; fn main(){
+    INFO!(&quot;{}&quot;,FLAG);
+    color_output_test();
+    panic!();
+}
+</code></pre></pre>
+<p>在linker文件中，指定了入口为main函数，因此这里关闭了rust的函数名重整，这样才能正确链接到符号。其中<code>color_output_test</code>与<code>rCore</code>中打印链接脚本中提供的各个段的地址代码相同。</p>
+<p>链接脚本如下所示:</p>
+<pre><code>OUTPUT_ARCH( &quot;loongarch&quot; )
+ENTRY( main)
+
+SECTIONS
+{
+  . = 0x00100000;
+   text_start = .;
+  .text : {
+    *(.text .text.*)
+    PROVIDE(etext = .);
+    . = ALIGN(0x1000);
+  }
+    text_end = .;
+  . = ALIGN(0x1000);
+  rodata_start = .;
+  .rodata : {
+    . = ALIGN(16);
+    *(.srodata .srodata.*)
+    . = ALIGN(16);
+    *(.rodata .rodata.*)
+  }
+  . = ALIGN(0x1000);
+    rodata_end = .;
+    data_start = .;
+  .data : {
+. = ALIGN(16);
+    *(.sdata .sdata.*)
+. = ALIGN(16);
+    *(.data .data.*)
+  }
+
+  . = ALIGN(0x1000);
+    data_end = .;
+    bss_start = .;
+
+  .bss : {
+    sbss = .;
+. = ALIGN(16);
+    *(.sbss .sbss.*)
+. = ALIGN(16);
+    *(.bss .bss.*)
+  }
+  . = ALIGN(0x1000);
+    bss_end = .;
+
+    ekernel = .;
+  PROVIDE(end = .);
+}
+</code></pre>
+<p>其指定了内核的入口地址位于0x00100000，由上述介绍可知，BIOS会将内核代码直接加载到物理地址0x00100000处，然后跳转到此处开始运行，这里没有像linux一样进行窗口配置，一方面是因为BIOS已经为我们设置了这个窗口，并且BIOS会提供虚拟地址与物理地址之间的恒等映射，因此为了不带来更多的汇编代码配置，这里就直接使用了BIOS提供的便利。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="chapter_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="uart.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="chapter_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="uart.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script type="text/javascript">
+            window.playground_line_numbers = true;
+        </script>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="editor.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mode-rust.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-dawn.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-tomorrow_night.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>

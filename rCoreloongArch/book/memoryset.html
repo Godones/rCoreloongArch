@@ -1,0 +1,588 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>地址空间 - rCoreloongArch-tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">前置知识</li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">1.</strong> 工具链安装</a></li><li class="chapter-item expanded "><a href="linker.html"><strong aria-hidden="true">2.</strong> linker文件</a></li><li class="chapter-item expanded "><a href="rust_bare.html"><strong aria-hidden="true">3.</strong> Rust裸机环境配置</a></li><li class="chapter-item expanded "><a href="assemble.html"><strong aria-hidden="true">4.</strong> rust汇编</a></li><li class="chapter-item expanded affix "><li class="part-title">章节指导</li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">5.</strong> 第一章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="boot.html"><strong aria-hidden="true">5.1.</strong> 启动过程</a></li><li class="chapter-item expanded "><a href="uart.html"><strong aria-hidden="true">5.2.</strong> UART串口</a></li><li class="chapter-item expanded "><a href="macro.html"><strong aria-hidden="true">5.3.</strong> Rust宏</a></li></ol></li><li class="chapter-item expanded "><a href="ch2.html"><strong aria-hidden="true">6.</strong> 第二章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sup.html"><strong aria-hidden="true">6.1.</strong> 特权级架构</a></li><li class="chapter-item expanded "><a href="app.html"><strong aria-hidden="true">6.2.</strong> 应用程序</a></li></ol></li><li class="chapter-item expanded "><a href="ch3.html"><strong aria-hidden="true">7.</strong> 第三章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="task_ex.html"><strong aria-hidden="true">7.1.</strong> 任务切换</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">7.2.</strong> 时钟</a></li></ol></li><li class="chapter-item expanded "><a href="ch4.html"><strong aria-hidden="true">8.</strong> 第四章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="reg.html"><strong aria-hidden="true">8.1.</strong> 寄存器设计</a></li><li class="chapter-item expanded "><a href="buddy.html"><strong aria-hidden="true">8.2.</strong> 内存分配</a></li><li class="chapter-item expanded "><a href="manage-mem.html"><strong aria-hidden="true">8.3.</strong> 存储管理</a></li><li class="chapter-item expanded "><a href="mmu.html"><strong aria-hidden="true">8.4.</strong> 多级页表硬件机制</a></li><li class="chapter-item expanded "><a href="mmu-impl.html"><strong aria-hidden="true">8.5.</strong> 多级页表实现</a></li><li class="chapter-item expanded "><a href="memoryset.html" class="active"><strong aria-hidden="true">8.6.</strong> 地址空间</a></li></ol></li><li class="chapter-item expanded "><a href="ch5.html"><strong aria-hidden="true">9.</strong> 第五章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="kstack.html"><strong aria-hidden="true">9.1.</strong> 内核栈</a></li><li class="chapter-item expanded "><a href="f-e.html"><strong aria-hidden="true">9.2.</strong> fork和exec</a></li></ol></li><li class="chapter-item expanded "><a href="ch6.html"><strong aria-hidden="true">10.</strong> 第六章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="line.html"><strong aria-hidden="true">10.1.</strong> 总线</a></li><li class="chapter-item expanded "><a href="pci.html"><strong aria-hidden="true">10.2.</strong> pci设备探测</a></li><li class="chapter-item expanded "><a href="stat.html"><strong aria-hidden="true">10.3.</strong> 块设备驱动</a></li></ol></li><li class="chapter-item expanded "><a href="ch7.html"><strong aria-hidden="true">11.</strong> 第七章</a></li><li class="chapter-item expanded "><a href="ch8.html"><strong aria-hidden="true">12.</strong> 第八章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="thread.html"><strong aria-hidden="true">12.1.</strong> 线程</a></li></ol></li><li class="chapter-item expanded "><a href="other.html"><strong aria-hidden="true">13.</strong> 其它</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interrupt.html"><strong aria-hidden="true">13.1.</strong> 中断系统</a></li><li class="chapter-item expanded "><a href="stacktrace.html"><strong aria-hidden="true">13.2.</strong> 内核栈回溯工具</a></li><li class="chapter-item expanded "><a href="vbe.html"><strong aria-hidden="true">13.3.</strong> VBE图形显示</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rCoreloongArch-tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="地址空间"><a class="header" href="#地址空间">地址空间</a></h1>
+<p>在rcore中，在开启页表机制后，内核代码与应用程序代码均需要通过地址转换，因此在开启页表前需要为内核构建好地址空间。但是在loongarch平台上，有了前文所述的直接映射窗口机制，就可以免去构建内核地址空间的工作，只为用户程序构建地址空间。</p>
+<p>在前面的实验中，内核与应用程序使用着BIOS提供的便利，直接访问着物理内存，因此应用程序就可以无视限制直接修改内存的内容，在这一章中，我们需要充分利用loongarch提供的直接映射窗口机制和页表对应用程序的内存访问做出限制，并且降低构建内核地址空间和应用地址空间的难度。</p>
+<p>首先，内核地址空间由映射窗口完成映射，而不像rcore中建立恒等映射，但两者所起到的作用是一样的，即访问的虚拟地址就等于物理地址，因此，相对于前面的章节，本章在进入main函数前，需要设置直接映射窗口，实现如下：</p>
+<pre><code class="language-assembly">.section .text.init
+.global _start
+
+_start:
+0:
+    #设置映射窗口
+    addi.d $t0,$zero,0x11
+    csrwr $t0,0x180  #设置LOONGARCH_CSR_DMWIN0
+
+    la.global $t0,1f
+    jirl $zero, $t0,0
+1:
+    la.global $t0, sbss
+    la.global $t1, ebss
+    bgeu $t0, $t1, 3f   #bge如果前者大于等于后者则跳转
+2:
+    st.d $zero, $t0,0
+    addi.d $t0, $t0, 8
+    bltu $t0, $t1, 2b
+3:
+    bl main
+</code></pre>
+<p>上述汇编代码将0x11写入DMW0寄存器，那么0x0 - 0xFFFFFFFFFFFF的地址范围内，内核所在的特权级PLV0就可以对其进行任意的访问，在链接脚本中，我们指定了内核起始地址为  0x1000,在qemu模拟的地址空间中，0x0-0xfffffff范围为低256MB物理内存，本实验中也会只使用此范围的物理内存。 并且上述汇编也将bss段进行了初始化，在跳转到main函数后，内核代码就可以正常执行了。对于应用程序而言，由于映射窗口并没有设置特权级PLV3，而且此时开启了页表机制，因此如果从内核进入应用程序后，由于应用程序的地址空间不能匹配映射窗口，那么只能去查找TLB，而此时TLB中并不会包含如何信息，此时就会发生TLB重填例外，由我们将应用程序地址空间中对应页表项写入TLB。</p>
+<p>有了直接映射窗口的实现，逻辑段和地址空间的抽象也需要做出相应的修改</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct MapArea {
+    vpn_range: VPNRange,
+    data_frames: BTreeMap&lt;VirtPageNum, FrameTracker&gt;,
+    map_perm: MapPermission,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在逻辑段的定义中删除了map_type字段，因为此时不再区分恒等映射和非恒等映射，逻辑段只有应用程序的非恒等映射。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//  PTEFlags 的一个子集
+// 主要含有几个读写标志位和存在位
+bitflags! {
+    pub struct MapPermission: usize {
+        const NX = 1 &lt;&lt; 62;
+        const NR = 1 &lt;&lt; 61;
+        const W = 1 &lt;&lt; 8;
+        const PLVL = 1 &lt;&lt; 2;
+        const PLVH = 1 &lt;&lt; 3;
+        const RPLV = 1 &lt;&lt; 63;
+    }
+}
+impl Default for MapPermission {
+    fn default() -&gt; Self {
+        MapPermission::PLVL | MapPermission::PLVH
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>这里MapPermission设置为PTEFlags的一个子集，主要控制逻辑段的读写执行属性一级期望可以运行的特权级。其默认的实现需要设置访问的特权级为3。在<code>from_elf</code>映射应用程序地址空间时，一般不对RPLV设置，这样一来，在特权级1-3上也可以访问对应的页表项。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn insert_area(&amp;mut self, start_va: VirtAddr, end_va: VirtAddr, permission: MapPermission) {
+        self.push(MapArea::new(start_va, end_va, permission), None);
+    }
+pub fn map_one(&amp;mut self, page_table: &amp;mut PageTable, vpn: VirtPageNum) {
+    let ppn: PhysPageNum;
+    let frame = frame_alloc().unwrap();
+    ppn = frame.ppn;
+    self.data_frames.insert(vpn, frame);
+    let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
+    page_table.map(vpn, ppn, pte_flags);
+}
+#[allow(unused)]
+pub fn unmap_one(&amp;mut self, page_table: &amp;mut PageTable, vpn: VirtPageNum) {
+    self.data_frames.remove(&amp;vpn);
+    page_table.unmap(vpn);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>由于去掉了多余的映射方式，在实际进行映射和解映射时就可以删除掉多余的判断。<code>new_kernel</code>的实现也被从代码中删除。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn from_elf(elf_data: &amp;[u8]) -&gt; (Self, usize, usize) {
+    let mut memory_set = Self::new_bare();
+    // map program headers of elf, with U flag
+    let elf = xmas_elf::ElfFile::new(elf_data).unwrap();
+    let elf_header = elf.header;
+    let magic = elf_header.pt1.magic;
+    assert_eq!(magic, [0x7f, 0x45, 0x4c, 0x46], &quot;invalid elf!&quot;);
+    let ph_count = elf_header.pt2.ph_count();
+    let mut max_end_vpn = VirtPageNum(0);
+    for i in 0..ph_count {
+        let ph = elf.program_header(i).unwrap();
+        if ph.get_type().unwrap() == xmas_elf::program::Type::Load {
+            let start_va: VirtAddr = (ph.virtual_addr() as usize).into();
+            let end_va: VirtAddr = ((ph.virtual_addr() + ph.mem_size()) as usize).into();
+            let mut map_perm = MapPermission::default();
+            let ph_flags = ph.flags();
+            if !ph_flags.is_read() {
+                map_perm |= MapPermission::NR;
+            }
+            if ph_flags.is_write() {
+                map_perm |= MapPermission::W;
+            } //可写
+            if !ph_flags.is_execute() {
+                map_perm |= MapPermission::NX;
+            }
+            let map_area = MapArea::new(start_va, end_va, map_perm);
+            max_end_vpn = map_area.vpn_range.get_end();
+            memory_set.push(
+                map_area,
+                Some(&amp;elf.input[ph.offset() as usize..(ph.offset() + ph.file_size()) as usize]),
+            );
+        }
+    }
+    // map user stack with U flags
+    let max_end_va: VirtAddr = max_end_vpn.into();
+    let mut user_stack_bottom: usize = max_end_va.into();
+    // guard page
+    user_stack_bottom += PAGE_SIZE; //用户栈
+    let user_stack_top = user_stack_bottom + USER_STACK_SIZE;
+    memory_set.push(
+        MapArea::new(
+            user_stack_bottom.into(),
+            user_stack_top.into(),
+            MapPermission::default() | MapPermission::W,
+        ),
+        None,
+    );
+    //返回地址空间,用户栈顶,入口地址
+    (
+        memory_set,
+        user_stack_top,
+        elf.header.pt2.entry_point() as usize,
+    )
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在映射应用程序地址空间的实现中，主要的差异是MapPermission的设置以及比较重要的跳板页和Trap页映射，可以看到，上文中并没有映射这两个页。对于rcore来说，由于地址空间的切换需要在进行trap上下文保存和恢复时进行，而如果将trap上下文保存到内核栈上的话，只有一个sscratch寄存器将无法进行周转，因此其实现中为了保证在切换地址空间时保证指令执行的连续在应用程序地址空间和内核地址空间的最高部分设置了一个跳板页，并且将trap上下文保存在了应用程序的一个虚拟页面中。而在loongarch上，由于切换到内核地址空间并不需要设置相关寄存器的值，通过CRMD特权级PLV字段的变化，应用程序和内核的地址空间将会自动切换，而且就算没有直接映射窗口的支持，loongarch中可以周转的寄存器也可能有多个，这时仍然不需要像rcore一样为了寄存器进行取舍，因此在实现此部分的时候，仍然可以根前面的实现一样，使用一个寄存器来切换应用程序内核态和用户态栈，并将trap上下文保存在内核栈上，从而我们不需要增加跳板页和trap页的映射。但这也会带来一个比较棘手的问题，那就是应用程序的内核栈由于处于内核地址空间，通过直接映射窗口我们无法设置其权限，也无法设置保护页，这在发生栈溢出时可能就会造成内核代码被破坏的情况，这里暂时也没有较好的方法解决。</p>
+<p>通过上述的介绍，我们就可以理解loongarch代码中trap上下文的定义和保存恢复这些代码并没有发生太大的改变，对于内核栈的分配，本章节仍然沿用了前面章节中定义的全局变量</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>static KERNEL_STACK: [KernelStack; MAX_APP_NUM] = [KernelStack {
+    data: [0; KERNEL_STACK_SIZE],
+}; MAX_APP_NUM];
+
+#[repr(align(4096))]
+#[derive(Copy, Clone)]
+struct KernelStack {
+    data: [u8; KERNEL_STACK_SIZE],
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在任务控制块的定义中，添加了额外的字段</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct TaskControlBlock {
+    pub task_status: TaskStatus,
+    pub task_cx_ptr: TaskContext, //任务上下文栈顶地址
+    pub memory_set: MemorySet,    //新增的地址空间
+    pub task_id: usize,           //任务id
+    pub base_size: usize,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>因为我们会启用ASID功能，这个功能在前文介绍硬件机制有详细说明，因此需要为每个进程设置唯一的编号，这个时候没有进程的概念则使用task_id代替。</p>
+<p>任务控制块的建立也变得异常简单:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn new(elf_data: &amp;[u8], app_id: usize) -&gt; Self {
+        // memory_set with elf program headers/trampoline/trap context/user stack
+        let (memory_set, user_sp, entry_point) = MemorySet::from_elf(elf_data);
+        let task_status = TaskStatus::Ready; //准备指向状态
+        let task_control_block = Self {
+            task_status,
+            task_cx_ptr: TaskContext::goto_restore(init_app_cx(app_id, entry_point, user_sp)),
+            //初始化任务上下文,参数为内核栈地址，内核栈存放的是trap上下文
+            memory_set,
+            task_id: app_id,
+            stride: 0,
+            pass: 0,
+            base_size: user_sp,
+        };
+        // prepare TrapContext in user space
+        task_control_block
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在<code>init_app_cx</code>的实现中会将task_id传入。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn init_app_cx(app: usize, entry: usize, user_stack_ptr: usize) -&gt; usize {
+    //返回任务trap的上下文
+    let t = KERNEL_STACK[app].push_context(
+        //压入trap上下文
+        TrapContext::app_init_context(entry, user_stack_ptr),
+    );
+    t
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>有了上述软件的支持，下面就需要开启页表的相关功能了，使能页表的任务从进入内核就已经完成，我们需要做的是根据前面的文章所属设置好页表相关的寄存器并编写TLB重填异常的代码。</p>
+<p>首先是配置页表相关寄存器:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn init() {
+    extern &quot;C&quot; {
+        fn __alltraps();
+        fn __tlb_rfill();
+        fn kernel_trap_entry();
+    }
+    Tcfg::read().set_enable(false).write();
+    Ecfg::read().set_lie_with_index(11, false).write();
+    Crmd::read().set_ie(false).write(); //关闭全局中断
+    Eentry::read().set_eentry(__alltraps as usize).write(); //设置普通异常和中断入口
+                                                               //设置TLB重填异常地址
+    TLBREntry::read()
+        .set_val((__tlb_rfill as usize).get_bits(0..32))
+        .write(); //设置TLB重填异常入口
+    SltbPs::read().set_page_size(0xe).write(); //设置STLB的页面大小为16KiB
+    TlbREhi::read().set_page_size(0xe).write(); //设置STLB的页面大小为16KiB
+
+    Pwcl::read()
+        .set_ptbase(0xe)
+        .set_ptwidth(0xb)
+        .set_dir1_base(25) //页目录表起始位置
+        .set_dir1_width(0xb) //页目录表宽度为11位
+        .write(); //16KiB的页大小
+    Pwch::read()
+        .set_dir3_base(36) //第三级页目录表
+        .set_dir3_width(0xb) //页目录表宽度为11位
+        .write();
+    unsafe {
+        asm!(&quot;invtlb 0,$r0,$r0&quot;); //清除TLB
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<ol>
+<li>首先我们设置了TLB重填异常地址的入口为__tlb_rfill,其实现稍后给出，在跳转应用程序地址空间后会发生地址转换，这项工作由软件执行，因此代码需要完成将页表项放入TLB的工作</li>
+<li>设置页大小，由于loongarch下由两个部分构成，我们实验中的页大小都为16kb，因此需要设置寄存器SLTBPS的页大小为16kb</li>
+<li>设置TLBREHI的PS字段为14，这个位置是TLB 重填例外专用的页大小值，在发生TLB重填例外时，执行 TLBWR 和 TLBFILL指令，写入的 TLB 表项的 PS 域的值来自于此。</li>
+<li>设置多级页表各级页表的结构</li>
+<li>将原来TLB中所有的页表项都无效掉。</li>
+</ol>
+<h2 id="tlb重填异常"><a class="header" href="#tlb重填异常">TLB重填异常</a></h2>
+<p>当 TLB 重填异常发生后，其异常处理程序的主要处理流程是根据 CSR.TLBRBADV 中 VAddr 域记录的虚地址信息以及从 CSR.PGD 中得到的页目录表 PGD 的基址信息，遍历发生 TLB 重填异常的进程的多级页表，从内存中取回页表项信息填入 CSR.TLBRELO0和 CSR.TLBRELO1的相应域中，最终用 TLBFILL指令将页表项填入 TLB。前面在讲述 TLBFILL 指令写操作过程时，提到此时写入 TLB 的信息除了来自 CSR.TLBRELO0 和 CSR.TLBRELO1 的各个域之外，还有来自 CSR.ASID 中 ASID 域和 CSR.TLBREHI 中 VPPN域的信息。在 TLB 重填异常从发生到进行处理的过程中，软硬件都没有修改 CSR.ASID 中的 ASID 域，所以在执行 TLBFILL 指令时，CSR.ASID 中的 ASID 域记录的就是发生 TLB 重填异常的进程对应的 ASID。至于 CSR.TLBREHI 中的 VPPN 域，在 TLB 重填异常发生并进入异常入口时，已经被硬件填入了触发该异常的虚地址中的虚双页号信息。</p>
+<p>整个 TLB 重填异常处理过程中，遍历多级页表是一个较为复杂的操作，需要数十条普通访存、运算指令才能完成，而且如果遍历的页表级数增加，则需要更多的指令。LoongArch 指令系统中定义了 LDDIR 和 LDPTE 指令以及与之配套的 CSR.PWCL 和 CSR.PWCH 来加速 TLB 重填异常处理中的页表遍历。LDDIR 和 LDPTE 指令的功能简述如下图</p>
+<p><img src="sourcepicture/image-20220814204455637.png" alt="image-20220814204455637" /></p>
+<p>CSR.PWCL和 CSR.PWCH用来配置 LDDIR和 LDPTE指令所遍历页表的规格参数信息，其中 CSR.PWCL中定义了每个页表项的宽度（PTEwidth 域）以及末级页表索引的起始位置和位宽（PTbase 和 PTwidth域）、页目录表 1 索引的起始位置和位宽（Dir1_base 和 Dir1_width 域）、页目录表 2 索引的起始位置和位宽（Dir2_base和 Dir2_width域）,CSR.PWCH中定义了页目录表 3索引的起始位置和位宽（Dir3_base和Dir3_width 域）、页目录表 4 索引的起始位置和位宽（Dir4_base 和 Dir4_width 域）。在 loongArch64中，当进行三级页表的遍历时，通常用 Dir1_base 和 Dir1_width 域来配置页目录表 PMD 索引的起始位置和位宽，用 Dir3_base 和 Dir3_width 域来配置页目录表 PGD 索引的起始位置和位宽，Dir2_base 和Dir2_width 域、Dir4_base 和 Dir4_width 域空闲不用。</p>
+<p>使用上述指令，TLB 重填异常处理程序如下:</p>
+<pre><code class="language-assembly">    .section tlb_handler
+    .globl __tlb_rfill
+    .align 4
+__tlb_rfill:
+    csrwr $t0, 0x8B  #保存t0的值到CSR_TLBRSAVE
+    csrrd $t0, 0x1B  #读取PGD,类似于rcore中的token
+    lddir $t0, $t0, 3 #访问页目录表PGD
+    lddir $t0, $t0, 1 #访问页目录表PMD
+    ldpte $t0, 0
+    #取回偶数号页表项
+    ldpte $t0, 1
+    #取回奇数号页表项
+    tlbfill
+    csrrd $t0, 0x8B
+    #jr $ra
+    ertn
+
+</code></pre>
+<p>重填异常的处理中需要获取地址空间的根页表地址，类似rcore中token，但这里是完整的物理地址，而不是物理页号，所以在memoryset的实现中也可以看到返回token的实现存在差异。完成TLB重填的任务，还需要解决的是页修改例外，在risc-v上页表的访问由硬件完成，因此某些位将由硬件来设置，但loongarch上全部由软件完成，包括其中的D位，这是表示该页表项对应的数据是否有被写过，在构建页表项时，这个位被设置为0，当程序发生写操作时，如果这位为0会发生页修改例外，而我们需要做的就是修改应用地址空间页表项的对应位以及修改TLB中的页表项对应位。其实现如下:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Exception(PageModifyFault)的处理
+/// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且 V=1，且特权等级合规的项，但是该页
+//  表项的 D 位为 0，将触发该例外
+fn tlb_page_modify_handler() {
+    // INFO!(&quot;PageModifyFault handler&quot;);
+    //找到对应的页表项，修改D位为1
+    let badv = TlbRBadv::read().get_val(); //出错虚拟地址
+    let vpn: VirtAddr = badv.into(); //虚拟地址
+    let vpn: VirtPageNum = vpn.floor(); //虚拟地址的虚拟页号
+    let token = current_user_token(); //根页表的地址
+    let page_table = PageTable::from_token(token);
+    let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
+    pte.set_dirty(); //修改D位为1
+    unsafe {
+        asm!(&quot;tlbsrch&quot;, &quot;tlbrd&quot;,); //根据TLBEHI的虚双页号查询TLB对应项
+    }
+    let tlbidx = TlbIdx::read(); //获取TLB项索引
+    assert_eq!(tlbidx.get_ne(), false);
+    let mut tlbelo0 = TLBELO::read(0); //获取TLB项0
+    let mut tlbelo1 = TLBELO::read(1); //获取TLB项1
+    tlbelo0.set_dirty(true).write();
+    tlbelo1.set_dirty(true).write();
+    unsafe {
+        asm!(&quot;tlbwr&quot;); //重新将tlbelo写入tlb
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在完成上述工作后页表机制就可以正常运行了。在开启时钟的实现部分，我们修改了相关实现:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn enable_timer_interrupt() {
+    let timer_freq = get_timer_freq();
+    Ecfg::read().set_lie_with_index(11, true).write();
+    Ticlr::read().clear_timer().write(); //清除时钟专断
+    Tcfg::read()
+        .set_enable(true)
+        .set_loop(true)
+        .set_tval(timer_freq / TICKS_PER_SEC)
+        .write(); //设置计时器的配置
+
+    Crmd::read().set_ie(true).write(); //开启全局中断
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>在实验前期时钟的中断间隔被我们设置了一个大概值，这里通过读取cpu配置字查询到了时钟的频率，可以正确配置周期间隔了。</p>
+<p>其中trap的处理也做了对应于rcore的修改</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn trap_return(){
+    set_user_trap_entry();
+    let trap_cx = current_trap_cx();
+    extern  &quot;C&quot;{
+        fn __restore();
+    }
+    unsafe{
+        asm!(&quot;move $a0,{}&quot;,in(reg)trap_cx);
+        __restore();
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>这里要简单的多，只需要设置用户态发生异常时的入口然后将用户程序的trap上下文所在内核栈的地址传入a0即可。</p>
+<p>在切换任务时，处理切换任务上下文，我们还需要切换地址空间和设置ASID</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span>
+<span class="boring">fn main() {
+</span>    fn run_next_task(&amp;self) {
+        if let Some(next) = self.find_next_task() {
+            //查询是否有处于准备的任务，如果有就运行
+            let mut inner = self.inner.borrow();
+            let current_task = inner.current_task;
+            inner.current_task = next;
+            inner.tasks[next].task_status = TaskStatus::Running;
+            //获取两个任务的task上下文指针
+            let current_task_cx_ptr =
+                &amp;mut inner.tasks[current_task].task_cx_ptr as *mut TaskContext;
+            let next_task_cx_ptr2 = &amp;inner.tasks[next].task_cx_ptr as *const TaskContext;
+            let pgd = inner.tasks[next].get_user_token() &lt;&lt; PAGE_SIZE_BITS; //获得根页表基地址
+            Pgdl::read().set_val(pgd).write(); //设置根页表基地址
+            let current_task_id = inner.tasks[next].task_id;
+            //释放可变借用，否则进入下一个任务后将不能获取到inner的使用权
+            drop(inner);
+            unsafe {
+                __switch(current_task_cx_ptr, next_task_cx_ptr2, current_task_id);
+            }
+        } else {
+            panic!(&quot;There are no tasks!&quot;);
+        }
+    }
+<span class="boring">}
+</span></code></pre></pre>
+<p>在代码中我们获取了当前任务的根页表物理页号并将其转为物理地址写入PGDL寄存器中，在__switch中，传入了要切换到的任务id,在汇编代码实现中，会将id写入ASID寄存器，这样一来，当任务回复trap上下文回到用户态后，就会根据这两个寄存器来进行地址转换了。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="mmu-impl.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="ch5.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="mmu-impl.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="ch5.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script type="text/javascript">
+            window.playground_line_numbers = true;
+        </script>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="editor.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mode-rust.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-dawn.js" type="text/javascript" charset="utf-8"></script>
+        <script src="theme-tomorrow_night.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>
