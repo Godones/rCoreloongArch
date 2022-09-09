@@ -55,11 +55,12 @@ pub extern "C" fn main(
     _argv: *const *const u8,
     _boot_params_interface: *const BootParamsInterface,
 ) {
-    println!("{}", FLAG);
+    println!("{}",FLAG);
     unsafe {
         asm!("invtlb 0,$r0,$r0");
     }
     logging::init();
+
     print_range();
     info!("kernel args: {}", argc);
     info!("kernel argv address: {:#x}", _argv as usize);
