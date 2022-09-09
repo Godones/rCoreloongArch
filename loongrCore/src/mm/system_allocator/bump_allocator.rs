@@ -1,5 +1,5 @@
-use crate::mm::system_allocator::common::{align_up, Locked};
 use crate::info;
+use crate::mm::system_allocator::common::{align_up, Locked};
 use core::alloc::{GlobalAlloc, Layout};
 use core::ptr;
 /// bump分配器实现
@@ -31,8 +31,7 @@ impl BumpAllocator {
         self.next = self.start_heap;
         info!(
             "[kernel] start_heap: 0x{:x} end_heap: 0x{:x}",
-            self.start_heap,
-            self.end_heap
+            self.start_heap, self.end_heap
         );
     }
 }

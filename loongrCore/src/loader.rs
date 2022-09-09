@@ -1,6 +1,6 @@
-use rlibc::memcmp;
 use crate::config::*;
 use crate::trap::context::TrapContext;
+use rlibc::memcmp;
 
 static KERNEL_STACK: [KernelStack; MAX_APP_NUM] = [KernelStack {
     data: [0; KERNEL_STACK_SIZE],
@@ -24,7 +24,7 @@ impl KernelStack {
         }
         trap_cx_ptr as usize
     }
-    pub fn get_trap_cx(&self)->usize{
+    pub fn get_trap_cx(&self) -> usize {
         self.get_sp() - core::mem::size_of::<TrapContext>()
     }
 }
@@ -62,7 +62,6 @@ pub fn get_app_data(app_id: usize) -> &'static [u8] {
         )
     }
 }
-
 
 pub fn get_app_trap_cx(app_id: usize) -> usize {
     KERNEL_STACK[app_id].get_trap_cx()

@@ -1,5 +1,5 @@
 use crate::boot_param::boot_params_interface::{ExtListHeader, MemoryMap};
-use crate::{BootParamsInterface, info};
+use crate::{info, BootParamsInterface};
 
 pub mod boot_params_interface;
 

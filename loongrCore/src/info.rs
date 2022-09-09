@@ -9,8 +9,8 @@ use crate::loong_arch::tlb::pwch::Pwch;
 use crate::loong_arch::tlb::tlbentry::TLBREntry;
 use crate::loong_arch::tlb::tlbrehi::TlbREhi;
 use crate::loong_arch::tlb::{pwcl::Pwcl, sltbps::SltbPs};
+use crate::{info, Register};
 use crate::{Dmw0, Dmw1};
-use crate::{Register, info};
 // 打印硬件的相关信息
 pub fn print_machine_info() {
     info!("PALEN: {}", get_palen()); //支持的物理地址范围

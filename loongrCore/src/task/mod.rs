@@ -2,7 +2,7 @@ use crate::config::{BIG_STRIDE, PAGE_SIZE_BITS};
 use crate::loader::{get_app_data, get_app_trap_cx, get_num_app};
 use crate::loong_arch::tlb::pgdl::Pgdl;
 use crate::sync::UPSafeCell;
-use crate::{Register, info, enable_timer_interrupt};
+use crate::{enable_timer_interrupt, info, Register};
 use alloc::vec::Vec;
 use context::TaskContext;
 use lazy_static::lazy_static;
@@ -195,6 +195,6 @@ fn run_next_task() {
 pub fn current_user_token() -> usize {
     TASK_MANAGER.get_current_token()
 }
-pub fn current_trap_cx()->usize{
+pub fn current_trap_cx() -> usize {
     TASK_MANAGER.get_current_trap_cx()
 }

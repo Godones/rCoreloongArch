@@ -7,10 +7,10 @@ mod common;
 mod linked_list;
 
 use crate::config::KERNEL_HEAP_SIZE;
+use crate::info;
 use crate::mm::system_allocator::bump_allocator::BumpAllocator;
 use crate::mm::system_allocator::common::Locked;
 use bit_field::BitField;
-use crate::info;
 // use crate::system_allocator::linked_list::LinkedListAllocator;
 use crate::mm::system_allocator::buddy::Buddy;
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;

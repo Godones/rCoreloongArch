@@ -1,6 +1,5 @@
 pub mod context;
 
-use core::arch::{asm, global_asm};
 use crate::config::{PAGE_SIZE_BITS, TICKS_PER_SEC, VALEN};
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::estat::{Exception, Interrupt};
@@ -22,10 +21,13 @@ use crate::loong_arch::tlb::tlbrehi::TlbREhi;
 use crate::loong_arch::tlb::tlbrelo::TlbRelo;
 use crate::mm::{PageTable, VirtAddr, VirtPageNum};
 use crate::syscall::syscall;
-use crate::task::{current_trap_cx, current_user_token, exit_current_run_next, suspend_current_run_next};
-use crate::{println, info};
+use crate::task::{
+    current_trap_cx, current_user_token, exit_current_run_next, suspend_current_run_next,
+};
+use crate::{info, println};
 use bit_field::BitField;
 pub use context::TrapContext;
+use core::arch::{asm, global_asm};
 
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("tlb.S"));
@@ -40,7 +42,7 @@ pub fn init() {
     Ecfg::read().set_lie_with_index(11, false).write();
     Crmd::read().set_ie(false).write(); //关闭全局中断
     Eentry::read().set_eentry(__alltraps as usize).write(); //设置普通异常和中断入口
-                                                               //设置TLB重填异常地址
+                                                            //设置TLB重填异常地址
     TLBREntry::read()
         .set_val((__tlb_rfill as usize).get_bits(0..32))
         .write(); //复用原来的trap处理入口
@@ -75,7 +77,7 @@ pub fn enable_timer_interrupt() {
     Crmd::read().set_ie(true).write(); //开启全局中断
 }
 
-pub fn set_user_trap_entry(){
+pub fn set_user_trap_entry() {
     // 初始化
     extern "C" {
         fn __alltraps();
@@ -84,13 +86,13 @@ pub fn set_user_trap_entry(){
 }
 
 #[no_mangle]
-pub fn trap_return(){
+pub fn trap_return() {
     set_user_trap_entry();
     let trap_cx = current_trap_cx();
-    extern  "C"{
+    extern "C" {
         fn __restore();
     }
-    unsafe{
+    unsafe {
         asm!("move $a0,{}",in(reg)trap_cx);
         __restore();
     }
@@ -116,7 +118,10 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
         | Trap::Exception(Exception::FetchPageFault) => {
             //页面异常
             let fault = estat.cause();
-            println!("[kernel] {:?} PageFault in application, core dumped.",fault);
+            println!(
+                "[kernel] {:?} PageFault in application, core dumped.",
+                fault
+            );
             exit_current_run_next();
         }
         Trap::Exception(Exception::InstructionNotExist) => {
@@ -157,11 +162,11 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
 /// 而加载任务的时间可能会触发时钟中断
 /// 在正常运行后系统在从用户态trap进入内核态后是不会触发中断的
 #[no_mangle]
-pub fn trap_handler_kernel(){
+pub fn trap_handler_kernel() {
     info!("kernel trap");
     let estat = Estat::read();
     let crmd = Crmd::read();
-    if crmd.get_plv() !=0{
+    if crmd.get_plv() != 0 {
         // 只有在内核态才会触发中断
         panic!("{:?}", estat.cause());
     }
@@ -174,9 +179,7 @@ pub fn trap_handler_kernel(){
             panic!("{:?}", estat.cause());
         }
     }
-
 }
-
 
 fn timer_handler() {
     let mut ticlr = Ticlr::read();
@@ -215,7 +218,7 @@ fn tlb_refill_handler() {
     let pte = page_table.find_pte(vpn).unwrap(); //获取页表项
                                                  // INFO!("{:?},ppn: {:#x}", pte,pte.bits.get_bits(14..PALEN));
     info!("{:?}", pte);
-    let pmd:usize;
+    let pmd: usize;
     unsafe {
         asm!(
             "csrrd $t0, 0x1B",
@@ -225,7 +228,7 @@ fn tlb_refill_handler() {
             out(reg) pmd,
         )
     }
-    info!("PMD: {:#x} == {:#x}", pmd>>PAGE_SIZE_BITS,0xdb);
+    info!("PMD: {:#x} == {:#x}", pmd >> PAGE_SIZE_BITS, 0xdb);
 }
 
 /// Exception(PageModifyFault)的处理

@@ -13,6 +13,7 @@ mod config;
 mod info;
 mod lang_items;
 mod loader;
+mod logging;
 mod loong_arch;
 mod mm;
 mod print;
@@ -24,8 +25,6 @@ mod test;
 mod timer;
 mod trap;
 mod uart;
-mod logging;
-
 
 extern crate alloc;
 extern crate bit_field;
@@ -34,14 +33,12 @@ extern crate lazy_static;
 extern crate rlibc;
 extern crate xmas_elf;
 
-
-
 // use log::info;
 use crate::boot_param::boot_params_interface::BootParamsInterface;
 use crate::info::print_machine_info;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::dmwn::{Dmw0, Dmw1};
-use crate::test::{print_range};
+use crate::test::print_range;
 use crate::timer::get_time_ms;
 use crate::trap::enable_timer_interrupt;
 use config::FLAG;
@@ -56,8 +53,8 @@ pub extern "C" fn main(
     _argv: *const *const u8,
     _boot_params_interface: *const BootParamsInterface,
 ) {
-    println!("{}", FLAG);
     logging::init();
+    info!("{}", FLAG);
     print_range();
     info!("kernel args: {}", argc);
     info!("kernel argv address: {:#x}", _argv as usize);
