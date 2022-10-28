@@ -1,7 +1,6 @@
 // uart.rs
 // UART routines and driver
 
-use core::convert::TryInto;
 use core::fmt::Write;
 use core::fmt::Error;
 

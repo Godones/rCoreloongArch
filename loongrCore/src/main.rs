@@ -12,17 +12,20 @@ mod lang_items;
 mod test;
 mod loong_arch;
 
-use uart_16550::MmioSerialPort;
 use config::FLAG;
 use core::arch::{global_asm};
 use crate::print::get_char;
 use test::color_output_test;
-use crate::config::UART;
-use crate::uart::Uart;
 
 global_asm!(include_str!("boot.S"));
+
 #[no_mangle]
 pub extern "C" fn main(){
+    unsafe {
+        (0x1FE001E0 as *mut u8).write_volatile('L' as u8);
+        (0x1FE001E0 as *mut u8).write_volatile('\n' as u8);
+    }
+
     INFO!("{}",FLAG);
     color_output_test();
     panic!();
