@@ -13,7 +13,6 @@ pub struct Console{
 impl Console{
 	pub fn new(address:usize)->Self{
        let mut uart = Uart::new(address);
-        uart.init();
         Self{
             inner:uart,
         }
