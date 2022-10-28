@@ -1,3 +1,4 @@
+*.idea
 easy-fs-fuse/
 easy-fs/
 isomorphic_drivers/
