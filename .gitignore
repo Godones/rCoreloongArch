@@ -1,4 +1,5 @@
 pci
+*.idea
 vbe
 stack_trace
 easy-fs
