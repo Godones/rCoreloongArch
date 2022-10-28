@@ -17,51 +17,22 @@ impl Write for Uart {
         Ok(())
     }
 }
-
 impl Uart {
     pub fn new(base_address: usize) -> Self {
         Uart { base_address }
     }
 
-    pub fn init(&mut self) {
-        let ptr = self.base_address as *mut u8;
-        unsafe {
-            // 设置字符位数
-            ptr.add(3).write_volatile((1 << 0) | (1 << 1));
-
-            //使能FIFIO
-            ptr.add(2).write_volatile(1 << 0);
-
-            //开启中断
-            ptr.add(1).write_volatile(1 << 0);
-            // 设置波特率
-            let divisor: u16 = 592;
-            let divisor_least: u8 = (divisor & 0xff).try_into().unwrap();
-            let divisor_most: u8 = (divisor >> 8).try_into().unwrap();
-
-            // Notice that the divisor register DLL (divisor latch least) and DLM (divisor latch most)
-            // have the same base address as the receiver/transmitter and the interrupt enable register.
-            // To change what the base address points to, we open the "divisor latch" by writing 1 into
-            // the Divisor Latch Access Bit (DLAB), which is bit index 7 of the Line Control Register (LCR)
-            // which is at base_address + 3.
-            let lcr = ptr.add(3).read_volatile();
-            ptr.add(3).write_volatile(lcr | 1 << 7);
-
-            // Now, base addresses 0 and 1 point to DLL and DLM, respectively.
-            // Put the lower 8 bits of the divisor into DLL
-            ptr.add(0).write_volatile(divisor_least);
-            ptr.add(1).write_volatile(divisor_most);
-
-            // Now that we've written the divisor, we never have to touch this again. In hardware, this
-            // will divide the global clock (22.729 MHz) into one suitable for 2,400 signals per second.
-            // So, to once again get access to the RBR/THR/IER registers, we need to close the DLAB bit
-            // by clearing it to 0. Here, we just restore the original value of lcr.
-            ptr.add(3).write_volatile(lcr);
-        }
-    }
-
     pub fn put(&mut self, c: u8) {
-        let ptr = self.base_address as *mut u8;
+        let mut ptr = self.base_address as *mut u8;
+        loop {
+            unsafe {
+                let c = ptr.add(5).read_volatile();
+                if c & (1<<5)!=0{
+                    break;
+                }
+            }
+        }
+        ptr = self.base_address as *mut u8;
         unsafe {
             ptr.add(0).write_volatile(c);
         }

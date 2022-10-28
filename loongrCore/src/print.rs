@@ -12,7 +12,6 @@ pub struct Console {
 impl Console {
     pub fn new(address: usize) -> Self {
         let mut uart = Uart::new(address);
-        uart.init();
         Self { inner: uart }
     }
     pub fn write_char(&mut self, ch: u8) {
