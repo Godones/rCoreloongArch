@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use core::fmt::{Arguments, Write};
 use lazy_static::lazy_static;
+use log::Log;
 use spin::mutex::Mutex;
 use crate::config::UART;
 use crate::uart::Uart;
@@ -61,70 +62,43 @@ macro_rules! println {
 }
 
 
-///彩色输出，用于不同信息之间的分隔
-///表示发生严重错误，很可能或者已经导致程序崩溃
-#[macro_export]
-macro_rules! ERROR {
-    () => ($crate::print!("\n"));
-    ($($arg:tt)*) => {
-        ($crate::print!("\x1b[31m[ERROR]{}\x1b[0m\n", format_args!($($arg)*)));
+use log::{self, Level, LevelFilter, Metadata, Record};
+
+struct SimpleLogger;
+impl Log for SimpleLogger {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
+        true
     }
+    fn log(&self, record: &Record) {
+        if !self.enabled(record.metadata()) {
+            return;
+        }
+        let color = match record.level() {
+            Level::Error => 31, // Red
+            Level::Warn => 93,  // BrightYellow
+            Level::Info => 34,  // Blue
+            Level::Debug => 32, // Green
+            Level::Trace => 90, // BrightBlack
+        };
+        println!(
+            "\u{1B}[{}m[{:>5}] {}\u{1B}[0m",
+            color,
+            record.level(),
+            record.args(),
+        );
+    }
+    fn flush(&self) {}
 }
 
-// 表示发生不常见情况，但是并不一定导致系统错误
-#[macro_export]
-macro_rules! WARN {
-    () => (
-        #[cfg(any(feature = " WARN ", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
-        $crate::print!("\n");
-        $crate::print!("");
-    );
-    ($($arg:tt)*) => {
-        #[cfg(any(feature = " WARN ", feature = "INFO", feature = "DEBUG", feature = "TRACE"))]
-        ($crate::print!("\x1b[93m[WARN]{}\x1b[0m\n", format_args!($($arg)*)));
-        $crate::print!("");
-    }
-}
-
-// 比较中庸的选项，输出比较重要的信息，比较常用
-#[macro_export]
-macro_rules! INFO {
-    () => {
-        #[cfg(any(feature = "INFO",feature = "DEBUG", feature = "TRACE"))]
-        $crate::print!("[INFO]\n");
-        $crate::print!("");
-    };
-    ($($arg:tt)*) => {
-        #[cfg(any(feature = "INFO",feature = "DEBUG", feature = "TRACE"))]
-        ($crate::print!("\x1b[34m[INFO]{}\x1b[0m\n", format_args!($($arg)*)));
-        $crate::print!("");
-    }
-}
-#[macro_export]
-macro_rules! DEBUG {
-    () => {
-        #[cfg(any(feature = "DEBUG", feature = "TRACE"))]
-        $crate::print!("\n")
-        $crate::print!("");
-    };
-    ($($arg:tt)*) => {
-        #[cfg(any(feature = "DEBUG", feature = "TRACE"))]
-        ($crate::print!("\x1b[32m[DEBUG]{}\x1b[0m\n", format_args!($($arg)*)));
-        $crate::print!("");
-    }
-}
-
-// 最详细的输出，跟踪了每一步关键路径的执行
-#[macro_export]
-macro_rules! TRACE {
-    () => {
-        #[cfg(feature = "TRACE")]
-        $crate::print!("\n")
-        $crate::print!("");
-    };
-    ($($arg:tt)*) => {
-        #[cfg(feature = "TRACE")]
-        ($crate::print!("\x1b[90m[TRACE]{}\x1b[0m\n", format_args!($($arg)*)));
-        $crate::print!("");
-    }
+pub fn init_logger() {
+    println!("Init logger {:?}", option_env!("LOG"));
+    log::set_logger(&SimpleLogger).unwrap();
+    log::set_max_level(match option_env!("LOG") {
+        Some("ERROR") => LevelFilter::Error,
+        Some("WARN") => LevelFilter::Warn,
+        Some("INFO") => LevelFilter::Info,
+        Some("DEBUG") => LevelFilter::Debug,
+        Some("TRACE") => LevelFilter::Trace,
+        _ => LevelFilter::Off,
+    });
 }

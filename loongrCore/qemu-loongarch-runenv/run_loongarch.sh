@@ -24,16 +24,17 @@ Help()
 }
 
 # >= 512M
-MEM="1G"
+MEM="4G"
 # 1-4
 CPUS="1"
 #BIOS="./loongarch_bios_0310.bin"
-BIOS="./loongarch_bios_0310.bin"
+BIOS="./loongarch_bios_0310_debug.bin"
 KERNEL="./vmlinux"
 INITRD="busybox-rootfs.img"
 USE_GRAPHIC="no"
 DEBUG=''
-QEMU="./qemu-system-loongarch64"
+HOST_ARCH=$(uname -m)
+QEMU="./qemu/$HOST_ARCH/qemu-system-loongarch64"
 
 # Get the options
 while getopts ":b:c:dDghi:k:m:q:" option; do
@@ -70,9 +71,9 @@ if [ $USE_GRAPHIC = "no" ] ; then
 else
     # run with graphic
     CMDLINE="root=/dev/ram console=tty0 rdinit=/init"
-    GRAPHIC="-vga virtio -device virtio-keyboard-pci -device virtio-mouse-pci"
+#    GRAPHIC="-vga virtio -device virtio-keyboard-pci -device virtio-mouse-pci"
+    GRAPHIC="-vga virtio -device qemu-xhci -device usb-kbd -device usb-mouse"
 fi
 
 set -x
-$QEMU -m $MEM -smp $CPUS -bios $BIOS -kernel $KERNEL $GRAPHIC $DEBUG -serial mon:stdio
-# -initrd $INITRD -append "$CMDLINE" $GRAPHIC $DEBUG
+$QEMU -m $MEM -smp $CPUS -bios $BIOS -kernel $KERNEL $GRAPHIC $DEBUG

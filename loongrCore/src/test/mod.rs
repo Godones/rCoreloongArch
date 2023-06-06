@@ -1,5 +1,4 @@
-use crate::{DEBUG, ERROR, INFO,TRACE, WARN};
-
+use log::{info,warn,debug,trace};
 pub fn color_output_test() {
     extern "C" {
         fn text_start();
@@ -14,10 +13,10 @@ pub fn color_output_test() {
         fn heap_start();
         fn heap_size();
     }
-    WARN!(".text [{:#x}, {:#x})", text_start as usize, text_end as usize);
-    INFO!(".rodata [{:#x}, {:#x})", rodata_start as usize, rodata_end as usize);
-    DEBUG!(".data [{:#x}, {:#x})", data_start as usize, data_end as usize);
-    TRACE!(
+    warn!(".text [{:#x}, {:#x})", text_start as usize, text_end as usize);
+    info!(".rodata [{:#x}, {:#x})", rodata_start as usize, rodata_end as usize);
+    debug!(".data [{:#x}, {:#x})", data_start as usize, data_end as usize);
+    trace!(
         ".bss [{:#x}, {:#x})",
         bss_start as usize,
         bss_end as usize

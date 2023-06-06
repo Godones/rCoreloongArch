@@ -1,10 +1,10 @@
 OUTPUT_ARCH( "loongarch" )
-ENTRY( main)
+ENTRY(main)
 
 SECTIONS
 {
   #  . = 0x9000000001034804;
-  . = 0x00100000;
+  . = 0x92000000;
    text_start = .;
   .text : {
     *(.text .text.*)
@@ -35,12 +35,11 @@ SECTIONS
   . = ALIGN(0x1000);
     data_end = .;
     bss_start = .;
-
   .bss : {
     sbss = .;
-. = ALIGN(16);
+    . = ALIGN(16);
     *(.sbss .sbss.*)
-. = ALIGN(16);
+    . = ALIGN(16);
     *(.bss .bss.*)
   }
   . = ALIGN(0x1000);

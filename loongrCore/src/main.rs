@@ -4,7 +4,7 @@
 #![no_main]
 #![allow(dead_code)]
 #![feature(panic_info_message)]
-
+extern crate rlibc;
 mod config;
 mod uart;
 mod print;
@@ -13,22 +13,35 @@ mod test;
 mod loong_arch;
 
 use config::FLAG;
-use core::arch::{global_asm};
-use crate::print::get_char;
+use core::{arch::{global_asm}};
+use crate::{print::{get_char}};
 use test::color_output_test;
+use crate::config::UART;
+use crate::print::Console;
 
 global_asm!(include_str!("boot.S"));
 
 #[no_mangle]
-pub extern "C" fn main(){
+ fn main(){
     unsafe {
         (0x1FE001E0 as *mut u8).write_volatile('L' as u8);
         (0x1FE001E0 as *mut u8).write_volatile('\n' as u8);
+        (0x1FE001E0 as *mut u8).write_volatile('L' as u8);
+        (0x1FE001E0 as *mut u8).write_volatile('\n' as u8);
     }
-
-    INFO!("{}",FLAG);
+    let mut out = Console::new(UART);
+    out.write_str("HELLO");
+    println!("{}",FLAG);
+    print::init_logger();
     color_output_test();
-    panic!();
+    scanf();
+}
+
+
+#[no_mangle]
+fn m_test(){
+    let a = 4+12;
+    println!("a+b");
 }
 
 fn scanf(){

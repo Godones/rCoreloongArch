@@ -1,5 +1,8 @@
 # qemu-loongarch-runenv
 
+** NOTE: upstream qemu/kernel/tianocore has supported LoongArch, please refer to devel branch for new environment. **
+** TODO: Due to the changes of the bios and kernel interface, examples need modification to work with new environment. **
+
 This is an environment for running loongarch bios and OS on X86 machines, all
 components are open source:
 
@@ -325,9 +328,9 @@ Here is a short explanation for major files in this repository:
 
 ## source and build methods
 
-For bios, kernel and busybox, the resulting code is loongarch, so a cross compiling toolchain is needed. Used toolchain is [here](https://github.com/loongson/build-tools/releases/download/2021.12.21/loongarch64-clfs-2021-12-18-cross-tools-gcc-full.tar.xz). Unpack this package to /opt, then add /opt/cross-tools/bin to your PATH.
+For bios, kernel and busybox, the resulting code is loongarch, so a cross compiling toolchain is needed. Used toolchain is [here](https://github.com/foxsen/qemu-loongarch-runenv/releases/download/toolchain/loongarch64-clfs-2021-12-18-cross-tools-gcc-full.tar.xz). Unpack this package to /opt, then add /opt/cross-tools/bin to your PATH.
 
-    foxsen@foxsen-ThinkPad-T450:~/xinyan/algo$ /opt/cross-tools-1218/bin/loongarch64-unknown-linux-gnu-gcc -v
+    foxsen@foxsen-ThinkPad-T450:~/xinyan/algo$ /opt/cross-tools/bin/loongarch64-unknown-linux-gnu-gcc -v
     Using built-in specs.
     COLLECT_GCC=/opt/cross-tools-1218/bin/loongarch64-unknown-linux-gnu-gcc
     COLLECT_LTO_WRAPPER=/opt/cross-tools-1218/bin/../libexec/gcc/loongarch64-unknown-linux-gnu/12.0.0/lto-wrapper
@@ -365,16 +368,18 @@ Note: Please DON'T use gcc8 from loongnix: the ABI is changing! we are using the
 
 ### qemu
 
-The binary here is built from https://github.com/foxsen/qemu.git tag loongarch-v2022-03-10-1 on ubuntu 20.04.
+The binary here is built from https://github.com/foxsen/qemu.git tag loongarch-v2022-05-02 on ubuntu 20.04.
 
+```bash
 git clone https://github.com/foxsen/qemu.git
 <install necessary dependence packages, refer to qemu build doc>
-git checkout loongarch-v2022-03-10-1
+git checkout loongarch-v2022-05-02
 cd qemu
 mkdir build
 cd ./build/
 ../configure --target-list=loongarch64-softmmu --disable-werror (调试版本加--enable-debug)
 make -j4
+```
 
 Check branch loongarch for possible updates.
 
@@ -471,6 +476,7 @@ Check loongarch-qemu branch for updates.
 
 The binary here is built from https://github.com/foxsen/binutils-gdb tag loongarch-v2022-03-10 on ubuntu 20.04.
 
+```bash
 git clone https://github.com/foxsen/binutils-gdb
 git checkout loongarch-v2022-03-10
 mkdir build
@@ -478,6 +484,7 @@ cd build
 ../configure --target=loongarch64-unknown-linux-gnu --prefix=/opt/gdb
 make
 sudo make install
+```
 
 A simple example session is demoed in the following pictures:
 
@@ -543,6 +550,10 @@ head.S相应代码如下：
 * some full examples of kernel debugging
 * a docker file to reproduce all the components
 * More tests and fixes
+
+## 参考内核实现
+
+mini_kernel*目录存放一些参考实现代码，将逐步完善。
 
 ## References
 
