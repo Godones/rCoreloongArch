@@ -11,7 +11,8 @@ fn main() {
     script.write_all(include_bytes!("linker.ld")).unwrap();
     println!("cargo:rustc-link-arg=-T{}", &link_script.display());
     println!("cargo:rustc-link-arg=-nostdlib");//关闭gcc的默认链接
-    // println!("cargo:rustc-link-arg=-no-pie"); //rust默认连接到Scrt1.o，使用动态链接
-    //println!("cargo:rustc-link-arg=-Wl,-Map=rust.map");
+    println!("cargo:rustc-link-arg=-no-pie"); //rust默认连接到Scrt1.o，使用动态链接
+    // println!("cargo:rustc-link-arg=-Crelocation-model=static");
+    // println!("cargo:rustc-link-arg=-Wl,-Map=rust.map");
     println!("cargo:rerun-if-change=linker.ld");
 }
