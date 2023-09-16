@@ -5,9 +5,11 @@ _start:
 0:
  #设置映射窗口
     addi.d $t0,$zero,0x11
-    csrwr $t0,0x180  #设置LOONGARCH_CSR_DMWIN0
+    lu52i.d $t0, $t0, -1792
+    csrwr $t0,0x180  #设置LOONGARCH_CSR_DMWIN0 0x9000_0000_0000_0011
 
-    la.global $t0,1f
+    addi.d $t0,$zero,0
+    pcaddi $t0,2
     jirl $zero, $t0,0
 1:
     la.global $t0, bss_start

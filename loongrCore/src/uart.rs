@@ -1,8 +1,8 @@
 // uart.rs
 // UART routines and driver
 
-use core::fmt::Write;
 use core::fmt::Error;
+use core::fmt::Write;
 
 pub struct Uart {
     base_address: usize,
@@ -27,7 +27,7 @@ impl Uart {
         loop {
             unsafe {
                 let c = ptr.add(5).read_volatile();
-                if c & (1<<5)!=0{
+                if c & (1 << 5) != 0 {
                     break;
                 }
             }

@@ -7,7 +7,6 @@ use crate::{print, println};
 #[no_mangle]
 extern "C" fn eh_personality() {}
 
-
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     print!("Aborting: ");
@@ -18,16 +17,14 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
             p.file(),
             info.message().unwrap()
         );
-    }
-    else {
+    } else {
         println!("no information available.");
     }
     abort();
 }
 
 #[no_mangle]
-extern "C"
-fn abort() -> ! {
+extern "C" fn abort() -> ! {
     loop {
         unsafe {
             asm!("idle 0");
