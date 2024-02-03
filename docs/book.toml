@@ -1,0 +1,16 @@
+[book]
+authors = ["linfeng"]
+language = "en"
+multilingual = false
+src = "src"
+title = "rCoreloongArch-tutorial"
+
+
+[output.html]
+mathjax-support = true
+
+
+[output.html.playpen]
+editable = true
+line-numbers = true
+

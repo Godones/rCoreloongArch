@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    "kernel",
+    "user",
+    "easy-fs",
+    "easy-fs-fuse",
+    "pci",
+    "isomorphic_drivers",
+    "vbe",
+    "user",
+    "kernel",
+    "stack_trace"
+]
+resolver = "2"
