@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use crate::config::UART;
 use crate::uart::Uart;
 use core::fmt::{Arguments, Write};
@@ -51,24 +50,22 @@ pub fn get_char() -> u8 {
 pub fn _print(arg: Arguments) {
     CONSOLE.lock().write_fmt(arg).unwrap()
 }
-///借用标准库的print!实现
-/// $crate 变量使得我们不必在使用println!时导入宏
+
 #[macro_export]
-/// print string macro
 macro_rules! print {
-    ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::print::_print(format_args!($fmt $(, $($arg)+)?));
-    }
+    ($($arg:tt)*) => {
+        $crate::print::_print(format_args!("{}", format_args!($($arg)*)))
+    };
 }
 
+/// 系统启动初期使用的输出函数
 #[macro_export]
-/// println string macro
 macro_rules! println {
-    ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::print::_print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
-    }
+    () => ($crate::print!("\n"));
+    ($fmt:expr) => ($crate::print!(concat!($fmt, "\n")));
+    ($fmt:expr, $($arg:tt)*) => ($crate::print!(
+        concat!($fmt, "\n"), $($arg)*));
 }
-
 
 pub struct Screen{}
 

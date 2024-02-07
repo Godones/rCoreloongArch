@@ -9,13 +9,14 @@ use crate::loong_arch::tlb::Pgdl;
 use crate::mm::{translated_refmut, MemorySet};
 use crate::sync::{Condvar, Mutex, Semaphore, UPSafeCell};
 use crate::trap::TrapContext;
-use crate::Register;
+use crate::{Register};
 use alloc::string::String;
 use alloc::sync::{Arc, Weak};
 use alloc::vec;
 use alloc::vec::Vec;
 use core::arch::asm;
 use core::cell::RefMut;
+use log::info;
 
 // 进程控制块
 pub struct ProcessControlBlock {
@@ -41,7 +42,6 @@ pub struct ProcessControlBlockInner {
 }
 
 impl ProcessControlBlockInner {
-    #[allow(unused)]
     pub fn get_user_token(&self) -> usize {
         self.memory_set.token()
     }
@@ -118,6 +118,7 @@ impl ProcessControlBlock {
         let task_inner = task.inner_exclusive_access();
         let trap_cx = task_inner.get_trap_cx();
         let ustack_top = task_inner.res.as_ref().unwrap().ustack_top();
+        info!("ustack_top: {:#x}", ustack_top);
         drop(task_inner);
         // waring:在内核栈上压入trap上下文，与rcore实现不同
         *trap_cx = TrapContext::app_init_context(entry_point, ustack_top);

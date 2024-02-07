@@ -5,6 +5,7 @@ use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
+use log::{debug};
 
 use crate::config::{PAGE_SIZE};
 
@@ -83,11 +84,13 @@ impl MemorySet {
                 }
                 if ph_flags.is_write() {
                     map_perm |= MapPermission::W;
-                } //可写
+                }
                 if !ph_flags.is_execute() {
                     map_perm |= MapPermission::NX;
                 }
+                debug!("start_va: {:?}, end_va: {:?}, map_perm: {:?}",start_va,end_va,map_perm);
                 let map_area = MapArea::new(start_va, end_va, map_perm);
+                debug!("map_area: {:?}",map_area);
                 max_end_vpn = map_area.vpn_range.get_end();
                 memory_set.push(
                     map_area,
@@ -148,7 +151,7 @@ impl Default for MapPermission {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct MapArea {
     vpn_range: VPNRange,
     data_frames: BTreeMap<VirtPageNum, FrameTracker>,
@@ -182,7 +185,6 @@ impl MapArea {
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
         page_table.map(vpn, ppn, pte_flags);
     }
-    #[allow(unused)]
     pub fn unmap_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
         self.data_frames.remove(&vpn);
         page_table.unmap(vpn);
@@ -192,7 +194,6 @@ impl MapArea {
             self.map_one(page_table, vpn);
         }
     }
-    #[allow(unused)]
     pub fn unmap(&mut self, page_table: &mut PageTable) {
         for vpn in self.vpn_range {
             self.unmap_one(page_table, vpn);

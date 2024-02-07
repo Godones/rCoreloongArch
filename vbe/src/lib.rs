@@ -11,8 +11,5 @@ extern crate alloc;
 
 use spin::Mutex;
 use lazy_static::lazy_static;
-
-pub use log::{info};
 pub use gui::*;
-
 pub use embedded_graphics::*;

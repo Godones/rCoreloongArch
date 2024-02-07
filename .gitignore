@@ -19,3 +19,5 @@ Cargo.lock
 rust-project.json
 
 .idea
+vgabios-stdvga.bin
+efi-virtio.rom

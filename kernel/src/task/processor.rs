@@ -7,7 +7,7 @@ use crate::loong_arch::tlb::{Asid, Pgdl};
 use crate::sync::UPSafeCell;
 use crate::task::process::ProcessControlBlock;
 use crate::trap::TrapContext;
-use crate::Register;
+use crate::{Register};
 use alloc::sync::Arc;
 use core::arch::asm;
 use lazy_static::*;

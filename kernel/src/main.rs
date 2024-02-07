@@ -27,17 +27,7 @@ mod trap;
 mod uart;
 
 extern crate alloc;
-extern crate bit_field;
-extern crate bitflags;
-extern crate buddy_system_allocator;
-extern crate isomorphic_drivers;
-extern crate lazy_static;
-extern crate pci;
-extern crate rlibc;
-extern crate xmas_elf;
 
-
-// use log::info;
 use crate::boot_param::boot_params_interface::BootParamsInterface;
 use crate::info::print_machine_info;
 use crate::loong_arch::register::csr::Register;
@@ -50,25 +40,31 @@ use core::arch::{global_asm};
 
 use crate::fs::list_apps;
 use crate::loong_arch::{ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read, vbe_test};
-pub use log::{debug, error, info, trace, warn};
-global_asm!(include_str!("head.S"));
+pub use log::info;
+global_asm!(include_str!("head.s"));
 
+fn clear_bss() {
+    extern "C" {
+        fn sbss();
+        fn ebss();
+    }
+    (sbss as usize..ebss as usize).for_each(|addr| unsafe {
+        (addr as *mut u8).write_volatile(0);
+    });
+}
 #[no_mangle]
-pub extern "C" fn main(
-    argc: usize,
-    _argv: *const *const u8,
-    _boot_params_interface: *const BootParamsInterface,
-) {
+pub fn main(argc: usize, argv: *const *const u8, boot_params_interface: *const BootParamsInterface,){
+    clear_bss();
     println!("{}", FLAG);
     logging::init();
     rtc_init();
     info!("CURRENT TIME {:?}", rtc_time_read());
     print_range();
     info!("kernel args: {}", argc);
-    info!("kernel argv address: {:#x}", _argv as usize);
+    info!("kernel argv address: {:#x}", argv as usize);
     info!(
         "kernel boot_params_interface address: {:#x}",
-        _boot_params_interface as usize
+        boot_params_interface as usize
     );
     mm::init();
     if cfg!(feature = "gui") {

@@ -9,6 +9,6 @@ members = [
     "vbe",
     "user",
     "kernel",
-    "stack_trace"
+    "stack_trace",
 ]
 resolver = "2"

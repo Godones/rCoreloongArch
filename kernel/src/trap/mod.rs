@@ -35,17 +35,17 @@ use log::{error, trace, warn};
 use crate::loong_arch::register::era::Era;
 use crate::loong_arch::register::prmd::Prmd;
 
-global_asm!(include_str!("trap.S"));
-global_asm!(include_str!("tlb.S"));
-global_asm!(include_str!("trap_kernel.S"));
+global_asm!(include_str!("trap.s"),trap_handler = sym trap_handler);
+global_asm!(include_str!("tlb.s"));
+global_asm!(include_str!("trap_kernel.s"),trap_handler_kernel = sym trap_handler_kernel);
 
+extern "C" {
+    fn __alltraps();
+    fn __tlb_rfill();
+    fn kernel_trap_entry();
+}
 
 pub fn init() {
-    extern "C" {
-        fn __alltraps();
-        fn __tlb_rfill();
-        fn kernel_trap_entry();
-    }
     Ticlr::read().clear_timer().write(); //清除时钟专断
     Tcfg::read().set_enable(false).write();
     Ecfg::read().set_lie_with_index(11, false).write();
@@ -108,9 +108,6 @@ pub fn set_kernel_trap_entry() {
 pub fn trap_return() {
     set_user_trap_entry();
     let trap_addr = current_trap_addr();
-    unsafe {
-        asm!("ibar 0");
-    }
     extern "C" {
         fn __restore();
     }
@@ -277,8 +274,6 @@ fn tlb_page_modify_handler() {
         asm!("tlbwr"); //重新将tlbelo写入tlb
     }
 }
-#[no_mangle]
-fn man() {}
 
 #[no_mangle]
 fn tlb_page_fault() {

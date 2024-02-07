@@ -21,7 +21,6 @@ pub struct TextEditInner {
     text: String,
     font_color: Rgb888,
     graphic: Graphics,
-    #[allow(unused)]
     parent: Option<Arc<dyn Component>>,
     base_component: Panel,
     back_color: Rgb888,

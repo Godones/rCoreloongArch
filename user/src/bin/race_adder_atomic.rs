@@ -6,6 +6,7 @@ extern crate user_lib;
 extern crate alloc;
 
 use alloc::vec::Vec;
+use core::ptr::addr_of_mut;
 use core::sync::atomic::{AtomicBool, Ordering};
 use user_lib::{exit, get_time, thread_create, waittid, yield_};
 
@@ -23,7 +24,7 @@ unsafe fn f() -> ! {
         {
             yield_();
         }
-        let a = &mut A as *mut usize;
+        let a = addr_of_mut!(A);
         let cur = a.read_volatile();
         for _ in 0..500 {
             t = t * t % 10007;

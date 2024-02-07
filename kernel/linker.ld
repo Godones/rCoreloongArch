@@ -9,8 +9,9 @@ SECTIONS
    . = 0x0000000000001000;
   # . =  0x90100000;
 
-   PROVIDE(etext = .);
+
   .text : {
+    PROVIDE(etext = .);
     *(.text.init)
     *(.text .text.*)
     . = ALIGN(0x1000);
@@ -20,44 +21,46 @@ SECTIONS
     *(tlb_handler)
     . = ALIGN(0x1000);
     *(k1_eentry)
+    PROVIDE(stext = .);
   }
   . = ALIGN(4K);
-  PROVIDE(stext = .);
 
-  PROVIDE(erodata = .);
+
   .rodata : {
-     . = ALIGN(16);
+    PROVIDE(erodata = .);
+    . = ALIGN(16);
     *(.srodata .srodata.*)
     . = ALIGN(16);
     *(.rodata .rodata.*)
+    PROVIDE(srodata = .);
   }
   . = ALIGN(4K);
-  PROVIDE(srodata = .);
-
-  PROVIDE(edata = .);
 
   .data : {
-. = ALIGN(16);
+    PROVIDE(edata = .);
+    . = ALIGN(16);
     *(.sdata .sdata.*)
-. = ALIGN(16);
+    . = ALIGN(16);
     *(.data .data.*)
+    *(.got .got.*)
   }
   . = ALIGN(4K);
   PROVIDE(sdata = .);
 
   .bss : {
-  *(.bss.stack)
+    *(.bss.stack)
     ebss = .;
-. = ALIGN(16);
+    . = ALIGN(16);
     *(.sbss .sbss.*)
-. = ALIGN(16);
+    . = ALIGN(16);
     *(.bss .bss.*)
-  }
-  . = ALIGN(4K);
-
     sbss = .;
-    ekernel = .;
+  }
+   . = ALIGN(4K);
+
+
+   ekernel = .;
   /DISCARD/ : {
-          *(.eh_frame)
-      }
+      *(.eh_frame)
+  }
 }

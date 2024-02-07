@@ -12,7 +12,6 @@ use crate::info;
 use crate::mm::system_allocator::bump_allocator::BumpAllocator;
 use crate::mm::system_allocator::common::Locked;
 use bit_field::BitField;
-// use crate::system_allocator::linked_list::LinkedListAllocator;
 use crate::mm::system_allocator::buddy::Buddy;
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;
 use buddy_system_allocator::LockedHeap;
@@ -34,14 +33,15 @@ pub fn init_heap() {
     }
 }
 
+extern "C" {
+    fn sbss();
+    fn ebss();
+}
 #[allow(unused)]
 pub fn heap_test() {
     use alloc::boxed::Box; //使用Box包装器
     use alloc::vec::Vec; //使用vec数组
-    extern "C" {
-        fn sbss();
-        fn ebss();
-    }
+
     let bss_range = ebss as usize..sbss as usize;
 
     let a = Box::new(5);

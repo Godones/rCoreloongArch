@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 clap = "3.0.14"
 rand = "0.8.4"
-easy-fs = {path = "../easy-fs"}
+easy-fs = { path = "../easy-fs" }

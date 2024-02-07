@@ -20,7 +20,7 @@ use switch::__switch;
 use crate::println;
 use crate::timer::remove_timer;
 pub use context::TaskContext;
-pub use id::{kstack_alloc, pid_alloc, KernelStack, PidHandle, IDLE_PID};
+pub use id::{pid_alloc, KernelStack, PidHandle, IDLE_PID};
 pub use manager::{add_task, pid2process, remove_from_pid2process, remove_task};
 pub use processor::{
     current_process, current_task, current_trap_addr, current_trap_cx,
@@ -151,6 +151,7 @@ lazy_static! {
 }
 
 pub fn add_initproc() {
+    println!("add initproc to task manager");
     let _initproc = INITPROC.clone();
 }
 

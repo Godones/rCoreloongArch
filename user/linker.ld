@@ -10,21 +10,21 @@ SECTIONS
     *(.text .text.*)
     PROVIDE(etext = .);
   }
-    . = ALIGN(4K);
+    . = ALIGN(16K);
   .rodata : {
   . = ALIGN(16);
     *(.srodata .srodata.*)
     . = ALIGN(16);
     *(.rodata .rodata.*)
   }
-    . = ALIGN(4K);
+    . = ALIGN(16K);
   .data : {
   . = ALIGN(16);
     *(.sdata .sdata.*)
     . = ALIGN(16);
     *(.data .data.*)
   }
-    . = ALIGN(4K);
+    . = ALIGN(16K);
   .bss : {
     ebss = .;
     . = ALIGN(16);
@@ -32,7 +32,7 @@ SECTIONS
     . = ALIGN(16);
     *(.bss .bss.*)
   }
-    . = ALIGN(4K);
+    . = ALIGN(16K);
   sbss = .;
 
   PROVIDE(end = .);

@@ -63,23 +63,17 @@ pub struct KernelStack {
     pub frame: FrameTracker,
 }
 
-pub fn kstack_alloc() -> KernelStack {
-    frame_alloc().map(|frame| KernelStack { frame }).unwrap()
-}
 
-impl Drop for KernelStack {
-    fn drop(&mut self) {
-        // warn!("drop kernel stack");
-        // frame_dealloc(self.frame.ppn);
-    }
-}
 /// Create a kernelstack
 /// 在loongArch平台上，并不需要根据pid在内核空间分配内核栈
 /// 内核态并不处于页表翻译模式，而是以类似于直接管理物理内存的方式管理
 /// 因此这里会直接申请对应大小的内存空间
 /// 但这也会造成内核栈无法被保护的状态
 impl KernelStack {
-    #[allow(unused)]
+    pub fn new() -> Self {
+        frame_alloc().map(|frame| KernelStack { frame }).unwrap()
+    }
+
     pub fn push_on_top<T>(&self, value: T) -> *mut T
     where
         T: Sized,
@@ -91,7 +85,7 @@ impl KernelStack {
         }
         ptr_mut
     }
-    pub fn get_top(&self) -> usize {
+    fn get_top(&self) -> usize {
         let top: PhysAddr = self.frame.ppn.into();
         let top = top.0 + PAGE_SIZE;
         top
@@ -171,7 +165,6 @@ impl TaskUserRes {
         // dealloc trap_cx manually
     }
 
-    #[allow(unused)]
     pub fn alloc_tid(&mut self) {
         self.tid = self
             .process

@@ -3,6 +3,7 @@ use crate::loong_arch::cpu::CpuMode;
 use crate::loong_arch::register::crmd::Crmd;
 use crate::loong_arch::register::csr::Register;
 use crate::loong_arch::register::prmd::Prmd;
+use crate::trap::trap_handler;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -10,6 +11,7 @@ pub struct TrapContext {
     pub x: [usize; 32], //通用寄存器 ，第4个寄存器是sp
     pub crmd: usize,    //控制状态寄存器---似乎没有用
     pub sepc: usize,    //异常处理返回地址
+    pub trap_handler: usize,
 }
 
 impl Debug for TrapContext {
@@ -30,6 +32,7 @@ impl TrapContext {
             x: [0; 32],
             crmd,
             sepc: entry,
+            trap_handler: trap_handler as usize,
         };
         cx.set_sp(sp);
         cx

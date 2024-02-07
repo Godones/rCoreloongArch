@@ -21,7 +21,6 @@ pub struct Button {
 pub struct ButtonInner {
     graphic: Graphics,
     text: String,
-    #[allow(unused)]
     parent: Option<Arc<dyn Component>>,
 }
 

@@ -6,8 +6,10 @@ TARGET_DIR := target/$(TARGET)/$(MODE)
 
 OBJCOPY := loongarch64-unknown-linux-gnu-objcopy
 
-elf:
-	@cargo build --release
+all: build
 
+build:
+	@cargo build --release -Z build-std --target $(TARGET)
 
-build: elf
+.PHONY: clean
+

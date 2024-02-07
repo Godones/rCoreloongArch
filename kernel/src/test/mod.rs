@@ -64,20 +64,20 @@ pub fn test_csr_register() {
     }
 }
 pub fn print_range() {
-    extern "C" {
-        fn stext();
-        fn etext();
-        fn srodata();
-        fn erodata();
-        fn sdata();
-        fn edata();
-        fn sbss();
-        fn ebss();
-        fn ekernel();
-    }
-    info!(".text [{:#x}, {:#x})", etext as usize, stext as usize);
-    info!(".rodata [{:#x}, {:#x})", erodata as usize, srodata as usize);
-    info!(".data [{:#x}, {:#x})", edata as usize, sdata as usize);
-    info!(".bss [{:#x}, {:#x})", ebss as usize, sbss as usize);
-    info!("kernel end :{:#x}", ekernel as usize);
+    info!(".text    [{:#x}-{:#x})", etext as usize, stext as usize);
+    info!(".rodata  [{:#x}-{:#x})", erodata as usize, srodata as usize);
+    info!(".data    [{:#x}-{:#x})", edata as usize, sdata as usize);
+    info!(".bss     [{:#x}-{:#x})", ebss as usize, sbss as usize);
+    info!("end      [{:#x}]", ekernel as usize);
+}
+extern "C" {
+    fn stext();
+    fn etext();
+    fn srodata();
+    fn erodata();
+    fn sdata();
+    fn edata();
+    fn sbss();
+    fn ebss();
+    fn ekernel();
 }

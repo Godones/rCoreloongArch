@@ -16,7 +16,6 @@ pub struct Bar {
 struct BarInner {
     graphic: Graphics,                   //画布
     comps: VecDeque<Arc<dyn Component>>, //组件列表
-    #[allow(unused)]
     parent: Option<Arc<dyn Component>>, //父组件
 }
 

@@ -1,4 +1,4 @@
-use super::{kstack_alloc, KernelStack, ProcessControlBlock, TaskContext, TaskUserRes};
+use super::{KernelStack, ProcessControlBlock, TaskContext, TaskUserRes};
 use crate::sync::UPSafeCell;
 use crate::trap::TrapContext;
 use alloc::sync::{Arc, Weak};
@@ -39,7 +39,6 @@ impl TaskControlBlockInner {
         self.kstack.get_trap_addr()
     }
 
-    #[allow(unused)]
     fn get_status(&self) -> TaskStatus {
         self.task_status
     }
@@ -52,7 +51,7 @@ impl TaskControlBlock {
         alloc_user_res: bool,
     ) -> Self {
         let res = TaskUserRes::new(Arc::clone(&process), ustack_base, alloc_user_res);
-        let kstack = kstack_alloc();
+        let kstack = KernelStack::new();
         let kstack_top = kstack.get_trap_addr(); //存放了trap上下文后的地址
         Self {
             process: Arc::downgrade(&process),
