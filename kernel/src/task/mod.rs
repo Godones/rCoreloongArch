@@ -151,7 +151,6 @@ lazy_static! {
 }
 
 pub fn add_initproc() {
-    println!("add initproc to task manager");
     let _initproc = INITPROC.clone();
 }
 
