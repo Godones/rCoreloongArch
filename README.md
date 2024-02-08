@@ -112,6 +112,10 @@ mdbook serve --open
 
 或者查看根目录下导出的**rCoreloongArch-tutorial.pdf**文件。
 
+#### 建议
+
+从[Arceos](https://github.com/Godones/arceos/tree/la64)查看更多la64相关的内容。
+
 
 
 #### 未来
