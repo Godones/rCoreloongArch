@@ -5,7 +5,7 @@ kernel_trap_entry:
     addi.d  $sp, $sp, -264
     st.d    $ra, $sp, 0
     st.d    $tp, $sp, 8
-    st.d    $sp, $sp, 16
+    # st.d    $sp, $sp, 16
     st.d    $a0, $sp, 24
     st.d    $a1, $sp, 32
     st.d    $a2, $sp, 40
@@ -34,15 +34,24 @@ kernel_trap_entry:
     st.d    $s6, $sp, 224
     st.d    $s7, $sp, 232
     st.d    $s8, $sp, 240
+    csrrd   $t0, 0x1        #读取prmd
+    csrrd   $t1, 0x6        #返回地址
+    st.d    $t0, $sp, 248
+    st.d    $t1, $sp, 256
 
-    la.abs  $t0, {trap_handler_kernel}
+    la.abs  $t0, trap_handler_kernel
     # call the C trap handler in trap.c
     jirl    $ra, $t0, 0
 
     # restore register
+    ld.d    $t0, $sp, 248
+    ld.d    $t1, $sp, 256
+    csrwr   $t0, 0x1
+    csrwr   $t1, 0x6
+
     ld.d    $ra, $sp, 0
     ld.d    $tp, $sp, 8
-    ld.d    $sp, $sp, 16
+    # ld.d    $sp, $sp, 16
     ld.d    $a0, $sp, 24
     ld.d    $a1, $sp, 32
     ld.d    $a2, $sp, 40

@@ -24,6 +24,7 @@ bitflags! {
     }
 }
 impl PTEFlags {
+    #[allow(unused)]
     fn default() -> Self {
         PTEFlags::V | PTEFlags::MATL | PTEFlags::P | PTEFlags::W
     }
@@ -109,7 +110,7 @@ impl PageTableEntry {
     }
 }
 
-#[derive( Clone)]
+#[derive(Clone)]
 pub struct PageTable {
     root_ppn: PhysPageNum,
     frames: Vec<FrameTracker>,

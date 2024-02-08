@@ -25,7 +25,6 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     abort();
 }
 
-
 #[no_mangle]
 pub(crate) extern "C" fn abort() -> ! {
     loop {

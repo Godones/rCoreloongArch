@@ -28,7 +28,7 @@ const SYSCALL_SEMAPHORE_DOWN: usize = 1022;
 const SYSCALL_CONDVAR_CREATE: usize = 1030;
 const SYSCALL_CONDVAR_SIGNAL: usize = 1031;
 const SYSCALL_CONDVAR_WAIT: usize = 1032;
-const SYSCALL_LS: usize = 1040;//list files in a directory
+const SYSCALL_LS: usize = 1040; //list files in a directory
 
 global_asm!(include_str!("syscall.asm"));
 
@@ -188,6 +188,6 @@ pub fn sys_condvar_wait(condvar_id: usize, mutex_id: usize) -> isize {
     syscall(SYSCALL_CONDVAR_WAIT, condvar_id, mutex_id, 0)
 }
 
-pub fn sys_ls()->isize{
-    syscall(SYSCALL_LS,0,0,0)
+pub fn sys_ls() -> isize {
+    syscall(SYSCALL_LS, 0, 0, 0)
 }

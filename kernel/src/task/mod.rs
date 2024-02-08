@@ -5,7 +5,6 @@ mod process;
 mod processor;
 mod signal;
 mod switch;
-#[allow(clippy::module_inception)]
 mod task;
 
 use self::id::TaskUserRes;
@@ -23,8 +22,8 @@ pub use context::TaskContext;
 pub use id::{pid_alloc, KernelStack, PidHandle, IDLE_PID};
 pub use manager::{add_task, pid2process, remove_from_pid2process, remove_task};
 pub use processor::{
-    current_process, current_task, current_trap_addr, current_trap_cx,
-    current_user_token, run_tasks, schedule, take_current_task,
+    current_process, current_task, current_trap_addr, current_trap_cx, current_user_token,
+    run_tasks, schedule, take_current_task,
 };
 pub use signal::SignalFlags;
 pub use task::{TaskControlBlock, TaskStatus};

@@ -2,14 +2,14 @@
 #![no_std]
 #![allow(unused)]
 
-mod old_impl;
 mod driver;
 mod gui;
 pub mod id_allocator;
+mod old_impl;
 
 extern crate alloc;
 
-use spin::Mutex;
-use lazy_static::lazy_static;
-pub use gui::*;
 pub use embedded_graphics::*;
+pub use gui::*;
+use lazy_static::lazy_static;
+use spin::Mutex;

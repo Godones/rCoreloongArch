@@ -1,5 +1,5 @@
 use crate::config::PAGE_SIZE;
-use crate::loong_arch::AHCIDriver;
+use crate::loongarch::AHCIDriver;
 use log::info;
 use pci::*;
 // Register	Offset	Bits 31-24	Bits 23-16	Bits 15-8	Bits 7-0

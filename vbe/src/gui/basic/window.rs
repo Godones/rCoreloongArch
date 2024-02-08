@@ -1,3 +1,4 @@
+use crate::driver::VBE_DEVICE;
 use crate::gui::basic::manager::{SCREEN_MANAGER, WINDOW_ID_ALLOCATOR};
 use crate::gui::{Bar, Component, Graphics, ImageComp, Panel};
 use alloc::collections::VecDeque;
@@ -12,11 +13,10 @@ use embedded_graphics::prelude::RgbColor;
 use embedded_graphics::text::Baseline;
 use embedded_graphics::text::Text;
 use embedded_graphics::Drawable;
-use spin::Mutex;
 use log::info;
+use spin::Mutex;
 use virtio_input_decoder::Key;
 use virtio_input_decoder::Key::S;
-use crate::driver::VBE_DEVICE;
 
 pub struct Windows {
     id: usize,
@@ -73,8 +73,6 @@ impl Windows {
         bar.add(min_img);
         bar.add(close_img);
         bar.add(max_img);
-
-
 
         let windows = Arc::new(Panel::new(size, point));
         let id = WINDOW_ID_ALLOCATOR.lock().alloc();

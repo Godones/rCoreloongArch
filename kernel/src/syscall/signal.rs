@@ -13,6 +13,7 @@ pub fn sys_kill(pid: usize, signal: u32) -> isize {
     }
 }
 
+#[allow(unused)]
 fn check_sigaction_error(signal: SignalFlags, action: usize, old_action: usize) -> bool {
     if action == 0
         || old_action == 0

@@ -1,4 +1,4 @@
-use crate::loong_arch::{
+use crate::loongarch::{
     ls7a_read_b, ls7a_write_b, LS7A_I8042_COMMAND, LS7A_I8042_DATA, LS7A_I8042_STATUS,
 };
 use bit_field::BitField;

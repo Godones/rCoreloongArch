@@ -4,13 +4,13 @@
 
 #[macro_use]
 pub mod console;
+mod fs;
 mod lang_items;
+mod process;
+mod sign;
 mod sync;
 mod syscall;
 mod thread;
-mod fs;
-mod process;
-mod sign;
 mod time;
 
 use alloc::vec::Vec;
@@ -21,18 +21,17 @@ extern crate alloc;
 extern crate bitflags;
 extern crate buddy_system_allocator;
 
-pub use sync::*;
-pub use thread::*;
 pub use fs::*;
 pub use process::*;
 pub use sign::*;
+pub use sync::*;
+pub use thread::*;
 pub use time::*;
 
 const USER_HEAP_SIZE: usize = 0x4000;
 static mut HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
 #[global_allocator]
 static HEAP: LockedHeap = LockedHeap::empty();
-
 
 #[no_mangle]
 #[link_section = ".text.entry"]
@@ -76,4 +75,3 @@ fn clear_bss() {
 }
 
 use syscall::*;
-

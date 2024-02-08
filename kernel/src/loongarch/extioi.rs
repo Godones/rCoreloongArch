@@ -1,4 +1,9 @@
-use crate::loong_arch::{iocsr_read_b, iocsr_read_d, iocsr_write_b, iocsr_write_d, iocsr_write_h, iocsr_write_w, KEYBOARD_IRQ, LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE, LOONGARCH_IOCSR_EXTIOI_EN_BASE, LOONGARCH_IOCSR_EXTIOI_ISR_BASE, LOONGARCH_IOCSR_EXTIOI_MAP_BASE, LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE, MOUSE_IRQ, UART0_IRQ};
+use crate::loongarch::{
+    iocsr_read_b, iocsr_read_d, iocsr_write_b, iocsr_write_d, iocsr_write_h, iocsr_write_w,
+    KEYBOARD_IRQ, LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE, LOONGARCH_IOCSR_EXTIOI_EN_BASE,
+    LOONGARCH_IOCSR_EXTIOI_ISR_BASE, LOONGARCH_IOCSR_EXTIOI_MAP_BASE,
+    LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE, MOUSE_IRQ, UART0_IRQ,
+};
 use bit_field::BitField;
 use log::info;
 
@@ -21,7 +26,6 @@ pub fn extioi_init() {
     // nodetype0 set to 1, always trigger at node 0 */
     //固定分发模式时,只在0号处理器上触发
     iocsr_write_h(LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE, 0x1);
-
     //检查扩展i/o触发器是不是全0，即没有被触发的中断
     let extioi_isr = iocsr_read_b(LOONGARCH_IOCSR_EXTIOI_ISR_BASE);
     info!("extioi_init: extioi_isr = {:#b}", extioi_isr);

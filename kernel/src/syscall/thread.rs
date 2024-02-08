@@ -4,7 +4,6 @@ use crate::{
 };
 use alloc::sync::Arc;
 
-
 pub fn sys_thread_create(entry: usize, arg: usize) -> isize {
     let task = current_task().unwrap();
     let process = task.process.upgrade().unwrap();

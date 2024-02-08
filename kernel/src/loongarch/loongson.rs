@@ -7,9 +7,9 @@ pub const LOONGARCH_IOCSR_EXTIOI_MAP_BASE: usize = 0x14c0; //EXT_IOI[31:0]的引
 pub const LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE: usize = 0x1c00; //EXT_IOI[0]的处理器核路由方式
 pub const LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE: usize = 0x14a0; //16 个结点的映射向量类型 0（软件配置
 pub const LOONGARCH_IOCSR_EXRIOI_SEND: usize = 0x1140; // 配置寄存器中增加了一个扩展 IO 中断触发寄存
-// 器，用于将对应的 IO 中断置位
+                                                       // 器，用于将对应的 IO 中断置位
 
-/// 4
+// 4
 pub fn iocsr_write_w(reg: usize, value: u32) {
     unsafe {
         asm!("iocsrwr.w {},{}", in(reg) value, in(reg) reg);

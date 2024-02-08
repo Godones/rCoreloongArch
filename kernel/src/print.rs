@@ -1,8 +1,7 @@
 use crate::config::UART;
 use crate::uart::Uart;
 use core::fmt::{Arguments, Write};
-use lazy_static::lazy_static;
-use spin::mutex::Mutex;
+use spin::{Lazy, Mutex};
 
 pub struct Console {
     inner: Uart,
@@ -12,9 +11,6 @@ impl Console {
     pub fn new(address: usize) -> Self {
         let uart = Uart::new(address);
         Self { inner: uart }
-    }
-    pub fn write_char(&mut self, ch: u8) {
-        self.inner.put(ch)
     }
     pub fn write_str(&mut self, str: &str) {
         for ch in str.bytes() {
@@ -32,13 +28,10 @@ impl Write for Console {
     }
 }
 
-lazy_static! {
-    pub static ref CONSOLE: Mutex<Console> = Mutex::new(Console::new(UART));
-}
+pub static CONSOLE: Lazy< Mutex<Console>> = Lazy::new(||Mutex::new(Console::new(UART)));
 
-#[no_mangle]
 pub fn get_char() -> u8 {
-    //todo!根据rcore内部实现推测这里应该是一个阻塞调用
+    // todo!根据rcore内部实现推测这里应该是一个阻塞调用
     loop {
         let ch = CONSOLE.lock().get_char();
         if let Some(ch) = ch {
@@ -65,12 +58,4 @@ macro_rules! println {
     ($fmt:expr) => ($crate::print!(concat!($fmt, "\n")));
     ($fmt:expr, $($arg:tt)*) => ($crate::print!(
         concat!($fmt, "\n"), $($arg)*));
-}
-
-pub struct Screen{}
-
-impl Screen {
-    pub fn new() -> Self {
-        Self {}
-    }
 }

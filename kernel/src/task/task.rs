@@ -30,17 +30,12 @@ impl TaskControlBlock {
     }
 }
 
-
 impl TaskControlBlockInner {
     pub fn get_trap_cx(&self) -> &'static mut TrapContext {
         self.kstack.get_trap_cx()
     }
     pub fn get_trap_addr(&self) -> usize {
         self.kstack.get_trap_addr()
-    }
-
-    fn get_status(&self) -> TaskStatus {
-        self.task_status
     }
 }
 

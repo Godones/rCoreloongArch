@@ -1,6 +1,3 @@
-// uart.rs
-// UART routines and driver
-
 use core::fmt::Error;
 use core::fmt::Write;
 

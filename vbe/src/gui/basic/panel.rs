@@ -1,3 +1,4 @@
+use crate::driver::VBE_DEVICE;
 use alloc::{collections::VecDeque, sync::Arc};
 use embedded_graphics::{
     pixelcolor::Rgb888,
@@ -6,8 +7,6 @@ use embedded_graphics::{
     Drawable,
 };
 use spin::Mutex;
-use crate::driver::VBE_DEVICE;
-
 
 use super::{Component, Graphics};
 

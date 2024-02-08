@@ -6,14 +6,14 @@ pub mod bump_allocator;
 mod common;
 mod linked_list;
 
-use alloc::vec;
 use crate::config::KERNEL_HEAP_SIZE;
 use crate::info;
+use crate::mm::system_allocator::buddy::Buddy;
 use crate::mm::system_allocator::bump_allocator::BumpAllocator;
 use crate::mm::system_allocator::common::Locked;
-use bit_field::BitField;
-use crate::mm::system_allocator::buddy::Buddy;
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;
+use alloc::vec;
+use bit_field::BitField;
 use buddy_system_allocator::LockedHeap;
 use log::debug;
 

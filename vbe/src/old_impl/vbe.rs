@@ -105,7 +105,15 @@ impl VbeDriver {
         }
     }
 
-    pub fn stroke_rect(&self, x: usize, y: usize, width: usize, height: usize, color: u32, size: usize) {
+    pub fn stroke_rect(
+        &self,
+        x: usize,
+        y: usize,
+        width: usize,
+        height: usize,
+        color: u32,
+        size: usize,
+    ) {
         // Top
         self.fill_rect(x, y, width, size, color);
         // Bottom

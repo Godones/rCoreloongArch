@@ -3,12 +3,11 @@
 #[macro_use]
 extern crate user_lib;
 
-
 #[no_mangle]
-fn main(){
+fn main() {
     let mut sum = 0;
-    for i in 0..10000{
-        for j in 0..10000{
+    for i in 0..10000 {
+        for j in 0..10000 {
             sum += i + j;
         }
     }

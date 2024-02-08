@@ -1,11 +1,4 @@
-/*！
-
-本模块利用 log crate 为你提供了日志功能，使用方式见 main.rs.
-
-*/
-
 use crate::println;
-use isomorphic_drivers::log_init;
 use log::{self, Level, LevelFilter, Log, Metadata, Record};
 
 struct SimpleLogger;
@@ -37,7 +30,7 @@ impl Log for SimpleLogger {
 
 pub fn init() {
     static LOGGER: SimpleLogger = SimpleLogger;
-    log_init(&LOGGER);
+    log::set_logger(&LOGGER).unwrap();
     log::set_max_level(match option_env!("LOG") {
         Some("ERROR") => LevelFilter::Error,
         Some("WARN") => LevelFilter::Warn,

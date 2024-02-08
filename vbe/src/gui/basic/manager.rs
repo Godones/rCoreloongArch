@@ -1,4 +1,6 @@
+use crate::driver::{VIRTGPU_XRES, VIRTGPU_YRES};
 use crate::gui::{Component, Windows};
+use crate::id_allocator::RecycleAllocator;
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
@@ -7,8 +9,6 @@ use embedded_graphics::prelude::{Point, Size};
 use lazy_static::lazy_static;
 use log::info;
 use spin::Mutex;
-use crate::driver::{VIRTGPU_XRES, VIRTGPU_YRES};
-use crate::id_allocator::RecycleAllocator;
 pub struct Screen {
     inner: Mutex<ScreenInner>,
 }
@@ -26,9 +26,7 @@ lazy_static! {
 }
 
 lazy_static! {
-    pub static ref SCREEN_MANAGER: Mutex<Screen> = unsafe {
-        Mutex::new(Screen::new())
-    };
+    pub static ref SCREEN_MANAGER: Mutex<Screen> = unsafe { Mutex::new(Screen::new()) };
 }
 impl Screen {
     pub fn new() -> Self {

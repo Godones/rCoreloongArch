@@ -1,5 +1,5 @@
-use bitflags::bitflags;
 use crate::sys_kill;
+use bitflags::bitflags;
 
 pub const SIGDEF: i32 = 0; // Default signal handling
 pub const SIGHUP: i32 = 1;

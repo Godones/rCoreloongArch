@@ -3,15 +3,13 @@ use super::__switch;
 use super::{fetch_task, TaskStatus};
 use super::{TaskContext, TaskControlBlock};
 use crate::config::PAGE_SIZE_BITS;
-use crate::loong_arch::tlb::{Asid, Pgdl};
 use crate::sync::UPSafeCell;
 use crate::task::process::ProcessControlBlock;
 use crate::trap::TrapContext;
-use crate::{Register};
 use alloc::sync::Arc;
 use core::arch::asm;
 use lazy_static::*;
-
+use loongarch64::register::{asid, pgdl};
 /// Processor management structure
 pub struct Processor {
     /// The task currently executing on the current processor
@@ -55,8 +53,8 @@ pub fn run_tasks() {
             // access coming task TCB exclusively
             let pid = task.process.upgrade().unwrap().getpid(); //应用进程号
             let pgd = task.get_user_token() << PAGE_SIZE_BITS;
-            Pgdl::read().set_val(pgd).write(); //设置根页表基地址
-            Asid::read().set_asid(pid as u32).write(); //设置ASID
+            pgdl::set_base(pgd); //设置根页表基地址
+            asid::set_asid(pid); //设置ASID
             let mut task_inner = task.inner_exclusive_access();
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
@@ -78,7 +76,6 @@ pub fn run_tasks() {
         }
     }
 }
-
 
 ///Take the current task,leaving a None in its place
 pub fn take_current_task() -> Option<Arc<TaskControlBlock>> {
@@ -105,13 +102,6 @@ pub fn current_trap_cx() -> &'static mut TrapContext {
         .unwrap()
         .inner_exclusive_access()
         .get_trap_cx()
-}
-pub fn current_kstack_top() -> usize {
-    current_task()
-        .unwrap()
-        .inner_exclusive_access()
-        .kstack
-        .get_trap_addr()
 }
 
 pub fn current_trap_addr() -> usize {

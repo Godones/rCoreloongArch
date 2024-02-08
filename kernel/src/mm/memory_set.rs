@@ -5,9 +5,9 @@ use super::{StepByOne, VPNRange};
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use bitflags::bitflags;
-use log::{debug};
+use log::debug;
 
-use crate::config::{PAGE_SIZE};
+use crate::config::PAGE_SIZE;
 
 #[derive(Clone)]
 pub struct MemorySet {
@@ -58,8 +58,6 @@ impl MemorySet {
         memory_set
     }
 
-
-
     /// Include sections in elf and trampoline and TrapContext and user stack,
     /// also returns user_sp and entry point.
     pub fn from_elf(elf_data: &[u8]) -> (Self, usize, usize) {
@@ -88,9 +86,12 @@ impl MemorySet {
                 if !ph_flags.is_execute() {
                     map_perm |= MapPermission::NX;
                 }
-                debug!("start_va: {:?}, end_va: {:?}, map_perm: {:?}",start_va,end_va,map_perm);
+                debug!(
+                    "start_va: {:?}, end_va: {:?}, map_perm: {:?}",
+                    start_va, end_va, map_perm
+                );
                 let map_area = MapArea::new(start_va, end_va, map_perm);
-                debug!("map_area: {:?}",map_area);
+                debug!("map_area: {:?}", map_area);
                 max_end_vpn = map_area.vpn_range.get_end();
                 memory_set.push(
                     map_area,
@@ -103,7 +104,7 @@ impl MemorySet {
         let mut user_stack_bottom: usize = max_end_va.into();
         // guard page
         user_stack_bottom += PAGE_SIZE; //用户栈
-        //返回地址空间,用户栈顶,入口地址
+                                        //返回地址空间,用户栈顶,入口地址
         (
             memory_set,
             user_stack_bottom,
@@ -151,7 +152,7 @@ impl Default for MapPermission {
     }
 }
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct MapArea {
     vpn_range: VPNRange,
     data_frames: BTreeMap<VirtPageNum, FrameTracker>,

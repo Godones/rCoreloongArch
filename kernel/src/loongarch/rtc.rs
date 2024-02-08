@@ -1,7 +1,7 @@
-use crate::base_define::RtcTime;
-use crate::loong_arch::{ls7a_read_w, ls7a_write_w, LS7A_RTC_REG_BASE};
+use crate::loongarch::{ls7a_read_w, ls7a_write_w, LS7A_RTC_REG_BASE};
 use crate::println;
 use bit_field::BitField;
+use crate::loongarch::driver::rtc::RtcTime;
 
 pub const RTC_YEAR: usize = 0x30;
 pub const RTC_TOYREAD0: usize = 0x2c; //月日时分
@@ -39,4 +39,5 @@ pub fn rtc_init() {
     val.set_bit(13, true);
     val.set_bit(11, true);
     ls7a_write_w(LS7A_RTC_REG_BASE + RTC_CTRL, val);
+    check_rtc();
 }

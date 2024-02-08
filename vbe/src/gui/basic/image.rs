@@ -1,3 +1,4 @@
+use crate::driver::VBE_DEVICE;
 use alloc::sync::Arc;
 use embedded_graphics::{
     image::Image,
@@ -7,8 +8,6 @@ use embedded_graphics::{
 };
 use spin::Mutex;
 use tinybmp::Bmp;
-use crate::driver::VBE_DEVICE;
-
 
 use super::{Component, Graphics};
 

@@ -25,7 +25,6 @@ impl BlockDevice for BlockFile {
     }
 }
 
-
 fn easy_fs_pack() -> std::io::Result<()> {
     let matches = App::new("EasyFileSystem packer")
         .arg(

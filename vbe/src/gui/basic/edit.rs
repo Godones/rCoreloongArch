@@ -1,3 +1,4 @@
+use crate::driver::VBE_DEVICE;
 use crate::gui::{Component, Graphics, Panel};
 use alloc::string::String;
 use alloc::sync::Arc;
@@ -7,9 +8,8 @@ use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::RgbColor;
 use embedded_graphics::text::{Baseline, Text};
 use embedded_graphics::Drawable;
-use spin::Mutex;
 use log::info;
-use crate::driver::VBE_DEVICE;
+use spin::Mutex;
 
 /// 文本编辑框
 

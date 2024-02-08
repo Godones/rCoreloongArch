@@ -44,11 +44,11 @@ const SYSCALL_CONDVAR_WAIT: usize = 1032;
 const SYSCALL_LS: usize = 1040;
 
 mod fs;
+mod gui;
 mod process;
 mod signal;
 mod sync;
 mod thread;
-mod gui;
 
 use fs::*;
 use process::*;

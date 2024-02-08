@@ -18,7 +18,6 @@ pub fn waittid(tid: usize) -> isize {
     }
 }
 
-
 pub fn exit(exit_code: i32) -> ! {
     sys_exit(exit_code);
 }
@@ -26,4 +25,3 @@ pub fn exit(exit_code: i32) -> ! {
 pub fn yield_() -> isize {
     sys_yield()
 }
-

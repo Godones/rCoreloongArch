@@ -3,8 +3,9 @@ pub mod pci;
 /// !键盘驱动
 mod pckbd;
 mod vbe;
+pub mod rtc;
 
-use crate::loong_arch::pci::pci_init;
+use crate::loongarch::pci::pci_init;
 pub use ahci::AHCIDriver;
 use alloc::sync::Arc;
 use core::cell::UnsafeCell;
@@ -15,8 +16,6 @@ use log::info;
 pub use pckbd::{i8042_init, kbd_has_data, kbd_read_scancode};
 
 pub use self::vbe::*;
-
-
 
 
 /// Used only for initialization hacks.
@@ -31,6 +30,7 @@ pub fn ahci_init() {
     }
 }
 
+#[allow(unused)]
 pub fn block_device_test() {
     info!("Block device test...");
     let block_device = BLOCK_DEVICE.get().clone();
@@ -54,13 +54,6 @@ pub struct Cell<T>(UnsafeCell<T>);
 unsafe impl<T> Sync for Cell<T> {}
 
 impl<T> Cell<T> {
-    /// User is responsible to guarantee that inner struct is only used in
-    /// uniprocessor.
-    #[inline(always)]
-    pub const fn new(val: T) -> Self {
-        Self(UnsafeCell::new(val))
-    }
-
     #[inline(always)]
     pub fn get(&self) -> &mut T {
         unsafe { &mut *self.0.get() }

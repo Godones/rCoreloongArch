@@ -1,3 +1,4 @@
+use crate::driver::{VBE_DEVICE, VIRTGPU_XRES, VIRTGPU_YRES};
 use alloc::{string::String, sync::Arc, vec::Vec};
 use embedded_graphics::{
     image::Image,
@@ -7,11 +8,9 @@ use embedded_graphics::{
 };
 use spin::Mutex;
 use tinybmp::Bmp;
-use crate::driver::{VBE_DEVICE, VIRTGPU_XRES, VIRTGPU_YRES};
 
 use super::{Component, Graphics};
 use crate::gui::TextEdit;
-
 
 static FILEICON: &[u8] = include_bytes!("../../assert/file.bmp");
 

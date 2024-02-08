@@ -1,3 +1,4 @@
+use crate::driver::VBE_DEVICE;
 use alloc::string::ToString;
 use alloc::{string::String, sync::Arc};
 use embedded_graphics::{
@@ -8,7 +9,6 @@ use embedded_graphics::{
     Drawable,
 };
 use spin::Mutex;
-use crate::driver::VBE_DEVICE;
 
 use crate::gui::Panel;
 

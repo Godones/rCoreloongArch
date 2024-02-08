@@ -5,11 +5,9 @@ use super::{add_task, SignalFlags};
 use super::{pid_alloc, PidHandle};
 use crate::config::PAGE_SIZE_BITS;
 use crate::fs::{File, Stdin, Stdout};
-use crate::loong_arch::tlb::Pgdl;
 use crate::mm::{translated_refmut, MemorySet};
 use crate::sync::{Condvar, Mutex, Semaphore, UPSafeCell};
 use crate::trap::TrapContext;
-use crate::{Register};
 use alloc::string::String;
 use alloc::sync::{Arc, Weak};
 use alloc::vec;
@@ -17,6 +15,7 @@ use alloc::vec::Vec;
 use core::arch::asm;
 use core::cell::RefMut;
 use log::info;
+use loongarch64::register::pgdl;
 
 // 进程控制块
 pub struct ProcessControlBlock {
@@ -42,10 +41,6 @@ pub struct ProcessControlBlockInner {
 }
 
 impl ProcessControlBlockInner {
-    pub fn get_user_token(&self) -> usize {
-        self.memory_set.token()
-    }
-
     pub fn alloc_fd(&mut self) -> usize {
         if let Some(fd) = (0..self.fd_table.len()).find(|fd| self.fd_table[*fd].is_none()) {
             fd
@@ -118,7 +113,6 @@ impl ProcessControlBlock {
         let task_inner = task.inner_exclusive_access();
         let trap_cx = task_inner.get_trap_cx();
         let ustack_top = task_inner.res.as_ref().unwrap().ustack_top();
-        info!("ustack_top: {:#x}", ustack_top);
         drop(task_inner);
         // waring:在内核栈上压入trap上下文，与rcore实现不同
         *trap_cx = TrapContext::app_init_context(entry_point, ustack_top);
@@ -186,7 +180,8 @@ impl ProcessControlBlock {
         }
         // 设置新的pgdl
         let pgd = new_token << PAGE_SIZE_BITS;
-        Pgdl::read().set_val(pgd).write(); //设置新的页基址
+        // Pgdl::read().set_val(pgd).write(); //设置新的页基址
+        pgdl::set_base(pgd); //设置新的页基址
     }
 
     /// Only support processes with a single thread.

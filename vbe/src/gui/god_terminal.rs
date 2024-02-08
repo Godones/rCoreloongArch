@@ -3,8 +3,8 @@ use alloc::sync::Arc;
 use embedded_graphics::geometry::Size;
 use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::prelude::{Point, RgbColor};
-use spin::Mutex;
 use log::info;
+use spin::Mutex;
 
 pub struct GodTerminal {
     inner: Mutex<GodTerminalInner>,

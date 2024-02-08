@@ -1,12 +1,8 @@
-pub mod cpu;
 mod driver;
 mod extioi;
 mod loongson;
 mod ls7a;
-pub mod mem;
-pub mod register;
 mod rtc;
-pub mod tlb;
 
 pub use driver::*;
 pub use extioi::{extioi_claim, extioi_complete, extioi_init};

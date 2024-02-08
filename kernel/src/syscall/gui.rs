@@ -1,11 +1,11 @@
+use crate::fs::ROOT_INODE;
+use crate::loongarch::{VIRTGPU_XRES, VIRTGPU_YRES};
+use crate::rtc_time_read;
+use crate::sync::UPSafeCell;
 use alloc::{string::ToString, sync::Arc};
 use log::info;
-use crate::sync::UPSafeCell;
-use vbe::*;
 use vbe::prelude::{Point, Size};
-use crate::fs::{ROOT_INODE};
-use crate::loong_arch::{VIRTGPU_XRES,VIRTGPU_YRES};
-use crate::rtc_time_read;
+use vbe::*;
 
 static DT: &[u8] = include_bytes!("../assert/desktop.bmp");
 
@@ -47,7 +47,6 @@ pub fn create_desktop() -> isize {
     desktop.paint();
     drop(desktop);
 
-
     create_desktop_bar();
     create_god_terminal();
     1
@@ -61,6 +60,7 @@ pub fn create_god_terminal() {
     info!("create god terminal done");
 }
 
+#[allow(unused)]
 pub fn create_windows() {
     let desktop = DESKTOP.exclusive_access();
     let windows = Windows::new(Size::new(500, 500), Point::new(40, 40));
@@ -87,7 +87,7 @@ fn create_desktop_bar() {
         Some(bar.clone()),
     );
     bar.add(Arc::new(img));
-    let rtc_time =  rtc_time_read().to_string();
+    let rtc_time = rtc_time_read().to_string();
 
     let time_button = Arc::new(Button::new(
         Size::new(100, 48),

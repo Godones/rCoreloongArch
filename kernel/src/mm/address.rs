@@ -198,7 +198,7 @@ impl StepByOne for PhysPageNum {
         self.0 += 1;
     }
 }
-#[derive(Copy, Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct SimpleRange<T>
 where
     T: StepByOne + Copy + PartialEq + PartialOrd + Debug,

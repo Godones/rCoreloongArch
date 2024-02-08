@@ -5,6 +5,6 @@ extern crate user_lib;
 use user_lib::ls;
 
 #[no_mangle]
-fn main(){
+fn main() {
     ls();
 }

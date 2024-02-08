@@ -5,7 +5,6 @@
 __alltraps:
     # 需要交换 sp 与 0x502 寄存器的值
     csrwr   $sp, 0x502
-    # addi.d  $sp, $sp, -272
     # 保存通用寄存器
     st.d    $r0, $sp, 0
     st.d    $r1, $sp, 8
@@ -41,26 +40,19 @@ __alltraps:
     st.d    $r30, $sp, 240
     st.d    $r31, $sp, 248
 
-
-    csrrd   $t0, 0x0        #读取crmd
+    csrrd   $t0, 0x1        #读取prmd
     csrrd   $t1, 0x6        #返回地址
     st.d    $t0, $sp,256
     st.d    $t1, $sp,264
 
-
-    ld.d    $t0, $sp, 272   #读取trap_handler地址
-
     csrrd   $t2,0x502       #读出用户栈指针
     st.d    $t2, $sp,24
 
-
     # set input argument of trap_handler(cx: &mut TrapContext)
-
     move    $a0, $sp
+
     # bl trap_handler       #This will cause a link error
-    # la.abs $t0, {trap_handler}
-
-
+    ld.d    $t0, $sp, 272   #读取trap_handler地址
     jirl    $ra, $t0, 0
 
 __restore:
@@ -68,7 +60,9 @@ __restore:
 
     ld.d    $t1, $sp,264    #加载返回地址
     ld.d    $t2, $sp,24     #用户栈指针
+    ld.d    $t3, $sp,256    #加载prmd
 
+    csrwr   $t3, 0x1        #将prmd写入prmd寄存器中
     csrwr   $t1, 0x6        #将返回地址写入$era寄存器中
     csrwr   $t2, 0x502      #将用户栈指针放到DSAVE中,这里暂时使用此寄存器
 
@@ -108,5 +102,5 @@ __restore:
     ld.d    $r31, $sp, 248
     # r0不用恢复
 
-    csrwr $sp, 0x502        #将用户栈指针与内核栈指针交换
+    csrwr   $sp, 0x502        #将用户栈指针与内核栈指针交换
     ertn

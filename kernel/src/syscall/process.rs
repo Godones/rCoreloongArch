@@ -5,7 +5,6 @@ use crate::task::{
     suspend_current_and_run_next,
 };
 use alloc::string::String;
-// use crate::timer::get_time_ms;
 use crate::fs::{open_file, OpenFlags};
 use alloc::sync::Arc;
 use alloc::vec::Vec;

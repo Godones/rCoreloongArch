@@ -63,7 +63,6 @@ pub struct KernelStack {
     pub frame: FrameTracker,
 }
 
-
 /// Create a kernelstack
 /// 在loongArch平台上，并不需要根据pid在内核空间分配内核栈
 /// 内核态并不处于页表翻译模式，而是以类似于直接管理物理内存的方式管理
@@ -164,16 +163,6 @@ impl TaskUserRes {
             .remove_area_with_start_vpn(ustack_bottom_va.into());
         // dealloc trap_cx manually
     }
-
-    pub fn alloc_tid(&mut self) {
-        self.tid = self
-            .process
-            .upgrade()
-            .unwrap()
-            .inner_exclusive_access()
-            .alloc_tid();
-    }
-
     pub fn dealloc_tid(&self) {
         let process = self.process.upgrade().unwrap();
         let mut process_inner = process.inner_exclusive_access();
