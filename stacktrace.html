@@ -1,0 +1,377 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>内核栈回溯工具 - rCoreloongArch-tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">前置知识</li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">1.</strong> 工具链安装</a></li><li class="chapter-item expanded "><a href="linker.html"><strong aria-hidden="true">2.</strong> linker文件</a></li><li class="chapter-item expanded "><a href="rust_bare.html"><strong aria-hidden="true">3.</strong> Rust裸机环境配置</a></li><li class="chapter-item expanded "><a href="assemble.html"><strong aria-hidden="true">4.</strong> rust汇编</a></li><li class="chapter-item expanded affix "><li class="part-title">章节指导</li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">5.</strong> 第一章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="boot.html"><strong aria-hidden="true">5.1.</strong> 启动过程</a></li><li class="chapter-item expanded "><a href="uart.html"><strong aria-hidden="true">5.2.</strong> UART串口</a></li><li class="chapter-item expanded "><a href="macro.html"><strong aria-hidden="true">5.3.</strong> Rust宏</a></li></ol></li><li class="chapter-item expanded "><a href="ch2.html"><strong aria-hidden="true">6.</strong> 第二章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sup.html"><strong aria-hidden="true">6.1.</strong> 特权级架构</a></li><li class="chapter-item expanded "><a href="app.html"><strong aria-hidden="true">6.2.</strong> 应用程序</a></li></ol></li><li class="chapter-item expanded "><a href="ch3.html"><strong aria-hidden="true">7.</strong> 第三章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="task_ex.html"><strong aria-hidden="true">7.1.</strong> 任务切换</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">7.2.</strong> 时钟</a></li></ol></li><li class="chapter-item expanded "><a href="ch4.html"><strong aria-hidden="true">8.</strong> 第四章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="reg.html"><strong aria-hidden="true">8.1.</strong> 寄存器设计</a></li><li class="chapter-item expanded "><a href="buddy.html"><strong aria-hidden="true">8.2.</strong> 内存分配</a></li><li class="chapter-item expanded "><a href="manage-mem.html"><strong aria-hidden="true">8.3.</strong> 存储管理</a></li><li class="chapter-item expanded "><a href="mmu.html"><strong aria-hidden="true">8.4.</strong> 多级页表硬件机制</a></li><li class="chapter-item expanded "><a href="mmu-impl.html"><strong aria-hidden="true">8.5.</strong> 多级页表实现</a></li><li class="chapter-item expanded "><a href="memoryset.html"><strong aria-hidden="true">8.6.</strong> 地址空间</a></li></ol></li><li class="chapter-item expanded "><a href="ch5.html"><strong aria-hidden="true">9.</strong> 第五章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="kstack.html"><strong aria-hidden="true">9.1.</strong> 内核栈</a></li><li class="chapter-item expanded "><a href="f-e.html"><strong aria-hidden="true">9.2.</strong> fork和exec</a></li></ol></li><li class="chapter-item expanded "><a href="ch6.html"><strong aria-hidden="true">10.</strong> 第六章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="line.html"><strong aria-hidden="true">10.1.</strong> 总线</a></li><li class="chapter-item expanded "><a href="pci.html"><strong aria-hidden="true">10.2.</strong> pci设备探测</a></li><li class="chapter-item expanded "><a href="stat.html"><strong aria-hidden="true">10.3.</strong> 块设备驱动</a></li></ol></li><li class="chapter-item expanded "><a href="ch7.html"><strong aria-hidden="true">11.</strong> 第七章</a></li><li class="chapter-item expanded "><a href="ch8.html"><strong aria-hidden="true">12.</strong> 第八章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="thread.html"><strong aria-hidden="true">12.1.</strong> 线程</a></li></ol></li><li class="chapter-item expanded "><a href="other.html"><strong aria-hidden="true">13.</strong> 其它</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interrupt.html"><strong aria-hidden="true">13.1.</strong> 中断系统</a></li><li class="chapter-item expanded "><a href="stacktrace.html" class="active"><strong aria-hidden="true">13.2.</strong> 内核栈回溯工具</a></li><li class="chapter-item expanded "><a href="vbe.html"><strong aria-hidden="true">13.3.</strong> VBE图形显示</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rCoreloongArch-tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="内核栈回溯工具"><a class="header" href="#内核栈回溯工具">内核栈回溯工具</a></h1>
+<p>本实验包含了risc-v版本的堆栈回溯工具以及loongarch版本，两者的实现原理相同，这里给出的是risc-v版本说明。</p>
+<h1 id="使用说明"><a class="header" href="#使用说明">使用说明</a></h1>
+<p>此工具用于在<code>rCore</code> panic时进行堆栈回溯，打印函数调用路径。目前只在ch9分支上进行测试，从ch6开启文件系统后均可以使用此工具。</p>
+<h2 id="如何获取函数信息"><a class="header" href="#如何获取函数信息">如何获取函数信息</a></h2>
+<p>在栈回溯时，需要查询函数信息，而这些函数信息主要包含于可执行文件中。具体的细节可以在<a href="https://blog.csdn.net/Chasing_Chasing/article/details/96750109">elf文件函数信息</a>这里查看，这里给出主要的查找过程</p>
+<p><img src="sourcepicture/image-20220815222556888.png" alt="image-20220815222556888" /></p>
+<p>由于<code>rust</code>会对函数名称进行重整，类似于c++，因此需要使用相应工具进行解析才能转为可读的名称。同时，汇编文件中的函数可能不会被上述过程收集到。</p>
+<h2 id="栈回溯分类"><a class="header" href="#栈回溯分类">栈回溯分类</a></h2>
+<p>主要有两种堆栈回溯方式，一种是使用<code>sp</code>和<code>fp</code>指针进行回溯，如下图所示，在这种方式下，每当函数进行开辟栈帧操作后，就会保存<code>ra</code> <code>tp</code>的值，然后令<code>fp</code>指向当前的栈顶，</p>
+<p><img src="sourcepicture/image-20220809234146841.png" alt="" /></p>
+<p>在这种情况下，在进行栈回溯时，首先根据<code>fp</code>寄存器指向的地址，取出保存在函数栈中<code>ra</code>和<code>fp</code>寄存器的数据,<code>ra</code>的值是函数返回地址，<code>fp</code>的值是上一级函数栈的栈顶地址,根据<code>ra</code>的值到收集的函数信息中查找此地址是否位于某个函数的范围，如果是，则记录函数信息，然后根据<code>fp</code>回到上一级函数，继续读取<code>ra</code>和<code>fp</code>的值，指导无法找到对应的函数区间。</p>
+<p>第二种回溯方式是由于某些编译器不会利用<code>fp</code>生成上述的代码，从而需要额外的手段进行解析，有的会使用ELF文件中的<code>.eh_frame</code>段内容，由于这些方式比较复杂，因此本工具暂不使用此方法。</p>
+<h2 id="本工具回溯方法"><a class="header" href="#本工具回溯方法">本工具回溯方法</a></h2>
+<p>本工具根据一般函数生成形式，比如rust生成的一段<code>risc-v</code>代码如下</p>
+<pre><code>0000000080210412 &lt;my_trace&gt;:
+    80210412:   7149                    addi    sp,sp,-368
+    80210414:   f686                    sd      ra,360(sp)
+    80210416:   f2a2                    sd      s0,352(sp)
+    80210418:   eea6                    sd      s1,344(sp)
+    8021041a:   eaca                    sd      s2,336(sp)
+    8021041c:   e6ce                    sd      s3,328(sp)
+    8021041e:   e2d2                    sd      s4,320(sp)
+    80210420:   fe56                    sd      s5,312(sp)
+    80210422:   fa5a                    sd      s6,304(sp
+</code></pre>
+<p>可以看到，函数的前两条指令是开辟栈空间和保存<code>ra</code>的指令，因此这里一个简单的想法就是通过读取函数的第一条指令和第二条指令，获取到开辟的栈空间大小以及<code>ra</code>存储的位置，这里<code>ra</code>一般就是存储在栈顶，读取第二条指令主要是确保这条指令是保存<code>ra</code>的指令。再使用汇编指令读取当前的<code>sp</code>值，就可以得到下面的回溯方式：</p>
+<pre><code>读取函数第一条指令和第二条指令获得栈大小size
+栈底: sp
+栈顶: sp + size
+ra : m[sp+size-8]
+寻找ra所在函数
+将找到的函数设置为当前函数
+再次重复上述过程
+</code></pre>
+<p>因此主要工作在于如何解析函数的第一条和第二条指令，通过查询risc-v手册可以找到各条指令的格式，比如<code>addi</code>指令的格式</p>
+<img src="sourcepicture/image-20220810001529026.png" alt="image-20220810001529026" style="zoom:50%;" />
+<p>读取第一条指令并按照上面的格式解析出立即数部分就可以得到栈大小，但由于risc-v的编译器会做某些优化，将<code>addi</code>指令使用压缩指令表示，而压缩指令一般是两字节格式，比如<code>c.addi</code>指令的格式如下:</p>
+<img src="sourcepicture/image-20220810001808761.png" alt="image-20220810001808761" style="zoom:50%;" />
+<p>因此需要根据压缩指令和未压缩的指令共同判断第一条指令是否未开辟栈空间的指令和栈空间大小。同理，判断第二条指令也需要如上的工作。</p>
+<p>具体的实现请查看源代码。</p>
+<h2 id="使用方法"><a class="header" href="#使用方法">使用方法</a></h2>
+<p>本工具以一个库的形式提供，需要传入的参数为OS的可执行文件。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[panic_handler]
+fn panic(info: &amp;PanicInfo) -&gt; ! {
+    if let Some(location) = info.location() {
+        println!(
+            &quot;[kernel] Panicked at {}:{} {}&quot;,
+            location.file(),
+            location.line(),
+            info.message().unwrap()
+        );
+    } else {
+        println!(&quot;[kernel] Panicked: {}&quot;, info.message().unwrap());
+    }
+    unsafe {
+        backtrace();
+    }
+    shutdown(255)
+}
+use stack_trace::{Trace};
+unsafe fn backtrace() {
+    let mut os_name:Vec&lt;&amp;str&gt; = Vec::new();
+    let all_file = ROOT_INODE.ls();
+    all_file.iter().for_each(|x| {
+         if x.contains(&quot;os&quot;) {
+             os_name.push(x);
+         }
+     });
+    os_name.sort();//由于内核文件较大，会被分成多个文件
+    let mut data = Vec::new();
+    os_name.iter().for_each(|name|{
+        let mut file = open_file(*name,OpenFlags::RDONLY).unwrap();
+        let d = file.read_all();
+        trace!(&quot;name: {} {}&quot;,name,d.len());
+        data.extend_from_slice(d.as_slice());
+    });//合并内核文件
+    let mut trace = Trace::new();
+    trace.init(data.as_slice());//初始化，传入内核可执行文件
+    let road = trace.trace();//收集函数调用信息
+    road.iter().for_each(|s|{
+        println!(&quot;{}&quot;,s);
+    });
+}
+<span class="boring">}</span></code></pre></pre>
+<p>目前的内核无法传递参数，为了在内核中读取本身的ELF文件，需要在编译后将ELF文件与应用程序文件一样打包在fs.img中，为了不将代码写死，这里在easy-fs-fuse添加了一个参数:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span> .arg(
+            Arg::with_name(&quot;kernel&quot;)
+                .short(&quot;k&quot;)
+                .long(&quot;kernel&quot;)
+                .takes_value(true)
+                .help(&quot;Kernel source dir(with backslash)&quot;),
+)
+<span class="boring">}</span></code></pre></pre>
+<p>同时在os的Makefile文件也需要修改相应的参数:</p>
+<pre><code>@cd ../easy-fs-fuse &amp;&amp; cargo run --release -- -s ../user/src/bin/ -t ../user/target/riscv64gc-unknown-none-elf/release/ -k ../os/target/riscv64gc-unknown-none-elf/release/
+</code></pre>
+<p>然后只需要在easy-fs-fuse将内核文件写入fs-img, 由于内核可执行文件高达16MB，并且os中文件系统最多支持8MB大小的文件，因此在打包时需要将文件进行切分，并且设置fs-img大小为32MB</p>
+<p><img src="sourcepicture/image-20220810104906410.png" alt="image-20220810104906410" /></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span> let kernel_path = matches.value_of(&quot;kernel&quot;).unwrap();
+    println!(&quot;kernel path = {}{}&quot;,kernel_path,&quot;os&quot;);
+    let mut file = File::open(format!(&quot;{}{}&quot;, kernel_path, &quot;os&quot;)).unwrap();
+    let mut all_data: Vec&lt;u8&gt; = Vec::new();
+    file.read_to_end(&amp;mut all_data).unwrap();
+    println!(&quot;{}&quot;, all_data.len());
+    //如果数据大于8MB,将数据切分
+    let mut data_vec: Vec&lt;Vec&lt;u8&gt;&gt; = Vec::new();
+    let mut data_vec_len = 0;
+    while data_vec_len &lt; all_data.len() {
+        let mut data_vec_tmp: Vec&lt;u8&gt; = Vec::new();
+        data_vec_tmp.extend_from_slice(&amp;all_data[data_vec_len..(data_vec_len + 8 * 1024 * 1024).min(all_data.len())]);
+        data_vec.push(data_vec_tmp);
+        data_vec_len += 8 * 1024 * 1024;
+    }
+    for i in 0..data_vec.len() {
+        let inode = root_inode.create(format!(&quot;os{}&quot;, i).as_str()).unwrap();
+        inode.write_at(0, data_vec[i].as_slice());
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>完成上述步骤，就可以在内核中读取本身的ELF文件并传入栈回溯库了(内核读取这种大文件有点慢)</p>
+<p>目前在内核中使用此功能可以达到的效果如下所示</p>
+<img src="sourcepicture/image-20220810003715547.png" alt="image-20220810003715547" style="zoom: 67%;" />
+<img src="sourcepicture/image-20220810105838745.png" alt="image-20220810105838745" style="zoom:67%;" />
+<h2 id="注意事项"><a class="header" href="#注意事项">注意事项</a></h2>
+<p>目前的实现仍然比较简陋，且限制较大，由于在出错时需要读取文件内容，此时如果发生任务调度可能会造成死锁的问题，但这是在ch9会发生的现象，如果在前面的章节中，读取文件内容是阻塞式的不会发生任务调度，因此应该不会造成死锁问题。</p>
+<p>为了解决这个问题，可以在开始进入用户态之前就读取内核数据，后面如果发生错误，就不需要读取文件发生死锁。上面的代码修改为:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>lazy_static!{
+    static ref KERNEL_DATA: UPIntrFreeCell&lt;Vec&lt;u8&gt;&gt; = unsafe{UPIntrFreeCell::new(Vec::new())};
+}
+pub fn init_kernel_data(){
+    let mut os_name:Vec&lt;&amp;str&gt; = Vec::new();
+    let all_file = ROOT_INODE.ls();
+    all_file.iter().for_each(|x| {
+        if x.contains(&quot;os&quot;) {
+            os_name.push(x);
+        }
+    });
+    os_name.sort();
+    os_name.iter().for_each(|name|{
+        let mut file = open_file(*name,OpenFlags::RDONLY).unwrap();
+        let d = file.read_all();
+        trace!(&quot;name: {} {}&quot;,name,d.len());
+        KERNEL_DATA.exclusive_access().extend_from_slice(d.as_slice());
+    });
+}
+
+unsafe fn backtrace() {
+    let mut trace = Trace::new();
+    trace.init(KERNEL_DATA.exclusive_access().as_slice());
+    let road = trace.trace();
+    road.iter().for_each(|s|{
+        println!(&quot;{}&quot;,s);
+    });
+}
+<span class="boring">}</span></code></pre></pre>
+<p>在main函数中，在开始进入用户程序之前调用<code>init_kernel_data()</code>即可。</p>
+<h2 id="改进"><a class="header" href="#改进">改进</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"/>
+在编译前获取函数信息并与内核一同链接 --&gt; 适用于所有章节的栈回溯方法</li>
+<li><input disabled="" type="checkbox"/>
+使用<code>.eh_frame</code>进行栈回溯而不是读取函数的前两条指令</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="interrupt.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="vbe.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="interrupt.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="vbe.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js"></script>
+        <script src="editor.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
