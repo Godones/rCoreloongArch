@@ -17,7 +17,7 @@ pci = { path = "../pci" }
 isomorphic_drivers = { path = "../isomorphic_drivers" }
 vbe = {path = "../vbe"}
 stack_trace = { path = "../stack_trace" }
-loongarch64 = { git = "https://github.com/Godones/loongArch64" }
+loongarch64 = { git = "https://github.com/Godones/loongArch64", package = "loongArch64" }
 [dependencies.lazy_static]
 version = "1.4.0"
 features = ["spin_no_std"] #禁止链接标准库
