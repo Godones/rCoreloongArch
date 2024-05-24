@@ -85,6 +85,10 @@ ch8:
 - [x] VESA BIOS Extensions 显示(初步)
 
 
+#### 依赖
+```
+rustup target add loongarch64-unknown-none
+```
 
 #### 项目运行
 
