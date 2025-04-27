@@ -1,0 +1,9 @@
+{
+    "rust-analyzer.check.allTargets": false,
+    "rust-analyzer.cargo.target": "loongarch64-unknown-none",
+    "rust-analyzer.check.targets": [
+        "loongarch64-unknown-none"
+    ],
+    "rust-analyzer.check.features": "all",
+    "rust-analyzer.check.extraArgs": []
+}

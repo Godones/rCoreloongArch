@@ -1,0 +1,252 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>linker文件 - rCoreloongArch-tutorial</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">前置知识</li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">1.</strong> 工具链安装</a></li><li class="chapter-item expanded "><a href="linker.html" class="active"><strong aria-hidden="true">2.</strong> linker文件</a></li><li class="chapter-item expanded "><a href="rust_bare.html"><strong aria-hidden="true">3.</strong> Rust裸机环境配置</a></li><li class="chapter-item expanded "><a href="assemble.html"><strong aria-hidden="true">4.</strong> rust汇编</a></li><li class="chapter-item expanded affix "><li class="part-title">章节指导</li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">5.</strong> 第一章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="boot.html"><strong aria-hidden="true">5.1.</strong> 启动过程</a></li><li class="chapter-item expanded "><a href="uart.html"><strong aria-hidden="true">5.2.</strong> UART串口</a></li><li class="chapter-item expanded "><a href="macro.html"><strong aria-hidden="true">5.3.</strong> Rust宏</a></li></ol></li><li class="chapter-item expanded "><a href="ch2.html"><strong aria-hidden="true">6.</strong> 第二章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sup.html"><strong aria-hidden="true">6.1.</strong> 特权级架构</a></li><li class="chapter-item expanded "><a href="app.html"><strong aria-hidden="true">6.2.</strong> 应用程序</a></li></ol></li><li class="chapter-item expanded "><a href="ch3.html"><strong aria-hidden="true">7.</strong> 第三章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="task_ex.html"><strong aria-hidden="true">7.1.</strong> 任务切换</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">7.2.</strong> 时钟</a></li></ol></li><li class="chapter-item expanded "><a href="ch4.html"><strong aria-hidden="true">8.</strong> 第四章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="reg.html"><strong aria-hidden="true">8.1.</strong> 寄存器设计</a></li><li class="chapter-item expanded "><a href="buddy.html"><strong aria-hidden="true">8.2.</strong> 内存分配</a></li><li class="chapter-item expanded "><a href="manage-mem.html"><strong aria-hidden="true">8.3.</strong> 存储管理</a></li><li class="chapter-item expanded "><a href="mmu.html"><strong aria-hidden="true">8.4.</strong> 多级页表硬件机制</a></li><li class="chapter-item expanded "><a href="mmu-impl.html"><strong aria-hidden="true">8.5.</strong> 多级页表实现</a></li><li class="chapter-item expanded "><a href="memoryset.html"><strong aria-hidden="true">8.6.</strong> 地址空间</a></li></ol></li><li class="chapter-item expanded "><a href="ch5.html"><strong aria-hidden="true">9.</strong> 第五章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="kstack.html"><strong aria-hidden="true">9.1.</strong> 内核栈</a></li><li class="chapter-item expanded "><a href="f-e.html"><strong aria-hidden="true">9.2.</strong> fork和exec</a></li></ol></li><li class="chapter-item expanded "><a href="ch6.html"><strong aria-hidden="true">10.</strong> 第六章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="line.html"><strong aria-hidden="true">10.1.</strong> 总线</a></li><li class="chapter-item expanded "><a href="pci.html"><strong aria-hidden="true">10.2.</strong> pci设备探测</a></li><li class="chapter-item expanded "><a href="stat.html"><strong aria-hidden="true">10.3.</strong> 块设备驱动</a></li></ol></li><li class="chapter-item expanded "><a href="ch7.html"><strong aria-hidden="true">11.</strong> 第七章</a></li><li class="chapter-item expanded "><a href="ch8.html"><strong aria-hidden="true">12.</strong> 第八章</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="thread.html"><strong aria-hidden="true">12.1.</strong> 线程</a></li></ol></li><li class="chapter-item expanded "><a href="other.html"><strong aria-hidden="true">13.</strong> 其它</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interrupt.html"><strong aria-hidden="true">13.1.</strong> 中断系统</a></li><li class="chapter-item expanded "><a href="stacktrace.html"><strong aria-hidden="true">13.2.</strong> 内核栈回溯工具</a></li><li class="chapter-item expanded "><a href="vbe.html"><strong aria-hidden="true">13.3.</strong> VBE图形显示</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rCoreloongArch-tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="linker文件"><a class="header" href="#linker文件">linker文件</a></h1>
+<p>​	链接脚本的主要目的是描述如何将输入文件中的各个section（节）映射到输出文件中，并控制输出文件的内存布局。链接器总是使用链接脚本，如果不主动修改，链接器将使用一个默认的链接脚本，这个脚本被编译进了链接器可执行文件中。</p>
+<p>​	链接器将输入文件组合成一个输出文件。输出文件和每个输入文件都采用一种特殊的数据格式，称为目标文件格式。每个文件称为一个目标文件。输出文件通常称为可执行文件，有时也仍然会称为目标文件。每个目标文件都有一个段（section）列表。有时把输入文件的段称作输入段，类似的，输出文件的段称作输出段。目标文件中的每个段都有名称和大小。大多数段还具有关联的数据块，称为段内容。一个段可能被标记为可加载(loadable)，这意味着在运行输出文件时，段内容需要先加载到内存中。一个没有内容的段是可分配的，这意味着应该在内存中预留一个区域，但是这里不需要加载任何东西（在某些情况下，该内存必须清零）。既不可装载也不可分配的部分通常包含某种调试信息。</p>
+<p>使用下面的命令查看文件中的section信息:</p>
+<pre><code>objdump -h x.out
+</code></pre>
+<p>对于<code>loongArch64</code>使用<code>loongarch64-unknown-linux-gnu-objdump</code></p>
+<p>​	每个目标文件还具有一个符号列表，称为符号表。符号可以是定义的也可以是未定义的。每个符号都有一个名称，每个定义的符号都有一个地址，以及其他信息。如果将C或C ++程序编译到目标文件中，则将会将所有定义过的函数和全局变量以及静态变量作为已定义符号。输入文件中引用的每个未定义函数或全局变量都将成为未定义符号。</p>
+<p>使用linux命令<code>nm</code>查看符号信息。</p>
+<p>链接脚本是一种特殊的文本文件。文本描述是一系列的命令，每个命令都是一个关键字，可能后面还跟有一个参数，或者一个符号的赋值。使用分号分割命令，空格通常被忽略。</p>
+<p>一个最简单的链接脚本文件如下:</p>
+<pre><code>SECTIONS
+{
+    . = 0x10000;
+    .text : { *(.text) }
+    . = 0x8000000;
+    .data : { *(.data) }
+    .bss : { *(.bss) }
+}
+</code></pre>
+<p>最简单的链接脚本只有一个命令：<code>SECTIONS</code>，这个命令用来描述输出文件的内存布局。</p>
+<p><code>.</code>符号是location counter，用于指定section的地址，SECTIONS命令开始时，其值为0，可以显式设置，如果没有设置，则按照section大小自动增长。<code>.text</code>定义一个ouput section。后面跟一个冒号，现在可以省略。大括号用来指定input sections，*是通配符，匹配任何文件名。表达式<code>'*(.text)'</code>表示输入文件的所有<code>.text</code> section。链接器保证output section满足对齐要求。</p>
+<p>程序执行的第一条指令叫做entry point。<code>ENTRY</code>命令用于设置入口点。链接器按照下面的顺序寻找入口点。</p>
+<ol>
+<li>-e 命令行选项。</li>
+<li>ENTRY(symbol)链接脚本命令。</li>
+<li>目标指定的符号，通常是start。</li>
+<li>.text的第一个字节。</li>
+<li>0</li>
+</ol>
+<p>在操作系统实验中一般使用第二种方法指定。</p>
+<p><code>PHDRS </code>命令用于创建程序头，链接器缺省或创建合适的程序头。</p>
+<p>链接脚本也可以定义变量，这时只会生成一个 symbol 项，并不会分配内存。 在目标文件内定义的符号也可以在链接脚本内被赋值。符号定义是全局的。每个符号都对应了一个地址。使用<code>nm</code>命令时可以看到定义的符号，在内核代码中需要查看各个段的内存范围需要在链接脚本提供相应的符号。</p>
+<p><code>PROVIDE</code> 关键字于定义这类符号：在目标文件内被引用，但没有在任何目标文件内被定义的 符号</p>
+<pre><code>SECTIONS
+{
+  .text :
+  {
+    *(.text)
+    _etext = .;
+    PROVIDE(etext = .);
+  }
+}
+</code></pre>
+<p>当目标文件内引用了 etext 符号，却没有定义它时，etext 符号对应的地址被定义 为 <code>.text</code> section 之后的第一个字节的地址。</p>
+<p><code>ALIGN(align)</code>命令常用来指定对齐地址。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="env.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="rust_bare.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="env.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="rust_bare.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js"></script>
+        <script src="editor.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
