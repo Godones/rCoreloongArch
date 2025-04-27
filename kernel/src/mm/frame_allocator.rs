@@ -1,12 +1,11 @@
-use super::{PhysAddr, PhysPageNum};
-use crate::config::MEMORY_END;
-use crate::println;
-use crate::sync::UPSafeCell;
 use alloc::vec::Vec;
-
 use core::fmt::{self, Debug, Formatter};
+
 use lazy_static::*;
 use log::info;
+
+use super::{PhysAddr, PhysPageNum};
+use crate::{config::MEMORY_END, loongarch::VIRT_BIAS, println, sync::UPSafeCell, virt_to_phys};
 
 #[derive(Clone)]
 pub struct FrameTracker {
@@ -74,7 +73,6 @@ impl FrameAllocator for StackFrameAllocator {
                 ans = Some((self.current - 1).into())
             }
         }
-        // info!("alloc: {:#x}", ans.unwrap().0);
         ans
     }
     fn dealloc(&mut self, ppn: PhysPageNum) {
@@ -100,14 +98,14 @@ pub fn init_frame_allocator() {
     extern "C" {
         fn ekernel();
     }
-    info!(
+    println!(
         "frame range: {:#x}-{:#x}",
-        PhysAddr::from(ekernel as usize).ceil().0,
-        PhysAddr::from(MEMORY_END).floor().0
+        PhysAddr::from(virt_to_phys!(ekernel as usize)).ceil().0,
+        PhysAddr::from(virt_to_phys!(MEMORY_END)).floor().0
     );
     FRAME_ALLOCATOR.exclusive_access().init(
-        PhysAddr::from(ekernel as usize).ceil(),
-        PhysAddr::from(MEMORY_END).floor(),
+        PhysAddr::from(virt_to_phys!(ekernel as usize)).ceil(),
+        PhysAddr::from(virt_to_phys!(MEMORY_END)).floor(),
     );
 }
 

@@ -1,14 +1,15 @@
-use crate::config::UART;
-use crate::uart::Uart;
 use core::fmt::{Arguments, Write};
+
 use spin::{Lazy, Mutex};
+
+use crate::{config::UART, uart::Uart};
 
 pub struct Console {
     inner: Uart,
 }
 
 impl Console {
-    pub fn new(address: usize) -> Self {
+    pub const fn new(address: usize) -> Self {
         let uart = Uart::new(address);
         Self { inner: uart }
     }
@@ -28,7 +29,7 @@ impl Write for Console {
     }
 }
 
-pub static CONSOLE: Lazy< Mutex<Console>> = Lazy::new(||Mutex::new(Console::new(UART)));
+pub static CONSOLE: Mutex<Console> = Mutex::new(Console::new(UART));
 
 pub fn get_char() -> u8 {
     // todo!根据rcore内部实现推测这里应该是一个阻塞调用

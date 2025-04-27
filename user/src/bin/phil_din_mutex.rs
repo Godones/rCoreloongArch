@@ -7,9 +7,10 @@ extern crate user_lib;
 extern crate alloc;
 
 use alloc::vec::Vec;
-use user_lib::{exit, get_time, sleep};
-use user_lib::{mutex_blocking_create, mutex_lock, mutex_unlock};
-use user_lib::{thread_create, waittid};
+
+use user_lib::{
+    exit, get_time, mutex_blocking_create, mutex_lock, mutex_unlock, sleep, thread_create, waittid,
+};
 
 const N: usize = 5;
 const ROUND: usize = 4;

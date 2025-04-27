@@ -1,13 +1,18 @@
-use crate::driver::VBE_DEVICE;
-use crate::gui::{Component, Graphics};
-use alloc::collections::VecDeque;
-use alloc::sync::Arc;
-use embedded_graphics::geometry::{Point, Size};
-use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics::prelude::Primitive;
-use embedded_graphics::primitives::{PrimitiveStyle, Rectangle};
-use embedded_graphics::Drawable;
+use alloc::{collections::VecDeque, sync::Arc};
+
+use embedded_graphics::{
+    geometry::{Point, Size},
+    pixelcolor::Rgb888,
+    prelude::Primitive,
+    primitives::{PrimitiveStyle, Rectangle},
+    Drawable,
+};
 use spin::Mutex;
+
+use crate::{
+    driver::VBE_DEVICE,
+    gui::{Component, Graphics},
+};
 
 pub struct Bar {
     inner: Mutex<BarInner>,

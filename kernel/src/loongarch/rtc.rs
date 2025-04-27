@@ -1,7 +1,9 @@
-use crate::loongarch::{ls7a_read_w, ls7a_write_w, LS7A_RTC_REG_BASE};
-use crate::println;
 use bit_field::BitField;
-use crate::loongarch::driver::rtc::RtcTime;
+
+use crate::{
+    loongarch::{driver::rtc::RtcTime, ls7a_read_w, ls7a_write_w, LS7A_RTC_REG_BASE},
+    println,
+};
 
 pub const RTC_YEAR: usize = 0x30;
 pub const RTC_TOYREAD0: usize = 0x2c; //月日时分

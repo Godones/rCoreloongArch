@@ -1,108 +1,86 @@
 pub mod context;
-use crate::config::{TICKS_PER_SEC};
-use crate::loongarch::{
-    extioi_claim, extioi_complete, kbd_has_data, kbd_read_scancode, ls7a_intc_complete,
-    KEYBOARD_IRQ, MOUSE_IRQ, UART0_IRQ,
-};
-use crate::mm::{PageTable, VirtAddr, VirtPageNum};
-use crate::syscall::syscall;
-use crate::task::*;
-use crate::timer::check_timer;
-use crate::{println};
+mod trap;
+use core::arch::{asm, global_asm};
+
 use bit_field::BitField;
 pub use context::TrapContext;
-use core::arch::{asm, global_asm};
 use log::{info, trace};
-use loongarch64::register::*;
-use loongarch64::register::ecfg::LineBasedInterrupt;
-use loongarch64::register::estat::{Exception, Interrupt, Trap};
-use loongarch64::time::get_timer_freq;
+use loongarch64::{
+    register::{
+        ecfg::LineBasedInterrupt,
+        estat::{Exception, Interrupt, Trap},
+        *,
+    },
+    time::get_timer_freq,
+};
+
+use crate::{
+    config::TICKS_PER_SEC,
+    loongarch::{
+        extioi_claim, extioi_complete, kbd_has_data, kbd_read_scancode, ls7a_intc_complete,
+        KEYBOARD_IRQ, MOUSE_IRQ, UART0_IRQ,
+    },
+    mm::{PageTable, VirtAddr, VirtPageNum},
+    println,
+    syscall::syscall,
+    task::*,
+    timer::check_timer,
+};
 
 global_asm!(include_str!("trap.s"));
-global_asm!(include_str!("tlb.s"));
-global_asm!(include_str!("trap_kernel.s"));
 
 extern "C" {
     fn __alltraps();
-    fn __tlb_rfill();
-    fn kernel_trap_entry();
     fn __restore();
 }
 pub fn init() {
     // 清除时钟专断
     ticlr::clear_timer_interrupt();
-    // Ticlr::read().clear_timer().write();
     tcfg::set_en(false);
-    // Tcfg::read().set_enable(false).write();
     // disable all interrupts
     ecfg::set_lie(LineBasedInterrupt::empty());
     // Ecfg::read().set_lie_with_index(11, false).write();
     // 关闭全局中断
     crmd::set_ie(false);
-    // Crmd::read().set_ie(false).write();
-    // Eentry::read()
-    //     .set_eentry(kernel_trap_entry as usize)
-    //     .write();
 
     // 设置普通异常和中断入口
     // 设置TLB重填异常地址
-    eentry::set_eentry(kernel_trap_entry as usize);
+    println!("kernel_trap_entry: {:#x}", trap::kernel_trap_entry as usize);
+    eentry::set_eentry(trap::kernel_trap_entry as usize);
     // 设置重填tlb地址
-    tlbrentry::set_tlbrentry(__tlb_rfill as usize);
+    tlbrentry::set_tlbrentry(trap::__tlb_rfill as usize);
     // 设置TLB的页面大小为16KiB
     stlbps::set_ps(0xe);
     // 设置TLB的页面大小为16KiB
     tlbrehi::set_ps(0xe);
-
-    // TLBREntry::read()
-    //     .set_val((__tlb_rfill as usize).get_bits(0..32))
-    //     .write(); //复用原来的trap处理入口
-    // SltbPs::read().set_page_size(0xe).write();
-    // TlbREhi::read().set_page_size(0xe).write();
-
     pwcl::set_ptbase(0xe);
-    pwcl::set_ptwidth(0xb);
+    pwcl::set_ptwidth(0xb); //16KiB的页大小
     pwcl::set_dir1_base(25); //页目录表起始位置
     pwcl::set_dir1_width(0xb); //页目录表宽度为11位
 
     pwch::set_dir3_base(36); //第三级页目录表
     pwch::set_dir3_width(0xb); //页目录表宽度为11位
 
-    info!("trap init end");
-    // Pwcl::read()
-    //     .set_ptbase(0xe)
-    //     .set_ptwidth(0xb)
-    //     .set_dir1_base(25) //页目录表起始位置
-    //     .set_dir1_width(0xb) //页目录表宽度为11位
-    //     .write(); //16KiB的页大小
-    // Pwch::read()
-    //     .set_dir3_base(36) //第三级页目录表
-    //     .set_dir3_width(0xb) //页目录表宽度为11位
-    //     .write();
+    // make sure that the interrupt is enabled when first task returns user mode
+    prmd::set_pie(true);
+
+    println!("trap init success");
 }
 
 pub fn enable_timer_interrupt() {
     let timer_freq = get_timer_freq();
-    // Ticlr::read().clear_timer().write(); //清除时钟专断
     ticlr::clear_timer_interrupt();
     // 设置计时器的配置
+    // println!("timer freq: {}", timer_freq);
     tcfg::set_init_val(timer_freq / TICKS_PER_SEC);
     tcfg::set_en(true);
     tcfg::set_periodic(true);
-    // Tcfg::read()
-    //     .set_enable(true)
-    //     .set_loop(true)
-    //     .set_tval(timer_freq / TICKS_PER_SEC)
-    //     .write();
-    // Ecfg::read()
-    //     .set_lie_with_index(11, true)
-    //     .set_lie_with_index(2, true)
-    //     .write();
+
     // 开启全局中断
-    ecfg::set_lie(LineBasedInterrupt::TIMER|LineBasedInterrupt::HWI0);
+    ecfg::set_lie(LineBasedInterrupt::TIMER | LineBasedInterrupt::HWI0);
     crmd::set_ie(true);
-    // Crmd::read().set_ie(true).write();
-    info!("interrupt enable: {:?}", ecfg::read().lie());
+
+    println!("Interrupt enable: {:?}", ecfg::read().lie());
 }
 
 #[inline]
@@ -112,7 +90,7 @@ pub fn set_user_trap_entry() {
 }
 #[inline]
 pub fn set_kernel_trap_entry() {
-    eentry::set_eentry(kernel_trap_entry as usize);
+    eentry::set_eentry(trap::kernel_trap_entry as usize);
 }
 #[no_mangle]
 pub fn trap_return() {
@@ -159,7 +137,7 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
             println!("[kernel] InstructionPrivilegeIllegal in application, core dumped.");
             current_add_signal(SignalFlags::SIGILL);
         }
-        Trap::Interrupt( Interrupt::Timer) => {
+        Trap::Interrupt(Interrupt::Timer) => {
             // 时钟中断
             timer_handler();
         }
@@ -196,12 +174,11 @@ pub fn trap_handler(mut cx: &mut TrapContext) -> &mut TrapContext {
 }
 
 fn timer_handler() {
-    trace!("timer interrupt from user");
+    // println!("timer interrupt from user");
     // 释放那些处于等待的任务
     check_timer();
     // 清除时钟中断
     ticlr::clear_timer_interrupt();
-    // Ticlr::read().clear_timer().write();
     suspend_current_and_run_next();
 }
 
@@ -212,7 +189,7 @@ fn timer_handler() {
 /// 在正常运行后系统在从用户态trap进入内核态后是不会触发中断的
 #[no_mangle]
 pub fn trap_handler_kernel() {
-    info!("kernel trap");
+    // println!("kernel trap");
     let estat = estat::read();
     let crmd = crmd::read();
     let era = era::read();
@@ -230,24 +207,29 @@ pub fn trap_handler_kernel() {
             // 中断0 --- 外部中断处理
             hwi0_handler();
         }
-        _ => {
-            panic!("{:?}", estat.cause());
+        e => {
+            panic!(
+                "[pc:{:#x}], cause:{:?},  code:{:b}",
+                era.pc(),
+                e,
+                estat.is(),
+            );
         }
     }
-    era::set_pc(era.pc());
-    info!("kernel trap end");
+    // era::set_pc(era.pc());
 }
 
 // 重填异常处理
 fn tlb_refill_handler() {
+    log::error!("TLB refill exception");
     unsafe {
-        __tlb_rfill();
+        trap::__tlb_rfill();
     }
 }
 
 /// Exception(PageModifyFault)的处理
-/// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且 V=1，且特权等级合规的项，但是该页
-/// 表项的 D 位为 0，将触发该例外
+/// 页修改例外：store 操作的虚地址在 TLB 中找到了匹配，且
+/// V=1，且特权等级合规的项，但是该页 表项的 D 位为 0，将触发该例外
 fn tlb_page_modify_handler() {
     let pid = current_process().getpid();
     trace!("PageModifyFault handler [PID]{}", pid);

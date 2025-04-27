@@ -1,5 +1,6 @@
-use crate::println;
 use log::{self, Level, LevelFilter, Log, Metadata, Record};
+
+use crate::println;
 
 struct SimpleLogger;
 
@@ -37,6 +38,6 @@ pub fn init() {
         Some("INFO") => LevelFilter::Info,
         Some("DEBUG") => LevelFilter::Debug,
         Some("TRACE") => LevelFilter::Trace,
-        _ => LevelFilter::Off,
+        _ => LevelFilter::Error,
     });
 }

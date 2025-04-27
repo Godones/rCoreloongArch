@@ -1,8 +1,8 @@
-use super::{KernelStack, ProcessControlBlock, TaskContext, TaskUserRes};
-use crate::sync::UPSafeCell;
-use crate::trap::TrapContext;
 use alloc::sync::{Arc, Weak};
 use core::cell::RefMut;
+
+use super::{KernelStack, ProcessControlBlock, TaskContext, TaskUserRes};
+use crate::{sync::UPSafeCell, trap::TrapContext};
 
 pub struct TaskControlBlock {
     // immutable

@@ -1,20 +1,17 @@
-use crate::{print, println};
 use core::arch::asm;
+
+use crate::{print, println};
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     print!("Aborting: ");
     if let Some(p) = info.location() {
-        println!(
-            "line {}, file {}: {}",
-            p.line(),
-            p.file(),
-            info.message().unwrap()
-        );
+        println!("line {}, file {}: {}", p.line(), p.file(), info.message());
     } else {
         println!("no location information available");
     }
     // let mut trace = stack_trace::Trace::new();
-    // let data = include_bytes!("../target/loongarch64-unknown-linux-gnu/release/loongrCore");
+    // let data =
+    // include_bytes!("../target/loongarch64-unknown-linux-gnu/release/loongrCore");
     // trace.init(data);
     // unsafe {
     //     trace.trace().iter().for_each(|frame| {

@@ -1,13 +1,18 @@
-use super::ProcessControlBlock;
-use crate::config::{PAGE_SIZE, USER_STACK_SIZE};
-use crate::mm::{frame_alloc, FrameTracker, MapPermission, PhysAddr, VirtAddr};
-use crate::sync::UPSafeCell;
-use crate::trap::TrapContext;
 use alloc::{
     sync::{Arc, Weak},
     vec::Vec,
 };
+
 use lazy_static::*;
+
+use super::ProcessControlBlock;
+use crate::{
+    config::{PAGE_SIZE, USER_STACK_SIZE},
+    mm::{frame_alloc, FrameTracker, MapPermission, PhysAddr, VirtAddr},
+    phys_to_virt,
+    sync::UPSafeCell,
+    trap::TrapContext,
+};
 
 pub struct RecycleAllocator {
     current: usize,
@@ -77,16 +82,16 @@ impl KernelStack {
     where
         T: Sized,
     {
-        let kernel_stack_top = self.get_top();
+        let kernel_stack_top = self.get_virt_top();
         let ptr_mut = (kernel_stack_top - core::mem::size_of::<T>()) as *mut T;
         unsafe {
             *ptr_mut = value;
         }
         ptr_mut
     }
-    fn get_top(&self) -> usize {
+    fn get_virt_top(&self) -> usize {
         let top: PhysAddr = self.frame.ppn.into();
-        let top = top.0 + PAGE_SIZE;
+        let top = phys_to_virt!(top.0 + PAGE_SIZE);
         top
     }
 
@@ -99,13 +104,13 @@ impl KernelStack {
     /// 返回trap上下文的可变引用
     /// 用于修改返回值
     pub fn get_trap_cx(&self) -> &'static mut TrapContext {
-        let cx = self.get_top() - core::mem::size_of::<TrapContext>();
+        let cx = self.get_virt_top() - core::mem::size_of::<TrapContext>();
         unsafe { &mut *(cx as *mut TrapContext) }
     }
 
     /// 返回trap上下文的位置，用于初始化trap上下文
     pub fn get_trap_addr(&self) -> usize {
-        let addr = self.get_top() - core::mem::size_of::<TrapContext>();
+        let addr = self.get_virt_top() - core::mem::size_of::<TrapContext>();
         addr
     }
 }

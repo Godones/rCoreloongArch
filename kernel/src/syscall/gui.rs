@@ -1,11 +1,17 @@
-use crate::fs::ROOT_INODE;
-use crate::loongarch::{VIRTGPU_XRES, VIRTGPU_YRES};
-use crate::rtc_time_read;
-use crate::sync::UPSafeCell;
 use alloc::{string::ToString, sync::Arc};
+
 use log::info;
-use vbe::prelude::{Point, Size};
-use vbe::*;
+use vbe::{
+    prelude::{Point, Size},
+    *,
+};
+
+use crate::{
+    fs::ROOT_INODE,
+    loongarch::{VIRTGPU_XRES, VIRTGPU_YRES},
+    rtc_time_read,
+    sync::UPSafeCell,
+};
 
 static DT: &[u8] = include_bytes!("../assert/desktop.bmp");
 

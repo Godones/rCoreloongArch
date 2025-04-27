@@ -1,8 +1,9 @@
+use alloc::sync::Arc;
+
 use crate::{
     task::{add_task, current_task, TaskControlBlock},
     trap::TrapContext,
 };
-use alloc::sync::Arc;
 
 pub fn sys_thread_create(entry: usize, arg: usize) -> isize {
     let task = current_task().unwrap();

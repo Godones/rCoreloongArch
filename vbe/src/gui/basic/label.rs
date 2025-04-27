@@ -1,7 +1,8 @@
-use crate::gui::{Component, Graphics};
-use alloc::string::String;
-use alloc::sync::Arc;
+use alloc::{string::String, sync::Arc};
+
 use spin::lock_api::Mutex;
+
+use crate::gui::{Component, Graphics};
 
 pub struct Label {
     inner: Mutex<LabelInner>,

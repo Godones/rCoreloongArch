@@ -1,20 +1,20 @@
 //!Implementation of [`Processor`] and Intersection of control flow
-use super::__switch;
-use super::{fetch_task, TaskStatus};
-use super::{TaskContext, TaskControlBlock};
-use crate::config::PAGE_SIZE_BITS;
-use crate::sync::UPSafeCell;
-use crate::task::process::ProcessControlBlock;
-use crate::trap::TrapContext;
 use alloc::sync::Arc;
 use core::arch::asm;
+
 use lazy_static::*;
 use loongarch64::register::{asid, pgdl};
+
+use super::{TaskContext, TaskControlBlock, TaskStatus, __switch, fetch_task};
+use crate::{
+    config::PAGE_SIZE_BITS, sync::UPSafeCell, task::process::ProcessControlBlock, trap::TrapContext,
+};
 /// Processor management structure
 pub struct Processor {
     /// The task currently executing on the current processor
     current: Option<Arc<TaskControlBlock>>,
-    /// The basic control flow of each core, helping to select and switch process
+    /// The basic control flow of each core, helping to select and switch
+    /// process
     idle_task_cx: TaskContext,
 }
 
@@ -43,8 +43,9 @@ impl Processor {
 lazy_static! {
     pub static ref PROCESSOR: UPSafeCell<Processor> = unsafe { UPSafeCell::new(Processor::new()) };
 }
-///The main part of process execution and scheduling
-///Loop `fetch_task` to get the process that needs to run, and switch the process through `__switch`
+/// The main part of process execution and scheduling
+/// Loop `fetch_task` to get the process that needs to run, and switch the
+/// process through `__switch`
 pub fn run_tasks() {
     loop {
         let mut processor = PROCESSOR.exclusive_access();

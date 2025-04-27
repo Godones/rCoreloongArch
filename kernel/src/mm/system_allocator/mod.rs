@@ -6,23 +6,28 @@ pub mod bump_allocator;
 mod common;
 mod linked_list;
 
-use crate::config::KERNEL_HEAP_SIZE;
-use crate::info;
-use crate::mm::system_allocator::buddy::Buddy;
-use crate::mm::system_allocator::bump_allocator::BumpAllocator;
-use crate::mm::system_allocator::common::Locked;
-use crate::mm::system_allocator::linked_list::LinkedListAllocator;
 use alloc::vec;
+
 use bit_field::BitField;
 use buddy_system_allocator::LockedHeap;
 use log::debug;
 
+use crate::{
+    config::KERNEL_HEAP_SIZE,
+    info,
+    mm::system_allocator::{
+        buddy::Buddy, bump_allocator::BumpAllocator, common::Locked,
+        linked_list::LinkedListAllocator,
+    },
+};
+
 static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 
 #[global_allocator]
-// pub static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
-// static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
-// static ALLOCATOR: LockedHeap = LockedHeap::empty();
+// pub static ALLOCATOR: Locked<BumpAllocator> =
+// Locked::new(BumpAllocator::new()); static ALLOCATOR:
+// Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new()); static
+// ALLOCATOR: LockedHeap = LockedHeap::empty();
 static ALLOCATOR: Locked<Buddy> = Locked::new(Buddy::new());
 
 pub fn init_heap() {
@@ -42,7 +47,7 @@ pub fn heap_test() {
     use alloc::boxed::Box; //使用Box包装器
     use alloc::vec::Vec; //使用vec数组
 
-    let bss_range = ebss as usize..sbss as usize;
+    let bss_range = sbss as usize..ebss as usize;
 
     let a = Box::new(5);
 

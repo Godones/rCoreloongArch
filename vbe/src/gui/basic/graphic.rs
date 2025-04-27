@@ -1,10 +1,12 @@
-use crate::driver::{GPUDevice, VBE_DEVICE, VIRTGPU_XRES};
 use alloc::sync::Arc;
+
 use embedded_graphics::{
     draw_target::DrawTarget,
     pixelcolor::Rgb888,
     prelude::{OriginDimensions, Point, RgbColor, Size},
 };
+
+use crate::driver::{GPUDevice, VBE_DEVICE, VIRTGPU_XRES};
 
 #[derive(Clone)]
 pub struct Graphics {

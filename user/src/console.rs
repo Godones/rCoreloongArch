@@ -1,7 +1,7 @@
+use core::fmt::{self, Arguments, Write};
+
 use super::write;
 use crate::read;
-use core::fmt::Arguments;
-use core::fmt::{self, Write};
 
 struct Stdout;
 

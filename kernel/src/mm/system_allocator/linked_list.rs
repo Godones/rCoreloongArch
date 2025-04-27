@@ -1,10 +1,14 @@
+use core::{
+    alloc::{GlobalAlloc, Layout},
+    result,
+};
+
+use log::debug;
+
 /// 由于bump分配器存在的弊端
 /// 我们需要一个可以记录无限多空闲区域的分配器
 /// 以此来解决bump分配器不能即时回收使用的缺点
 use crate::mm::system_allocator::common::{align_up, Locked};
-use core::alloc::GlobalAlloc;
-use core::{alloc::Layout, result};
-use log::debug;
 
 struct ListNode {
     size: usize,

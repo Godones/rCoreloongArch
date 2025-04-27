@@ -1,11 +1,11 @@
-use alloc::format;
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{format, string::String, vec::Vec};
+
 use rustc_demangle::demangle;
-use xmas_elf::sections::{SectionData, ShType};
-use xmas_elf::symbol_table::Entry;
-use xmas_elf::symbol_table::Type::Func;
-use xmas_elf::ElfFile;
+use xmas_elf::{
+    sections::{SectionData, ShType},
+    symbol_table::{Entry, Type::Func},
+    ElfFile,
+};
 
 #[derive(Clone, Debug)]
 pub struct FuncInfo {

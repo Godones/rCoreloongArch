@@ -1,7 +1,10 @@
-use crate::sync::{Condvar, Mutex, MutexBlocking, MutexSpin, Semaphore};
-use crate::task::{block_current_and_run_next, current_process, current_task};
-use crate::timer::{add_timer, get_time_ms};
 use alloc::sync::Arc;
+
+use crate::{
+    sync::{Condvar, Mutex, MutexBlocking, MutexSpin, Semaphore},
+    task::{block_current_and_run_next, current_process, current_task},
+    timer::{add_timer, get_time_ms},
+};
 
 pub fn sys_sleep(ms: usize) -> isize {
     let expire_ms = get_time_ms() + ms;

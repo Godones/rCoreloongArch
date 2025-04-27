@@ -7,8 +7,8 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use core::ptr::addr_of_mut;
-use user_lib::{exit, get_time, thread_create, waittid};
-use user_lib::{mutex_create, mutex_lock, mutex_unlock};
+
+use user_lib::{exit, get_time, mutex_create, mutex_lock, mutex_unlock, thread_create, waittid};
 
 static mut A: usize = 0;
 const PER_THREAD: usize = 1000;

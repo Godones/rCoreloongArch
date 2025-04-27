@@ -1,8 +1,12 @@
-use crate::loongarch::{
-    ls7a_read_b, ls7a_write_b, LS7A_I8042_COMMAND, LS7A_I8042_DATA, LS7A_I8042_STATUS,
-};
 use bit_field::BitField;
 use log::{info, trace};
+
+use crate::{
+    loongarch::{
+        ls7a_read_b, ls7a_write_b, LS7A_I8042_COMMAND, LS7A_I8042_DATA, LS7A_I8042_STATUS,
+    },
+    println,
+};
 
 pub const KEY_BOARD_BUFFER_SIZE: usize = 100;
 
@@ -24,11 +28,12 @@ impl KeyboardDriver {
 
 /// 键盘驱动初始化
 pub fn i8042_init() {
-    trace!("i8042_init...");
+    println!("i8042_init...");
     // disable device
     // command:ADh
     // function:禁止键盘接口。禁用第一个接口
     ls7a_write_b(LS7A_I8042_COMMAND, 0xAD);
+    println!("disable keyboard");
     // 禁用第二个接口
     ls7a_write_b(LS7A_I8042_COMMAND, 0xA7);
     // 清空缓冲区

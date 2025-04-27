@@ -1,14 +1,12 @@
-use crate::old_impl::ascii::FONT_ASCII;
-use alloc::alloc::alloc;
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use alloc::{alloc::alloc, boxed::Box, vec::Vec};
+use core::{alloc::Layout, fmt::Debug, ops::Add};
+
 use bit_field::BitField;
-use core::alloc::Layout;
-use core::fmt::Debug;
-use core::ops::Add;
 use lazy_static::lazy_static;
 use rlibc::memcmp;
 use spin::Mutex;
+
+use crate::old_impl::ascii::FONT_ASCII;
 
 pub struct VbeDriver {
     pub vbe_info: VbeInfo,

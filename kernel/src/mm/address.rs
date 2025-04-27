@@ -1,12 +1,18 @@
-use super::PageTableEntry;
-use crate::config::{PAGE_SIZE, PAGE_SIZE_BITS};
-use core::fmt::{self, Debug, Formatter};
-use core::ops::Add;
-
 /// 在loongArch平台上，虚拟地址为48位，物理地址为48位
 /// 采用16kb页大小，则使用三级页表
 /// 低14位表示业内偏移，每个页可以存放2k个页表项
 /// 因此11-11-11-14,最高位是次高位的扩展
+///
+use core::{
+    fmt::{self, Debug, Formatter},
+    ops::Add,
+};
+
+use super::PageTableEntry;
+use crate::{
+    config::{PAGE_SIZE, PAGE_SIZE_BITS},
+    phys_to_virt,
+};
 
 /// Definitions
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -24,8 +30,6 @@ pub struct PhysPageNum(pub usize);
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 #[repr(C)]
 pub struct VirtPageNum(pub usize);
-
-/// Debugging
 
 impl Debug for VirtAddr {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -54,10 +58,6 @@ impl Add<usize> for VirtPageNum {
         VirtPageNum(self.0 + rhs)
     }
 }
-
-/// T: {PhysAddr, VirtAddr, PhysPageNum, VirtPageNum}
-/// T -> usize: T.0
-/// usize -> T: usize.into()
 
 impl From<usize> for PhysAddr {
     fn from(v: usize) -> Self {
@@ -127,10 +127,10 @@ impl From<VirtPageNum> for VirtAddr {
 }
 impl PhysAddr {
     pub fn get_mut<T>(&self) -> &'static mut T {
-        unsafe { (self.0 as *mut T).as_mut().unwrap() }
+        unsafe { ((phys_to_virt!(self.0)) as *mut T).as_mut().unwrap() }
     }
     pub fn get_ref<T>(&self) -> &'static T {
-        unsafe { (self.0 as *const T).as_ref().unwrap() }
+        unsafe { ((phys_to_virt!(self.0)) as *const T).as_ref().unwrap() }
     }
     pub fn floor(&self) -> PhysPageNum {
         PhysPageNum(self.0 / PAGE_SIZE)
@@ -172,12 +172,14 @@ impl VirtPageNum {
 impl PhysPageNum {
     pub fn get_pte_array(&self) -> &'static mut [PageTableEntry] {
         let pa: PhysAddr = self.clone().into();
-        unsafe { core::slice::from_raw_parts_mut(pa.0 as *mut PageTableEntry, 2048) }
-        //每一个页有2048个项目
+        let va = phys_to_virt!(pa.0);
+        // 每一个页有2048个项目 : 16kb/8 = 2048
+        unsafe { core::slice::from_raw_parts_mut(va as *mut PageTableEntry, 2048) }
     }
     pub fn get_bytes_array(&self) -> &'static mut [u8] {
         let pa: PhysAddr = self.clone().into();
-        unsafe { core::slice::from_raw_parts_mut(pa.0 as *mut u8, 16 * 1024) }
+        let va = phys_to_virt!(pa.0);
+        unsafe { core::slice::from_raw_parts_mut(va as *mut u8, 16 * 1024) }
     }
     pub fn get_mut<T>(&self) -> &'static mut T {
         let pa: PhysAddr = self.clone().into();

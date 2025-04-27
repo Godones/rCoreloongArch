@@ -1,11 +1,13 @@
-use crate::config::MSEC_PER_SEC;
-use crate::task::{add_task, TaskControlBlock};
-use alloc::collections::BinaryHeap;
-use alloc::sync::Arc;
+use alloc::{collections::BinaryHeap, sync::Arc};
 use core::cmp::Ordering;
+
 use loongarch64::time::{get_timer_freq, Time};
 use spin::{Lazy, Mutex};
 
+use crate::{
+    config::MSEC_PER_SEC,
+    task::{add_task, TaskControlBlock},
+};
 
 pub fn get_time_ms() -> usize {
     Time::read() / (get_timer_freq() / MSEC_PER_SEC)
@@ -36,7 +38,8 @@ impl Ord for TimerCondVar {
     }
 }
 
-static TIMERS:Lazy<Mutex<BinaryHeap<TimerCondVar>>> = Lazy::new(||Mutex::new(BinaryHeap::<TimerCondVar>::new()));
+static TIMERS: Lazy<Mutex<BinaryHeap<TimerCondVar>>> =
+    Lazy::new(|| Mutex::new(BinaryHeap::<TimerCondVar>::new()));
 
 pub fn add_timer(expire_ms: usize, task: Arc<TaskControlBlock>) {
     let mut timers = TIMERS.lock();

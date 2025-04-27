@@ -5,11 +5,19 @@ FS_IMG := ./target/$(TARGET)/$(MODE)/fs.img
 KERNEL_ELF := target/$(TARGET)/$(MODE)/kernel
 KERNEL_BIN := $(KERNEL_ELF).bin
 INFO := DEBUG
-
+GUI ?= n
 # BOARD
 BOARD ?= qemu
+VGA ?= -nographic
 
-BOOTLOADER := ./qemu-loongarch-runenv/loongarch_bios_0310.bin
+FEATURES := board_$(BOARD)
+
+ifeq ($(GUI),y)
+	FEATURES += gui
+	VGA := -device VGA -serial stdio
+endif
+
+
 
 build: kernel
 
@@ -23,8 +31,7 @@ user_app:
 
 kernel:
 	@echo Platform: $(BOARD)
-	cargo build --$(MODE) -p kernel -Z build-std --target ${TARGET} --features "board_$(BOARD)"
-
+	cargo build --$(MODE) -p kernel --target ${TARGET} --features "$(FEATURES)"
 
 run: run-inner
 
@@ -33,57 +40,33 @@ doc:
 
 run-inner: user_app build
 ifeq ($(BOARD),qemu)
-	cp qemu-loongarch-runenv/efi-virtio.rom .
 	qemu-system-loongarch64 \
 		-m 1G \
 		-smp 1 \
-		-bios $(BOOTLOADER) \
 		-kernel $(KERNEL_ELF) \
-		-vga none \
-		-nographic \
+		$(VGA) \
 		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
 		-device ahci,id=ahci0 \
 		-device ide-hd,drive=x0,bus=ahci0.0
-	rm efi-virtio.rom
 endif
 
-build_gui:
-	@echo Platform: $(BOARD)
-	cargo build --$(MODE) -p kernel -Z build-std --target ${TARGET} --features "board_$(BOARD)","gui"
 
-gui: user_app build_gui
-	cp qemu-loongarch-runenv/efi-virtio.rom .
-	cp qemu-loongarch-runenv/vgabios-stdvga.bin .
-	@qemu-system-loongarch64 \
-		-m 1G \
-		-smp 1 \
-		-bios $(BOOTLOADER) \
-		-kernel $(KERNEL_ELF) \
-		-vga std \
-		-serial stdio \
-		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
-		-device ahci,id=ahci0 \
-		-device ide-hd,drive=x0,bus=ahci0.0
-	rm efi-virtio.rom
-	rm vgabios-stdvga.bin
 debug:build
 	@tmux new-session -d \
-		"qemu-system-loongarch64 -m 1G -smp 1 -bios $(BOOTLOADER) -kernel $(KERNEL_ELF) -vga none -nographic -drive file=$(FS_IMG),if=none,format=raw,id=x0 -device ahci,id=ahci0 -device ide-hd,drive=x0,bus=ahci0.0 -s -S" && \
+		"qemu-system-loongarch64 -m 1G -smp 1 -kernel $(KERNEL_ELF) -vga none -nographic -drive file=$(FS_IMG),if=none,format=raw,id=x0 -device ahci,id=ahci0 -device ide-hd,drive=x0,bus=ahci0.0 -s -S" && \
 		tmux split-window -h "loongarch64-unknown-linux-gnu-gdb -ex 'file $(KERNEL_ELF)'  -ex 'target remote localhost:1234'" && \
 		tmux -2 attach-session -d
 
-gdb-server:
-	cp qemu-loongarch-runenv/efi-virtio.rom .
+gdb-server: build
 	qemu-system-loongarch64 \
 		-m 1G -smp 1 \
-		-bios $(BOOTLOADER) \
 		-kernel $(KERNEL_ELF) \
 		-vga none -nographic \
 		-drive file=$(FS_IMG),if=none,format=raw,id=x0 \
 		-device ahci,id=ahci0 \
 		-device ide-hd,drive=x0,bus=ahci0.0 \
 		-s -S
-gdb-client:
+gdb-client: build
 	loongarch64-unknown-linux-gnu-gdb -ex 'file $(KERNEL_ELF)'  -ex 'target remote localhost:1234'
 
 docs:

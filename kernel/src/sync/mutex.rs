@@ -1,8 +1,10 @@
-use super::UPSafeCell;
-use crate::task::TaskControlBlock;
-use crate::task::{add_task, current_task};
-use crate::task::{block_current_and_run_next, suspend_current_and_run_next};
 use alloc::{collections::VecDeque, sync::Arc};
+
+use super::UPSafeCell;
+use crate::task::{
+    add_task, block_current_and_run_next, current_task, suspend_current_and_run_next,
+    TaskControlBlock,
+};
 
 pub trait Mutex: Sync + Send {
     fn lock(&self);

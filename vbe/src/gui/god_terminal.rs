@@ -1,10 +1,14 @@
-use crate::gui::{Component, TextEdit, Windows};
 use alloc::sync::Arc;
-use embedded_graphics::geometry::Size;
-use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics::prelude::{Point, RgbColor};
+
+use embedded_graphics::{
+    geometry::Size,
+    pixelcolor::Rgb888,
+    prelude::{Point, RgbColor},
+};
 use log::info;
 use spin::Mutex;
+
+use crate::gui::{Component, TextEdit, Windows};
 
 pub struct GodTerminal {
     inner: Mutex<GodTerminalInner>,

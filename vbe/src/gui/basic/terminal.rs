@@ -1,9 +1,9 @@
-use crate::driver::VBE_DEVICE;
 use alloc::{
     collections::VecDeque,
     string::{String, ToString},
     sync::Arc,
 };
+
 use embedded_graphics::{
     mono_font::{ascii::FONT_10X20, MonoTextStyle},
     pixelcolor::Rgb888,
@@ -14,6 +14,7 @@ use embedded_graphics::{
 use spin::Mutex;
 
 use super::{Component, Graphics};
+use crate::driver::VBE_DEVICE;
 
 pub struct Terminal {
     inner: Mutex<TerminalInner>,

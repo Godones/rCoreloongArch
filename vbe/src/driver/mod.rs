@@ -1,5 +1,6 @@
 use alloc::{sync::Arc, vec::Vec};
 use core::any::Any;
+
 use embedded_graphics::pixelcolor::Rgb888;
 use spin::Mutex;
 use tinybmp::Bmp;

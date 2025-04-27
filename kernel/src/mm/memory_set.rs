@@ -1,12 +1,12 @@
-use super::{frame_alloc, FrameTracker};
-use super::{PTEFlags, PageTable, PageTableEntry};
-use super::{PhysPageNum, VirtAddr, VirtPageNum};
-use super::{StepByOne, VPNRange};
-use alloc::collections::BTreeMap;
-use alloc::vec::Vec;
+use alloc::{collections::BTreeMap, vec::Vec};
+
 use bitflags::bitflags;
 use log::debug;
 
+use super::{
+    frame_alloc, FrameTracker, PTEFlags, PageTable, PageTableEntry, PhysPageNum, StepByOne,
+    VPNRange, VirtAddr, VirtPageNum,
+};
 use crate::config::PAGE_SIZE;
 
 #[derive(Clone)]

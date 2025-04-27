@@ -51,12 +51,11 @@ mod sync;
 mod thread;
 
 use fs::*;
+pub use gui::*;
 use process::*;
 use signal::*;
 use sync::*;
 use thread::*;
-
-pub use gui::*;
 
 /// handle syscall exception with `syscall_id` and other arguments
 pub fn syscall(syscall_id: usize, args: [usize; 3]) -> isize {

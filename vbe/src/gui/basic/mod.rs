@@ -11,9 +11,10 @@ mod terminal;
 mod window;
 
 use alloc::sync::Arc;
+use core::any::Any;
+
 pub use bar::Bar;
 pub use button::*;
-use core::any::Any;
 pub use edit::*;
 use embedded_graphics::prelude::{Point, Size};
 pub use graphic::*;

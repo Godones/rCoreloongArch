@@ -1,5 +1,5 @@
-use crate::driver::VBE_DEVICE;
 use alloc::{collections::VecDeque, sync::Arc};
+
 use embedded_graphics::{
     pixelcolor::Rgb888,
     prelude::{Point, Primitive, RgbColor, Size},
@@ -9,6 +9,7 @@ use embedded_graphics::{
 use spin::Mutex;
 
 use super::{Component, Graphics};
+use crate::driver::VBE_DEVICE;
 
 pub struct Panel {
     inner: Mutex<PanelInner>,

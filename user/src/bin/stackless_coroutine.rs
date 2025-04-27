@@ -3,15 +3,14 @@
 #![no_std]
 #![no_main]
 
-use core::future::Future;
-use core::pin::Pin;
-use core::task::{Context, Poll};
-use core::task::{RawWaker, RawWakerVTable, Waker};
+use core::{
+    future::Future,
+    pin::Pin,
+    task::{Context, Poll, RawWaker, RawWakerVTable, Waker},
+};
 
 extern crate alloc;
-use alloc::collections::VecDeque;
-
-use alloc::boxed::Box;
+use alloc::{boxed::Box, collections::VecDeque};
 
 #[macro_use]
 extern crate user_lib;

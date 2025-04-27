@@ -1,17 +1,17 @@
 #![no_std]
 #![no_main]
-
+#![allow(static_mut_refs)]
 #[macro_use]
 extern crate user_lib;
 
 extern crate alloc;
 
 use alloc::vec;
-use user_lib::exit;
+
 use user_lib::{
-    condvar_create, condvar_signal, condvar_wait, mutex_blocking_create, mutex_lock, mutex_unlock,
+    condvar_create, condvar_signal, condvar_wait, exit, mutex_blocking_create, mutex_lock,
+    mutex_unlock, sleep, thread_create, waittid,
 };
-use user_lib::{sleep, thread_create, waittid};
 
 static mut A: usize = 0;
 

@@ -1,21 +1,25 @@
-use super::id::RecycleAllocator;
-use super::manager::insert_into_pid2process;
-use super::TaskControlBlock;
-use super::{add_task, SignalFlags};
-use super::{pid_alloc, PidHandle};
-use crate::config::PAGE_SIZE_BITS;
-use crate::fs::{File, Stdin, Stdout};
-use crate::mm::{translated_refmut, MemorySet};
-use crate::sync::{Condvar, Mutex, Semaphore, UPSafeCell};
-use crate::trap::TrapContext;
-use alloc::string::String;
-use alloc::sync::{Arc, Weak};
-use alloc::vec;
-use alloc::vec::Vec;
-use core::arch::asm;
-use core::cell::RefMut;
+use alloc::{
+    string::String,
+    sync::{Arc, Weak},
+    vec,
+    vec::Vec,
+};
+use core::{arch::asm, cell::RefMut};
+
 use log::info;
 use loongarch64::register::pgdl;
+
+use super::{
+    add_task, id::RecycleAllocator, manager::insert_into_pid2process, pid_alloc, PidHandle,
+    SignalFlags, TaskControlBlock,
+};
+use crate::{
+    config::PAGE_SIZE_BITS,
+    fs::{File, Stdin, Stdout},
+    mm::{translated_refmut, MemorySet},
+    sync::{Condvar, Mutex, Semaphore, UPSafeCell},
+    trap::TrapContext,
+};
 
 // 进程控制块
 pub struct ProcessControlBlock {
@@ -173,7 +177,8 @@ impl ProcessControlBlock {
         trap_cx.x[5] = argv_base;
         *task_inner.get_trap_cx() = trap_cx;
 
-        //由于切换了地址空间，因此之前的ASID对应的地址空间将不会再有用，因此这里需要将TLB中的内容无效掉
+        //由于切换了地址空间，因此之前的ASID对应的地址空间将不会再有用，
+        // 因此这里需要将TLB中的内容无效掉
         let pid = self.getpid();
         unsafe {
             asm!("invtlb 0x4,{},$r0",in(reg) pid);

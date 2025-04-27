@@ -1,11 +1,11 @@
+use alloc::{string::String, sync::Arc, vec::Vec};
+
+use spin::{Mutex, MutexGuard};
+
 use super::{
     block_cache_sync_all, get_block_cache, BlockDevice, DirEntry, DiskInode, DiskInodeType,
     EasyFileSystem, DIRENT_SZ,
 };
-use alloc::string::String;
-use alloc::sync::Arc;
-use alloc::vec::Vec;
-use spin::{Mutex, MutexGuard};
 /// Virtual filesystem layer over easy-fs
 pub struct Inode {
     block_id: usize,

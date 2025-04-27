@@ -13,10 +13,9 @@ const DL: u8 = 0x7fu8;
 const BS: u8 = 0x08u8; //退格键
 const LINE_START: &str = ">> ";
 
-use alloc::string::String;
-use alloc::vec::Vec;
-use user_lib::console::getchar;
-use user_lib::{close, dup, exec, fork, open, pipe, waitpid, OpenFlags};
+use alloc::{string::String, vec::Vec};
+
+use user_lib::{close, console::getchar, dup, exec, fork, open, pipe, waitpid, OpenFlags};
 
 #[derive(Debug)]
 struct ProcessArguments {
@@ -190,7 +189,8 @@ pub fn main() -> i32 {
                         for pid in children.into_iter() {
                             let exit_pid = waitpid(pid as usize, &mut exit_code);
                             assert_eq!(pid, exit_pid);
-                            //println!("Shell: Process {} exited with code {}", pid, exit_code);
+                            //println!("Shell: Process {} exited with code {}",
+                            // pid, exit_code);
                         }
                     }
                     line.clear();

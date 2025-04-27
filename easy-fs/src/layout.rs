@@ -1,7 +1,7 @@
-use super::{get_block_cache, BlockDevice, BLOCK_SZ};
-use alloc::sync::Arc;
-use alloc::vec::Vec;
+use alloc::{sync::Arc, vec::Vec};
 use core::fmt::{Debug, Formatter, Result};
+
+use super::{get_block_cache, BlockDevice, BLOCK_SZ};
 
 /// Magic number for sanity check
 const EFS_MAGIC: u32 = 0x3b800001;
@@ -132,7 +132,8 @@ impl DiskInode {
         }
         total as u32
     }
-    /// Get the number of data blocks that have to be allocated given the new size of data
+    /// Get the number of data blocks that have to be allocated given the new
+    /// size of data
     pub fn blocks_num_needed(&self, new_size: u32) -> u32 {
         assert!(new_size >= self.size);
         Self::total_blocks(new_size) - Self::total_blocks(self.size)

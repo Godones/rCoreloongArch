@@ -1,13 +1,12 @@
 // 定义各个架构如何进行回溯，即如何通过sp,tp找到返回地址
 
-use crate::parse::FuncInfo;
-use crate::parse_elf;
-use alloc::format;
-use alloc::string::String;
-use alloc::vec::Vec;
-use bit_field::BitField;
+use alloc::{format, string::String, vec::Vec};
 use core::arch::asm;
+
+use bit_field::BitField;
 use log::info;
+
+use crate::{parse::FuncInfo, parse_elf};
 
 pub struct Trace {
     func_info: Vec<FuncInfo>,

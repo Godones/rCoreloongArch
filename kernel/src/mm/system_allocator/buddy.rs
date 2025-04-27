@@ -1,11 +1,14 @@
+use core::{
+    alloc::{GlobalAlloc, Layout},
+    fmt::{Debug, Formatter},
+    mem::size_of,
+    ptr::null_mut,
+};
+
 ///! buddy分配器
 ///! 使用bump分配器分配内存然后在buddy分配器中进行分配管理
 use crate::mm::system_allocator::common::{align_up, Locked};
 use crate::mm::system_allocator::linked_list::LinkedListAllocator;
-use core::alloc::{GlobalAlloc, Layout};
-use core::fmt::{Debug, Formatter};
-use core::mem::size_of;
-use core::ptr::null_mut;
 
 const MAXLISTS: usize = 32;
 

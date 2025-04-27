@@ -1,14 +1,16 @@
-use crate::driver::{VIRTGPU_XRES, VIRTGPU_YRES};
-use crate::gui::{Component, Windows};
-use crate::id_allocator::RecycleAllocator;
-use alloc::boxed::Box;
-use alloc::collections::BTreeMap;
-use alloc::sync::Arc;
+use alloc::{boxed::Box, collections::BTreeMap, sync::Arc};
 use core::cell::RefCell;
+
 use embedded_graphics::prelude::{Point, Size};
 use lazy_static::lazy_static;
 use log::info;
 use spin::Mutex;
+
+use crate::{
+    driver::{VIRTGPU_XRES, VIRTGPU_YRES},
+    gui::{Component, Windows},
+    id_allocator::RecycleAllocator,
+};
 pub struct Screen {
     inner: Mutex<ScreenInner>,
 }

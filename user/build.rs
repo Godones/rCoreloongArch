@@ -1,8 +1,10 @@
-use std::env;
-use std::fs::{self};
-use std::include_bytes;
-use std::io::Write;
-use std::path::Path;
+use std::{
+    env,
+    fs::{self},
+    include_bytes,
+    io::Write,
+    path::Path,
+};
 
 fn main() {
     let outdir = env::var("OUT_DIR").unwrap();

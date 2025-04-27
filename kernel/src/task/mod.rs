@@ -7,26 +7,29 @@ mod signal;
 mod switch;
 mod task;
 
-use self::id::TaskUserRes;
-use crate::fs::{open_file, OpenFlags};
 use alloc::{sync::Arc, vec::Vec};
 use core::arch::asm;
-use lazy_static::*;
-use manager::fetch_task;
-use process::ProcessControlBlock;
-use switch::__switch;
 
-use crate::println;
-use crate::timer::remove_timer;
 pub use context::TaskContext;
 pub use id::{pid_alloc, KernelStack, PidHandle, IDLE_PID};
+use lazy_static::*;
+use manager::fetch_task;
 pub use manager::{add_task, pid2process, remove_from_pid2process, remove_task};
+use process::ProcessControlBlock;
 pub use processor::{
     current_process, current_task, current_trap_addr, current_trap_cx, current_user_token,
     run_tasks, schedule, take_current_task,
 };
 pub use signal::SignalFlags;
+use switch::__switch;
 pub use task::{TaskControlBlock, TaskStatus};
+
+use self::id::TaskUserRes;
+use crate::{
+    fs::{open_file, OpenFlags},
+    println,
+    timer::remove_timer,
+};
 
 pub fn block_current_and_run_next() {
     let task = take_current_task().unwrap();

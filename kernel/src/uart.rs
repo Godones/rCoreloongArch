@@ -1,5 +1,4 @@
-use core::fmt::Error;
-use core::fmt::Write;
+use core::fmt::{Error, Write};
 
 pub struct Uart {
     base_address: usize,
@@ -15,7 +14,7 @@ impl Write for Uart {
 }
 
 impl Uart {
-    pub fn new(base_address: usize) -> Self {
+    pub const fn new(base_address: usize) -> Self {
         Uart { base_address }
     }
 

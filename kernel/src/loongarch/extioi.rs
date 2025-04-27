@@ -1,11 +1,12 @@
-use crate::loongarch::{
+use bit_field::BitField;
+use log::info;
+
+use crate::{loongarch::{
     iocsr_read_b, iocsr_read_d, iocsr_write_b, iocsr_write_d, iocsr_write_h, iocsr_write_w,
     KEYBOARD_IRQ, LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE, LOONGARCH_IOCSR_EXTIOI_EN_BASE,
     LOONGARCH_IOCSR_EXTIOI_ISR_BASE, LOONGARCH_IOCSR_EXTIOI_MAP_BASE,
     LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE, MOUSE_IRQ, UART0_IRQ,
-};
-use bit_field::BitField;
-use log::info;
+}, println};
 
 /// 初始化外部中断
 pub fn extioi_init() {
@@ -28,9 +29,9 @@ pub fn extioi_init() {
     iocsr_write_h(LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE, 0x1);
     //检查扩展i/o触发器是不是全0，即没有被触发的中断
     let extioi_isr = iocsr_read_b(LOONGARCH_IOCSR_EXTIOI_ISR_BASE);
-    info!("extioi_init: extioi_isr = {:#b}", extioi_isr);
+    println!("extioi_init: extioi_isr = {:#b}", extioi_isr);
     let current_trigger = extioi_claim();
-    info!("extioi_init: current_trigger = {:#b}", current_trigger);
+    println!("extioi_init: current_trigger = {:#b}", current_trigger);
     assert_eq!(extioi_isr, 0);
 }
 

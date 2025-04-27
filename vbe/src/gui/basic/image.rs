@@ -1,5 +1,5 @@
-use crate::driver::VBE_DEVICE;
 use alloc::sync::Arc;
+
 use embedded_graphics::{
     image::Image,
     pixelcolor::Rgb888,
@@ -10,6 +10,7 @@ use spin::Mutex;
 use tinybmp::Bmp;
 
 use super::{Component, Graphics};
+use crate::driver::VBE_DEVICE;
 
 pub struct ImageComp {
     inner: Mutex<ImageInner>,

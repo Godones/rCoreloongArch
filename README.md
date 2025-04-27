@@ -84,6 +84,12 @@ ch8:
 - [x] 简易内核栈回溯`risc-v`版本
 - [x] VESA BIOS Extensions 显示(初步)
 
+#### Qemu
+已经经过测试的qemu版本:
+- 8.2.0
+- 10.0.0
+
+理论上其它版本也没有问题，因为现在不需要bios了。
 
 #### 依赖
 ```
@@ -97,8 +103,15 @@ rustup target add loongarch64-unknown-none
 ```
 进入loongrCore目录下
 make run #直接运行
-make debug #gdb
+make gdb-server
+make gdb-client #使用gdb调试
 ```
+
+#### 注意
+- 其它分支没有同步主分支的修改，以主分支为准
+- 新的qemu上暂时无法开启GUI显示
+
+
 
 运行截图：
 

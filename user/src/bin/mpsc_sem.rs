@@ -8,9 +8,8 @@ extern crate user_lib;
 extern crate alloc;
 
 use alloc::vec::Vec;
-use user_lib::exit;
-use user_lib::{semaphore_create, semaphore_down, semaphore_up};
-use user_lib::{thread_create, waittid};
+
+use user_lib::{exit, semaphore_create, semaphore_down, semaphore_up, thread_create, waittid};
 
 const SEM_MUTEX: usize = 0;
 const SEM_EMPTY: usize = 1;

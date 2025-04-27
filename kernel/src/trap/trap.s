@@ -1,7 +1,6 @@
-    .section k_eentry
     .globl __alltraps
     .globl __restore
-    .align 4
+    .balign 4096
 __alltraps:
     # 需要交换 sp 与 0x502 寄存器的值
     csrwr   $sp, 0x502

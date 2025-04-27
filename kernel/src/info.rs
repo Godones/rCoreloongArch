@@ -1,6 +1,7 @@
 use log::info;
-use loongarch64::cpu;
-use loongarch64::register::*;
+use loongarch64::{cpu, register::*};
+
+use crate::println;
 
 // 打印硬件的相关信息
 pub fn print_machine_info() {
@@ -120,11 +121,23 @@ pub fn test_csr_register() {
     info!("local_interrupt {:?}", interrupt);
 }
 pub fn kernel_layout() {
-    info!(".text    [{:#x}-{:#x})", etext as usize, stext as usize);
-    info!(".rodata  [{:#x}-{:#x})", erodata as usize, srodata as usize);
-    info!(".data    [{:#x}-{:#x})", edata as usize, sdata as usize);
-    info!(".bss     [{:#x}-{:#x})", ebss as usize, sbss as usize);
-    info!("end      [{:#x}]", ekernel as usize);
+    println!(
+        ".text           [{:#x}-{:#x})",
+        stext as usize, etext as usize
+    );
+    println!(
+        ".rodata         [{:#x}-{:#x})",
+        srodata as usize, erodata as usize
+    );
+    println!(
+        ".data           [{:#x}-{:#x})",
+        sdata as usize, edata as usize
+    );
+    println!(
+        ".bss            [{:#x}-{:#x})",
+        sbss as usize, ebss as usize
+    );
+    println!("kernel end      [{:#x}]", ekernel as usize);
 }
 extern "C" {
     fn stext();

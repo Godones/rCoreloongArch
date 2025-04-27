@@ -9,7 +9,7 @@ OBJCOPY := loongarch64-unknown-linux-gnu-objcopy
 all: build
 
 build:
-	@cargo build --release -Z build-std --target $(TARGET)
+	@cargo build --release --target $(TARGET)
 
 .PHONY: clean
 

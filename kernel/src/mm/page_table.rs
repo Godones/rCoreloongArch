@@ -1,12 +1,14 @@
-use super::{frame_alloc, FrameTracker, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
-use crate::config::{PAGE_SIZE_BITS, PALEN};
-use crate::mm::PhysAddr;
-use alloc::string::String;
-use alloc::vec;
-use alloc::vec::Vec;
+use alloc::{string::String, vec, vec::Vec};
+use core::fmt::{self};
+
 use bit_field::BitField;
 use bitflags::*;
-use core::fmt::{self};
+
+use super::{frame_alloc, FrameTracker, PhysPageNum, StepByOne, VirtAddr, VirtPageNum};
+use crate::{
+    config::{PAGE_SIZE_BITS, PALEN},
+    mm::PhysAddr,
+};
 bitflags! {
     pub struct PTEFlags: usize {
         const V = 1 << 0;
@@ -220,7 +222,8 @@ pub fn translated_byte_buffer(token: usize, ptr: *const u8, len: usize) -> Vec<&
     }
     v
 }
-/// translate a pointer to a mutable u8 Vec end with `\0` through page table to a `String`
+/// translate a pointer to a mutable u8 Vec end with `\0` through page table to
+/// a `String`
 pub fn translated_str(token: usize, ptr: *const u8) -> String {
     let page_table = PageTable::from_token(token);
     let mut string = String::new();

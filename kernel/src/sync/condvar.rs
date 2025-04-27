@@ -1,6 +1,9 @@
-use crate::sync::{Mutex, UPSafeCell};
-use crate::task::{add_task, block_current_and_run_next, current_task, TaskControlBlock};
 use alloc::{collections::VecDeque, sync::Arc};
+
+use crate::{
+    sync::{Mutex, UPSafeCell},
+    task::{add_task, block_current_and_run_next, current_task, TaskControlBlock},
+};
 
 pub struct Condvar {
     pub inner: UPSafeCell<CondvarInner>,

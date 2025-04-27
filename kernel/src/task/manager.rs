@@ -1,10 +1,13 @@
 //!Implementation of [`TaskManager`]
-use super::TaskControlBlock;
-use crate::sync::UPSafeCell;
-use crate::task::ProcessControlBlock;
-use alloc::collections::{BTreeMap, VecDeque};
-use alloc::sync::Arc;
+use alloc::{
+    collections::{BTreeMap, VecDeque},
+    sync::Arc,
+};
+
 use lazy_static::*;
+
+use super::TaskControlBlock;
+use crate::{sync::UPSafeCell, task::ProcessControlBlock};
 
 ///A array of `TaskControlBlock` that is thread-safe
 pub struct TaskManager {

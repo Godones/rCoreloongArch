@@ -1,6 +1,9 @@
-use crate::sync::UPSafeCell;
-use crate::task::{add_task, block_current_and_run_next, current_task, TaskControlBlock};
 use alloc::{collections::VecDeque, sync::Arc};
+
+use crate::{
+    sync::UPSafeCell,
+    task::{add_task, block_current_and_run_next, current_task, TaskControlBlock},
+};
 
 pub struct Semaphore {
     pub inner: UPSafeCell<SemaphoreInner>,

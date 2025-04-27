@@ -2,18 +2,14 @@
 //!
 //! Spec: https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/serial-ata-ahci-spec-rev1-3-1.pdf
 
-use alloc::string::String;
-use alloc::vec::Vec;
-use core::hint::spin_loop;
-use core::marker::PhantomData;
-use core::mem::size_of;
-use core::slice;
+use alloc::{string::String, vec::Vec};
+use core::{hint::spin_loop, marker::PhantomData, mem::size_of, slice};
 
-use crate::provider::Provider;
-use crate::*;
 use bit_field::*;
 use bitflags::*;
 use volatile::Volatile;
+
+use crate::{provider::Provider, *};
 
 ///
 pub struct AHCI<P: Provider> {
@@ -421,8 +417,8 @@ impl<P: Provider> AHCI<P> {
             port.spin_on_slot(0);
 
             // debug!(
-            //     "Found ATA Device serial {} firmware {} model {} sectors 24bit={} 48bit={}",
-            //     from_ata_string(&identify_data.serial).trim_end(),
+            //     "Found ATA Device serial {} firmware {} model {} sectors 24bit={}
+            // 48bit={}",     from_ata_string(&identify_data.serial).trim_end(),
             //     from_ata_string(&identify_data.firmware).trim_end(),
             //     from_ata_string(&identify_data.model).trim_end(),
             //     identify_data.lba_sectors,

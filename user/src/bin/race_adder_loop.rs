@@ -7,6 +7,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use core::ptr::addr_of_mut;
+
 use user_lib::{exit, get_time, thread_create, waittid, yield_};
 
 static mut A: usize = 0;

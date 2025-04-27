@@ -26,14 +26,14 @@ SECTIONS
   }
     . = ALIGN(16K);
   .bss : {
-    ebss = .;
+    sbss = .;
     . = ALIGN(16);
     *(.sbss .sbss.*)
     . = ALIGN(16);
     *(.bss .bss.*)
   }
     . = ALIGN(16K);
-  sbss = .;
+  ebss = .;
 
   PROVIDE(end = .);
 }

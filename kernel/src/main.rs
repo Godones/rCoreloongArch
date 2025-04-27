@@ -1,11 +1,9 @@
 #![no_std]
 #![no_main]
-#![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
-#![feature(const_mut_refs)]
-#![feature(stmt_expr_attributes)]
-#![feature(asm_const)]
 #![allow(unused)]
+#![feature(naked_functions)]
+mod boot;
 mod config;
 mod fs;
 mod info;
@@ -20,72 +18,85 @@ mod task;
 mod timer;
 mod trap;
 mod uart;
-
 extern crate alloc;
 
-use crate::info::{kernel_layout, print_machine_info};
-use crate::task::add_initproc;
-use crate::timer::get_time_ms;
-use crate::trap::enable_timer_interrupt;
-use config::FLAG;
 use core::arch::global_asm;
 
-use crate::fs::list_apps;
+use config::{FLAG, UART};
 pub use log::info;
-use crate::loongarch::{ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read, vbe_test};
-global_asm!(include_str!("head.s"));
+use uart::Uart;
+
+use crate::{
+    fs::list_apps,
+    info::{kernel_layout, print_machine_info},
+    loongarch::{
+        ahci_init, extioi_init, i8042_init, ls7a_intc_init, rtc_init, rtc_time_read, vbe_test,
+    },
+    task::add_initproc,
+    timer::get_time_ms,
+    trap::enable_timer_interrupt,
+};
+
+// global_asm!(include_str!("head.s"));
 
 extern "C" {
     fn sbss();
     fn ebss();
 }
-fn clear_bss() {
-    (sbss as usize..ebss as usize).for_each(|addr| unsafe {
-        (addr as *mut u8).write_volatile(0);
-    });
+
+pub fn clear_bss() {
+    unsafe {
+        core::slice::from_raw_parts_mut(
+            sbss as usize as *mut u128,
+            (ebss as usize - sbss as usize) / size_of::<u128>(),
+        )
+        .fill(0);
+    }
 }
+
 #[no_mangle]
-pub fn main(
-    argc: usize,
-    argv: *const *const u8,
-    boot_params_interface: *const (),
-) {
+pub fn main(cpu: usize) {
     clear_bss();
     println!("{}", FLAG);
+    println!("cpu: {}", cpu);
     logging::init();
+    log::error!("Logging init success");
     rtc_init();
     println!("CURRENT TIME {:?}", rtc_time_read());
     kernel_layout();
-    info!("kernel args: {}", argc);
-    info!("kernel argv address: {:#x}", argv as usize);
-    info!(
-        "kernel boot_params_interface address: {:#x}",
-        boot_params_interface as usize
-    );
+
     mm::init();
     if cfg!(feature = "gui") {
         // 外部中断控制器初始化
         extioi_init();
+        println!("extioi init success");
         // 桥片中断初始化
         ls7a_intc_init();
+        println!("ls7a intc init success");
         // 键盘
         i8042_init();
+        println!("i8042 init success");
         // gui
     }
 
     trap::init();
     print_machine_info();
+    println!("machine info success");
     // sata硬盘
     ahci_init();
+    println!("ahci init success");
     //运行程序
 
     if cfg!(feature = "gui") {
         vbe_test();
     }
 
-    list_apps(); //列出所有程序
-    add_initproc(); //添加初始化程序
     enable_timer_interrupt();
+
+    // list_apps(); //列出所有程序
+    add_initproc(); //添加初始化程序
+    println!("add initproc success");
+
     task::run_tasks(); //运行程序
     panic!("main end");
 }

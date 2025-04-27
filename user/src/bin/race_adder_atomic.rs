@@ -6,8 +6,11 @@ extern crate user_lib;
 extern crate alloc;
 
 use alloc::vec::Vec;
-use core::ptr::addr_of_mut;
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::{
+    ptr::addr_of_mut,
+    sync::atomic::{AtomicBool, Ordering},
+};
+
 use user_lib::{exit, get_time, thread_create, waittid, yield_};
 
 static mut A: usize = 0;

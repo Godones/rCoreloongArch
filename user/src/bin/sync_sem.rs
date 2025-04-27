@@ -7,9 +7,10 @@ extern crate user_lib;
 extern crate alloc;
 
 use alloc::vec;
-use user_lib::exit;
-use user_lib::{semaphore_create, semaphore_down, semaphore_up};
-use user_lib::{sleep, thread_create, waittid};
+
+use user_lib::{
+    exit, semaphore_create, semaphore_down, semaphore_up, sleep, thread_create, waittid,
+};
 
 const SEM_SYNC: usize = 0;
 

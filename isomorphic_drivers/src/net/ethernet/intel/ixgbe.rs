@@ -1,18 +1,21 @@
 //! Intel 10Gb Network Adapter 82599 i.e. ixgbe network driver
 //! Datasheet: https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/82599-10-gbe-controller-datasheet.pdf
 
-use super::super::structs::EthernetAddress;
-use crate::provider::Provider;
-use crate::*;
 use alloc::vec::Vec;
+use core::{
+    hint::spin_loop,
+    marker::PhantomData,
+    mem::{size_of, MaybeUninit},
+    slice,
+    sync::atomic::{fence, Ordering},
+};
+
 use bit_field::*;
 use bitflags::*;
-use core::hint::spin_loop;
-use core::marker::PhantomData;
-use core::mem::{size_of, MaybeUninit};
-use core::slice;
-use core::sync::atomic::{fence, Ordering};
 use volatile::Volatile;
+
+use super::super::structs::EthernetAddress;
+use crate::{provider::Provider, *};
 // On linux, use ip link set <dev> mtu <MTU - 18>
 const IXGBE_MTU: usize = 8000;
 const IXGBE_BUFFER_SIZE: usize = 8192;
@@ -401,40 +404,49 @@ impl<P: Provider> IXGBE<P> {
         for i in IXGBE_PFVLVFB..IXGBE_PFVLVFB_END {
             ixgbe[i].write(0);
         }
-        // Set up the Multicast Table Array (MTA) registers. This entire table should be zeroed and only the desired multicast addresses should be permitted (by writing 0x1 to the corresponding bit location).
+        // Set up the Multicast Table Array (MTA) registers. This entire table should be
+        // zeroed and only the desired multicast addresses should be permitted
+        // (by writing 0x1 to the corresponding bit location).
         for i in IXGBE_MTA..IXGBE_MTA_END {
             ixgbe[i].write(0);
         }
 
-        // Program the different Rx filters and Rx offloads via registers FCTRL, VLNCTRL, MCSTCTRL, RXCSUM, RQTC, RFCTL, MPSAR, RSSRK, RETA, SAQF, DAQF, SDPQF, FTQF, SYNQF, ETQF, ETQS, RDRXCTL, RSCDBU.
-        // IPPCSE IP Payload Checksum Enable
+        // Program the different Rx filters and Rx offloads via registers FCTRL,
+        // VLNCTRL, MCSTCTRL, RXCSUM, RQTC, RFCTL, MPSAR, RSSRK, RETA, SAQF,
+        // DAQF, SDPQF, FTQF, SYNQF, ETQF, ETQS, RDRXCTL, RSCDBU. IPPCSE IP
+        // Payload Checksum Enable
         ixgbe[IXGBE_RXCSUM].update(|x| {
             x.set_bit(12, true);
         });
 
-        // Note that RDRXCTL.CRCStrip and HLREG0.RXCRCSTRP must be set to the same value. At the same time the RDRXCTL.RSCFRSTSIZE should be set to 0x0 as opposed to its hardware default.
-        // CRCStrip | RSCACKC | FCOE_WRFIX
+        // Note that RDRXCTL.CRCStrip and HLREG0.RXCRCSTRP must be set to the same
+        // value. At the same time the RDRXCTL.RSCFRSTSIZE should be set to 0x0
+        // as opposed to its hardware default. CRCStrip | RSCACKC | FCOE_WRFIX
         ixgbe[IXGBE_RDRXCTL].update(|x| {
             *x |= (1 << 0) | (1 << 25) | (1 << 26);
         });
 
         // Setup receive queue 0..
         // The following steps should be done once per transmit queue:
-        // 2. Receive buffers of appropriate size should be allocated and pointers to these buffers should be stored in the descriptor ring.
+        // 2. Receive buffers of appropriate size should be allocated and pointers to
+        //    these buffers should be stored in the descriptor ring.
         for i in 0..IXGBE_RECV_DESC_NUM {
             let (buffer_page_va, buffer_page_pa) = P::alloc_dma(IXGBE_BUFFER_SIZE);
             recv_queue[i].addr = buffer_page_pa as u64;
             recv_buffers[i] = buffer_page_va;
         }
 
-        // 3. Program the descriptor base address with the address of the region (registers RDBAL, RDBAH).
+        // 3. Program the descriptor base address with the address of the region
+        //    (registers RDBAL, RDBAH).
         ixgbe[IXGBE_RDBAL].write(recv_queue_pa as u32); // RDBAL
         ixgbe[IXGBE_RDBAH].write((recv_queue_pa >> 32) as u32); // RDBAH
 
-        // 4. Set the length register to the size of the descriptor ring (register RDLEN).
+        // 4. Set the length register to the size of the descriptor ring (register
+        //    RDLEN).
         ixgbe[IXGBE_RDLEN].write(IXGBE_RECV_QUEUE_SIZE as u32); // RDLEN
 
-        // 5. Program SRRCTL associated with this queue according to the size of the buffers and the required header control.
+        // 5. Program SRRCTL associated with this queue according to the size of the
+        //    buffers and the required header control.
         // Legacy descriptor, 8K buffer size
         // Enable packet drop
         ixgbe[IXGBE_SRRCTL].update(|x| {
@@ -443,26 +455,31 @@ impl<P: Provider> IXGBE<P> {
 
         ixgbe[IXGBE_RDH].write(0); // RDH
 
-        // 8. Program RXDCTL with appropriate values including the queue Enable bit. Note that packets directed to a disabled queue are dropped.
+        // 8. Program RXDCTL with appropriate values including the queue Enable bit.
+        //    Note that packets directed to a disabled queue are dropped.
         ixgbe[IXGBE_RXDCTL].update(|x| {
             x.set_bit(25, true);
         }); // enable queue
 
-        // 9. Poll the RXDCTL register until the Enable bit is set. The tail should not be bumped before this bit was read as 1b.
+        // 9. Poll the RXDCTL register until the Enable bit is set. The tail should not
+        //    be bumped before this bit was read as 1b.
         while !ixgbe[IXGBE_RXDCTL].read().get_bit(25) {
             spin_loop(); // wait for it
         }
 
-        // 10. Bump the tail pointer (RDT) to enable descriptors fetching by setting it to the ring length minus one.
+        // 10. Bump the tail pointer (RDT) to enable descriptors fetching by setting it
+        //     to the ring length minus one.
         ixgbe[IXGBE_RDT].write((IXGBE_RECV_DESC_NUM - 1) as u32); // RDT
 
         // all queues are setup
-        // 11. Enable the receive path by setting RXCTRL.RXEN. This should be done only after all other settings are done following the steps below.
+        // 11. Enable the receive path by setting RXCTRL.RXEN. This should be done only
+        //     after all other settings are done following the steps below.
         // Halt the receive data path by setting SECRXCTRL.RX_DIS bit.
         ixgbe[IXGBE_SECRXCTRL].update(|x| {
             x.set_bit(1, true);
         });
-        // Wait for the data paths to be emptied by HW. Poll the SECRXSTAT.SECRX_RDY bit until it is asserted by HW.
+        // Wait for the data paths to be emptied by HW. Poll the SECRXSTAT.SECRX_RDY bit
+        // until it is asserted by HW.
         while !ixgbe[IXGBE_SECRXSTAT].read().get_bit(0) {
             spin_loop(); // poll
         }
@@ -477,7 +494,8 @@ impl<P: Provider> IXGBE<P> {
             x.set_bit(1, false);
         });
 
-        // Set bit 16 of the CTRL_EXT register and clear bit 12 of the DCA_RXCTRL[n] register[n].
+        // Set bit 16 of the CTRL_EXT register and clear bit 12 of the DCA_RXCTRL[n]
+        // register[n].
         ixgbe[IXGBE_CTRL_EXT].update(|x| {
             x.set_bit(16, true);
         });
@@ -512,7 +530,8 @@ impl<P: Provider> IXGBE<P> {
             }
             send_queues[queue] = send_queue;
 
-            // 2. Program the descriptor base address with the address of the region (TDBAL, TDBAH).
+            // 2. Program the descriptor base address with the address of the region (TDBAL,
+            //    TDBAH).
             ixgbe[IXGBE_TDBAL + IXGBE_TDBAL_GAP * queue].write(send_queue_pa as u32); // TDBAL
             ixgbe[IXGBE_TDBAH + IXGBE_TDBAH_GAP * queue].write((send_queue_pa >> 32) as u32); // TDBAH
 
@@ -522,13 +541,16 @@ impl<P: Provider> IXGBE<P> {
             ixgbe[IXGBE_TDT + IXGBE_TDT_GAP * queue].write(0); // TDT
 
             if queue == 0 {
-                // 6. Enable transmit path by setting DMATXCTL.TE. This step should be executed only for the first enabled transmit queue and does not need to be repeated for any following queues.
+                // 6. Enable transmit path by setting DMATXCTL.TE. This step should be executed
+                //    only for the first enabled transmit queue and does not need to be repeated
+                //    for any following queues.
                 ixgbe[IXGBE_DMATXCTL].update(|x| {
                     x.set_bit(0, true);
                 });
             }
 
-            // 7. Enable the queue using TXDCTL.ENABLE. Poll the TXDCTL register until the Enable bit is set.
+            // 7. Enable the queue using TXDCTL.ENABLE. Poll the TXDCTL register until the
+            //    Enable bit is set.
             ixgbe[IXGBE_TXDCTL + IXGBE_TXDCTL_GAP * queue].update(|x| {
                 x.set_bit(25, true);
             });
@@ -541,11 +563,12 @@ impl<P: Provider> IXGBE<P> {
         }
 
         // 4.6.6 Interrupt Initialization
-        // The software driver associates between Tx and Rx interrupt causes and the EICR register by setting the IVAR[n] registers.
-        // map Rx0 to interrupt 0
+        // The software driver associates between Tx and Rx interrupt causes and the
+        // EICR register by setting the IVAR[n] registers. map Rx0 to interrupt
+        // 0
         ixgbe[IXGBE_IVAR].write(0b00000000_00000000_00000000_10000000);
-        // Set the interrupt throttling in EITR[n] and GPIE according to the preferred mode of operation.
-        // Throttle interrupts
+        // Set the interrupt throttling in EITR[n] and GPIE according to the preferred
+        // mode of operation. Throttle interrupts
         // Seems having good effect on tx bandwidth
         // but bad effect on rx bandwidth
         // CNT_WDIS | ITR Interval=100us

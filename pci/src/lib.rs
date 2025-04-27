@@ -12,16 +12,19 @@
 
 //! PCI bus management
 //!
-//! This crate defines various traits, functions, and types for working with the PCI local bus.
+//! This crate defines various traits, functions, and types for working with the
+//! PCI local bus.
 //!
 //!
-//! It is assumed that PCI(e) is already configured - that is, that each device has been allocated
-//! the memory it requests and the BARs are already configured correctly. The firmware (BIOS, UEFI)
-//! usually does this on PC platforms.
+//! It is assumed that PCI(e) is already configured - that is, that each device
+//! has been allocated the memory it requests and the BARs are already
+//! configured correctly. The firmware (BIOS, UEFI) usually does this on PC
+//! platforms.
 //!
 //! This crate is not yet suitable for multicore use - nothing is synchronized.
 //!
-//! This crate does not yet contain any hardware-specific workarounds for buggy or broken hardware.
+//! This crate does not yet contain any hardware-specific workarounds for buggy
+//! or broken hardware.
 //!
 //! This crate cannot yet exploit PCIe memory-mapped configuration spaces.
 //!
@@ -34,9 +37,9 @@ use core::fmt::{Debug, Formatter};
 
 /// A trait defining port I/O operations.
 ///
-/// All port I/O operations are parametric over this trait. This allows operating systems to use
-/// this crate without modifications, by suitably instantiating this trait with their own
-/// primitives.
+/// All port I/O operations are parametric over this trait. This allows
+/// operating systems to use this crate without modifications, by suitably
+/// instantiating this trait with their own primitives.
 pub trait PortOps {
     unsafe fn read8(&self, port: u16) -> u8;
     unsafe fn read16(&self, port: u16) -> u16;
@@ -108,8 +111,8 @@ impl CSpaceAccessMethod {
         );
     }
 
-    /// Takes a value in native endian, converts it to little-endian, and writes it to the PCI
-    /// device configuration space at register `offset`.
+    /// Takes a value in native endian, converts it to little-endian, and writes
+    /// it to the PCI device configuration space at register `offset`.
     pub unsafe fn write32<T: PortOps>(self, _ops: &T, loc: Location, offset: u16, val: u32) {
         debug_assert!(
             (offset & 0b11) == 0,
@@ -401,8 +404,8 @@ impl<'a, T: PortOps> BusScan<'a, T> {
     }
 
     fn increment(&mut self) {
-        // TODO: Decide whether this is actually nicer than taking a u16 and incrementing until it
-        // wraps.
+        // TODO: Decide whether this is actually nicer than taking a u16 and
+        // incrementing until it wraps.
         if self.loc.function < 7 {
             self.loc.function += 1;
             return;
@@ -429,8 +432,8 @@ impl<'a, T: PortOps> ::core::iter::Iterator for BusScan<'a, T> {
     type Item = PCIDevice;
     #[inline]
     fn next(&mut self) -> Option<PCIDevice> {
-        // FIXME: very naive atm, could be smarter and waste much less time by only scanning used
-        // busses.
+        // FIXME: very naive atm, could be smarter and waste much less time by only
+        // scanning used busses.
         let mut ret = None;
         loop {
             if self.done() {
@@ -468,9 +471,9 @@ pub unsafe fn probe_function<T: PortOps>(
         vendor_id: vid,
         device_id: did,
         revision_id: rid,
-        prog_if: prog_if,
-        class: class,
-        subclass: subclass,
+        prog_if,
+        class,
+        subclass,
     };
     let cache_line_size = am.read8(ops, loc, 12);
     let latency_timer = am.read8(ops, loc, 13);

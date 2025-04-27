@@ -5,10 +5,12 @@
 extern crate user_lib;
 extern crate alloc;
 
-use crate::alloc::string::ToString;
 use alloc::vec::Vec;
 use core::ptr::addr_of_mut;
+
 use user_lib::{exit, get_time, thread_create, waittid};
+
+use crate::alloc::string::ToString;
 
 static mut A: usize = 0;
 const PER_THREAD: usize = 1000;

@@ -1,8 +1,11 @@
-use crate::fs::{make_pipe, open_file, OpenFlags};
-use crate::list_apps;
-use crate::mm::{translated_byte_buffer, translated_refmut, translated_str, UserBuffer};
-use crate::task::{current_process, current_user_token};
 use alloc::sync::Arc;
+
+use crate::{
+    fs::{make_pipe, open_file, OpenFlags},
+    list_apps,
+    mm::{translated_byte_buffer, translated_refmut, translated_str, UserBuffer},
+    task::{current_process, current_user_token},
+};
 
 const FD_STDOUT: usize = 1;
 const FD_STDIN: usize = 0;

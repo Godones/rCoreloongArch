@@ -1,7 +1,8 @@
+use super::VIRT_BIAS;
 /// LS7A桥片配置空间
 /// LS7A桥片配置空间--中断控制器起始地址
 /// 0x1000_0000~0x1000_0fff 4k
-pub const LS7A_PCH_REG_BASE: usize = 0x1000_0000;
+pub const LS7A_PCH_REG_BASE: usize = 0x1000_0000 + VIRT_BIAS;
 pub const LS7A_MISC_REG_BASE: usize = LS7A_PCH_REG_BASE + 0x00080000;
 pub const LS7A_ACPI_REG_BASE: usize = LS7A_MISC_REG_BASE + 0x00050000;
 pub const LS7A_RTC_REG_BASE: usize = LS7A_MISC_REG_BASE + 0x00050100;
@@ -11,9 +12,9 @@ pub const KEYBOARD_IRQ: usize = 3;
 pub const MOUSE_IRQ: usize = 4;
 
 // 8042 Keyboard Controller
-pub const LS7A_I8042_DATA: usize = 0x1fe00060;
-pub const LS7A_I8042_COMMAND: usize = 0x1fe00064;
-pub const LS7A_I8042_STATUS: usize = 0x1fe00064;
+pub const LS7A_I8042_DATA: usize = 0x1fe00060 + VIRT_BIAS;
+pub const LS7A_I8042_COMMAND: usize = 0x1fe00064 + VIRT_BIAS;
+pub const LS7A_I8042_STATUS: usize = 0x1fe00064 + VIRT_BIAS;
 
 pub const LS7A_INT_MASK_REG: usize = LS7A_PCH_REG_BASE + 0x020; //中断掩码寄存器低32位
 pub const LS7A_INT_EDGE_REG: usize = LS7A_PCH_REG_BASE + 0x060; //触发方式寄存器

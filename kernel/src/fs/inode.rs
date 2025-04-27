@@ -4,16 +4,14 @@
 //!
 //! `UPSafeCell<OSInodeInner>` -> `OSInode`: for static `ROOT_INODE`,we
 //! need to wrap `OSInodeInner` into `UPSafeCell`
-use super::File;
-use crate::loongarch::BLOCK_DEVICE;
-use crate::mm::UserBuffer;
-use crate::println;
-use crate::sync::UPSafeCell;
-use alloc::sync::Arc;
-use alloc::vec::Vec;
+use alloc::{sync::Arc, vec::Vec};
+
 use bitflags::*;
 use easy_fs::{EasyFileSystem, Inode};
 use lazy_static::*;
+
+use super::File;
+use crate::{loongarch::BLOCK_DEVICE, mm::UserBuffer, println, sync::UPSafeCell};
 
 /// A wrapper around a filesystem inode
 /// to implement File trait atop

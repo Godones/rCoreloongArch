@@ -1,10 +1,12 @@
+use alloc::sync::Arc;
+
+use spin::Mutex;
+
 use super::{
     block_cache_sync_all, get_block_cache, Bitmap, BlockDevice, DiskInode, DiskInodeType, Inode,
     SuperBlock,
 };
 use crate::BLOCK_SZ;
-use alloc::sync::Arc;
-use spin::Mutex;
 ///An easy file system on block
 pub struct EasyFileSystem {
     ///Real device

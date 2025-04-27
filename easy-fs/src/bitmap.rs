@@ -1,5 +1,6 @@
-use super::{get_block_cache, BlockDevice, BLOCK_SZ};
 use alloc::sync::Arc;
+
+use super::{get_block_cache, BlockDevice, BLOCK_SZ};
 /// A bitmap block
 type BitmapBlock = [u64; 64];
 /// Number of bits in a block

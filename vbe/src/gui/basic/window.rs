@@ -1,22 +1,29 @@
-use crate::driver::VBE_DEVICE;
-use crate::gui::basic::manager::{SCREEN_MANAGER, WINDOW_ID_ALLOCATOR};
-use crate::gui::{Bar, Component, Graphics, ImageComp, Panel};
-use alloc::collections::VecDeque;
-use alloc::string::{String, ToString};
-use alloc::sync::Arc;
-use alloc::vec::Vec;
-use embedded_graphics::geometry::{Point, Size};
-use embedded_graphics::mono_font::ascii::FONT_10X20;
-use embedded_graphics::mono_font::MonoTextStyle;
-use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics::prelude::RgbColor;
-use embedded_graphics::text::Baseline;
-use embedded_graphics::text::Text;
-use embedded_graphics::Drawable;
+use alloc::{
+    collections::VecDeque,
+    string::{String, ToString},
+    sync::Arc,
+    vec::Vec,
+};
+
+use embedded_graphics::{
+    geometry::{Point, Size},
+    mono_font::{ascii::FONT_10X20, MonoTextStyle},
+    pixelcolor::Rgb888,
+    prelude::RgbColor,
+    text::{Baseline, Text},
+    Drawable,
+};
 use log::info;
 use spin::Mutex;
-use virtio_input_decoder::Key;
-use virtio_input_decoder::Key::S;
+use virtio_input_decoder::{Key, Key::S};
+
+use crate::{
+    driver::VBE_DEVICE,
+    gui::{
+        basic::manager::{SCREEN_MANAGER, WINDOW_ID_ALLOCATOR},
+        Bar, Component, Graphics, ImageComp, Panel,
+    },
+};
 
 pub struct Windows {
     id: usize,

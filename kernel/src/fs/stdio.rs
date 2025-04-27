@@ -1,9 +1,6 @@
 //!Stdin & Stdout
 use super::File;
-use crate::mm::UserBuffer;
-use crate::print;
-use crate::print::get_char;
-use crate::task::suspend_current_and_run_next;
+use crate::{mm::UserBuffer, print, print::get_char, task::suspend_current_and_run_next};
 ///Standard input
 pub struct Stdin;
 ///Standard output

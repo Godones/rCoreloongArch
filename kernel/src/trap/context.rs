@@ -1,6 +1,8 @@
-use crate::trap::trap_handler;
 use core::fmt::{Debug, Formatter};
-use loongarch64::register::{CpuMode, prmd};
+
+use loongarch64::register::{prmd, CpuMode};
+
+use crate::trap::trap_handler;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -21,7 +23,6 @@ impl Debug for TrapContext {
     }
 }
 
-
 impl TrapContext {
     pub fn set_sp(&mut self, sp: usize) {
         self.x[3] = sp;
@@ -31,7 +32,7 @@ impl TrapContext {
         prmd::set_pplv(CpuMode::Ring3);
         let mut cx = Self {
             x: [0; 32],
-            prmd:prmd::read().raw(),
+            prmd: prmd::read().raw(),
             sepc: entry,
             trap_handler: trap_handler as usize,
         };

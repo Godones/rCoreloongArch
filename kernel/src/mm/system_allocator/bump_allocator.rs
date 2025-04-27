@@ -1,7 +1,12 @@
-use crate::info;
-use crate::mm::system_allocator::common::{align_up, Locked};
-use core::alloc::{GlobalAlloc, Layout};
-use core::ptr;
+use core::{
+    alloc::{GlobalAlloc, Layout},
+    ptr,
+};
+
+use crate::{
+    info,
+    mm::system_allocator::common::{align_up, Locked},
+};
 /// bump分配器实现
 /// bump分配器来自于线性增加
 /// next变量指示已分配空间的边界，其单向移动以此来分配内存

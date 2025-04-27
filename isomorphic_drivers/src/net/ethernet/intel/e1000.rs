@@ -1,15 +1,15 @@
-use alloc::slice;
-use alloc::vec::Vec;
-use core::marker::PhantomData;
-use core::mem::size_of;
-use core::sync::atomic::{fence, Ordering};
+use alloc::{slice, vec::Vec};
+use core::{
+    marker::PhantomData,
+    mem::size_of,
+    sync::atomic::{fence, Ordering},
+};
 
-use crate::net::ethernet::structs::EthernetAddress;
-use crate::provider::Provider;
-use crate::*;
 use bit_field::*;
 use bitflags::*;
 use volatile::Volatile;
+
+use crate::{net::ethernet::structs::EthernetAddress, provider::Provider, *};
 
 // At the beginning, all transmit descriptors have there status non-zero,
 // so we need to track whether we are using the descriptor for the first time.
@@ -151,13 +151,16 @@ impl<P: Provider> E1000<P> {
         // Set the length register to the size of the descriptor ring.
         e1000[E1000_RDLEN].write(P::PAGE_SIZE as u32); // RDLEN
 
-        // If needed, program the head and tail registers. Note: the head and tail pointers are initialized (by hardware) to zero after a power-on or a software-initiated device reset.
+        // If needed, program the head and tail registers. Note: the head and tail
+        // pointers are initialized (by hardware) to zero after a power-on or a
+        // software-initiated device reset.
         e1000[E1000_RDH].write(0); // RDH
 
         // The tail pointer should be set to point one descriptor beyond the end.
         e1000[E1000_RDT].write((recv_queue.len() - 1) as u32); // RDT
 
-        // Receive buffers of appropriate size should be allocated and pointers to these buffers should be stored in the descriptor ring.
+        // Receive buffers of appropriate size should be allocated and pointers to these
+        // buffers should be stored in the descriptor ring.
         for i in 0..recv_queue.len() {
             let (buffer_page_va, buffer_page_pa) = P::alloc_dma(P::PAGE_SIZE);
             recv_queue[i].addr = buffer_page_pa as u64;

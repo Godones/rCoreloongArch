@@ -1,6 +1,8 @@
-use crate::driver::VBE_DEVICE;
-use alloc::string::ToString;
-use alloc::{string::String, sync::Arc};
+use alloc::{
+    string::{String, ToString},
+    sync::Arc,
+};
+
 use embedded_graphics::{
     mono_font::{ascii::FONT_10X20, MonoTextStyle},
     pixelcolor::Rgb888,
@@ -10,9 +12,8 @@ use embedded_graphics::{
 };
 use spin::Mutex;
 
-use crate::gui::Panel;
-
 use super::{Component, Graphics};
+use crate::{driver::VBE_DEVICE, gui::Panel};
 
 pub struct Button {
     inner: Mutex<ButtonInner>,

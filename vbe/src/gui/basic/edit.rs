@@ -1,15 +1,20 @@
-use crate::driver::VBE_DEVICE;
-use crate::gui::{Component, Graphics, Panel};
-use alloc::string::String;
-use alloc::sync::Arc;
-use embedded_graphics::geometry::{Point, Size};
-use embedded_graphics::mono_font::{ascii::FONT_10X20, MonoTextStyle};
-use embedded_graphics::pixelcolor::Rgb888;
-use embedded_graphics::prelude::RgbColor;
-use embedded_graphics::text::{Baseline, Text};
-use embedded_graphics::Drawable;
+use alloc::{string::String, sync::Arc};
+
+use embedded_graphics::{
+    geometry::{Point, Size},
+    mono_font::{ascii::FONT_10X20, MonoTextStyle},
+    pixelcolor::Rgb888,
+    prelude::RgbColor,
+    text::{Baseline, Text},
+    Drawable,
+};
 use log::info;
 use spin::Mutex;
+
+use crate::{
+    driver::VBE_DEVICE,
+    gui::{Component, Graphics, Panel},
+};
 
 /// 文本编辑框
 
